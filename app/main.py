@@ -12,7 +12,8 @@ from pathlib import Path
 from urllib.parse import quote
 from typing import Annotated
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse,JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, or_, select
@@ -53,6 +54,11 @@ TYPE_CONFIG = {
 app = FastAPI(title="QWOMS", version="0.1.0", docs_url=None if demo_mode() else "/docs",
               redoc_url=None if demo_mode() else "/redoc", openapi_url=None if demo_mode() else "/openapi.json")
 app.mount("/static", StaticFiles(directory=str(APP_ROOT / "static")), name="static")
+
+
+@app.exception_handler(RequestValidationError)
+async def safe_validation_error(request,exception):
+    return JSONResponse(status_code=422,content={'detail':[{'loc':error['loc'],'msg':error['msg'],'type':error['type']} for error in exception.errors()]})
 
 
 @app.middleware("http")
@@ -727,3 +733,6 @@ from .controlled_api import router as controlled_router
 app.include_router(controlled_router)
 from .workflow_api import router as workflow_router
 app.include_router(workflow_router)
+
+from .accounts_api import router as accounts_router
+app.include_router(accounts_router)

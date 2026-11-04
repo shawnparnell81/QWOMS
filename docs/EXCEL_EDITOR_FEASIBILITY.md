@@ -26,3 +26,12 @@ Obtain written vendor confirmation of the correct developer/automated-agent, dep
 ## Next acceptance gate
 
 Evaluate a correctly configured licensed/trial environment with required modules and representative synthetic cases, then company-approved representative original forms before any operational pilot that depends on in-app Excel. Test real user edits, calculations, visible PASS/FAIL colors, merged geometry, validations, images, print/PDF layout, worksheets/names, and Microsoft Excel reopen/round-trip behavior. Compare semantic properties and rendered output; also test unsupported functions, external links, macros, protection and large workbooks. Document every incompatibility. No lossy generic-grid fallback is acceptable. All accepted Excel requirements remain release-critical under AGENTS.md.
+
+
+## Additional module trial — 2026-11-04
+
+A separate local Chromium evaluation added official `@mescius/spread-sheets-print@19.2.5` and `@mescius/spread-sheets-shapes@19.2.5` before Excel IO, using an independently generated opaque ARGB-color fixture. Real import, formula PASS/FAIL calculation and export succeeded. The comparison reports **20 raw differences**, versus 26 in the original configuration. Because both modules and fixture changed, this does not isolate the contribution of each.
+
+The printing module restored several source print properties, but fit-to-width still changed from 1 to null. The embedded image remained absent from the exported workbook; conditional foreground fills remained black even with opaque source foreground colors. Evaluation sheet, font metadata, row dimensions, fractional column widths and secondary-sheet print defaults also differ. Some default/metadata changes may be visually equivalent; no rendered/native-Excel comparison establishes that yet. Evidence: `docs/evidence/excel-trial-modules-opaque-roundtrip.json`. Neither configuration passes exact fidelity. No trial libraries or license keys are shipped in QWOMS.
+
+Next diagnostics must isolate modules, test `importPictureAsFloatingObject`, inspect image handling and foreground/background conditional styles, and evaluate specialized alternatives such as ONLYOFFICE with server/embedding licensing verified separately. No alternative editor has passed a representative round-trip here. Full original-workbook testing, visible colors/images and print output remain release gates.

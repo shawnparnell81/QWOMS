@@ -20,12 +20,12 @@ Updated: 2026-11-04. This is the development record, not a certification.
 
 | Gate | Status |
 |---|---|
-| Starter smoke/API tests | 43 passed on SQLite and PostgreSQL; see milestone records below |
+| Starter smoke/API tests | 47 passed on SQLite and PostgreSQL; see milestone records below |
 | Dashboard/browser manual acceptance | Authenticated Chromium checks pass over local HTTPS, including control/forms; hosted/manual acceptance pending |
 | Work-order/part/drawing workflows beyond starter | Partial |
 | Controlled forms and exact Excel editing | Registry/attachments/filing verified; exact editor trial FAILED fidelity gate |
 | Projects, labor, pallets, chargebacks | Project linking verified; labor/pallets/chargebacks not built |
-| Production cloud storage, deployment and security review | Not built |
+| Production cloud storage, deployment and security review | Synthetic Render deployment verified live; production S3, recovery and security approval pending |
 | Final PR | **Not opened** |
 
 See `BUILD_PLAN.md` for detailed feature and test criteria.
@@ -136,3 +136,12 @@ See `BUILD_PLAN.md` for detailed feature and test criteria.
 - **Still unverified on hosted service:** authenticated browser walkthrough of all six workflows, controlled revision approvals/form filing, per-role permissions, CSRF and document data isolation; backups/restores and full end-to-end user acceptance. Do not claim these hosted acceptance checks passed based solely on local Chromium tests.
 - **Still not a company-data pilot or full go-live:** exact in-app Excel editing/fidelity and commercial licensing, remaining labor/pallets/chargebacks, complete account/security policies, durable S3, backups/recovery and IT sign-off are outstanding. Earlier 43-test/local Chromium milestone remains useful evidence; do not conflate it with hosted tests.
 - **Next step for Codex:** inspect this live deployment, then perform secure authenticated hosted acceptance and advance release-critical Excel and operations work. No need to request another Render API key in chat; keep secrets in approved secure settings, and avoid any paid service provisioning without authorization. Preserve the single-final-PR policy.
+
+
+## 2026-11-04 — Account lifecycle and hosted acceptance preparation
+
+- Added Management account listing including disabled employees, audited name/site/department/access changes, step-up password resets, and self-service password changes. Role/access/password changes revoke affected sessions. Signed-in managers cannot demote/deactivate themselves. Historical employee references remain intact. No email features added.
+- Validation responses omit submitted input and exception context so invalid password payloads are not echoed. Browser test helpers accept secure environment bindings or explicit local private files, redact credential values, and preserve the HTTP Basic gate. No credential values are committed.
+- Regression: **47 passed SQLite and 47 passed PostgreSQL 17** (three existing non-failing deprecation warnings). Chromium account creation, role change/deactivation and step-up password reset passed against the local synthetic server. A shorter desktop viewport exposed inaccessible lower navigation; sidebar scrolling was added and checked separately. Local tests are not hosted acceptance.
+- Hosted deployment remains LIVE as recorded above: deployment `dep-dbll70d6e07s7397t2eg`, commit `a56a553`, `/readyz` 200. This runtime's outbound proxy denied the hosted hostname before reaching Render, and the five Render password values are not bound in Codex. An additive cloud network draft and variable-name declarations were saved; publishing and secure Codex bindings are pending. No new Render key or provisioning is required. Authenticated hosted acceptance remains blocked, not failed.
+- Outstanding account/security work: step-up failure throttling, forced temporary-password rotation, site/record isolation, session cleanup, tamper-evident audit retention and independent security review. S3 live validation, backup/restore and all remaining operational scope remain mandatory. No production/pilot readiness claim; no PR opened.
