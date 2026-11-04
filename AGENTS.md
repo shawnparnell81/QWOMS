@@ -26,3 +26,7 @@ Read `docs/PRODUCT_REQUIREMENTS.md` and `README.md` before coding. Implement fea
 - Open **one PR from `development/qwoms-complete-build` to `main` only after user authorization**, all agreed features are implemented and the complete acceptance/security/test matrix passes. Do not merge without explicit user approval.
 - Never claim exact in-browser Excel fidelity, production readiness, cloud deployment, or security completion without tested evidence and representative workbooks. Show failed or blocked checks explicitly.
 - The GitHub private-repository setting does not change this branching policy. Keep production/company data out of GitHub.
+
+## Accelerated launch priority
+
+Read `docs/LAUNCH_ACCELERATION.md` at the beginning of each task. Prioritize an explicitly authorized, private synthetic-data **hosted demo** and test evidence, then approved real-data pilot and full production gates. Do not equate a running local app with a live website or approved company use. User wants fastest safe launch; do not delay a secure demo just for non-critical enhancements. Obtain authorization before provisioning chargeable services. Preserve the one-final-PR policy.
