@@ -98,6 +98,7 @@ def test_work_related_document_history_and_permissions(client,kind):
 def test_author_cannot_self_review_and_approval_cannot_skip_review(client):
     web,_=client;logged_in(web)
     file=upload(web,'Synthetic/Engineering authored.pdf','document')
+    assert web.patch('/api/admin/accounts/2',json={'current_password':'SufficientlyLongPassword!','capabilities':['engineering.approve','import.work_instructions']}).status_code==200
     login_as(web,'engineer','OtherLongPassword123!')
     doc=web.post('/api/controlled/documents',json={'kind':'Work instruction','number':'WI-SELF','title':'Fictional self review test'}).json()
     revision=web.post(f"/api/controlled/documents/{doc['id']}/revisions",json={'file_id':file['id'],'revision':'1','change_summary':'Fictional original'}).json()['id']

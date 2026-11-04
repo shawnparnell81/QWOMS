@@ -7,7 +7,7 @@ from sqlalchemy import select,update
 from sqlalchemy.orm import Session
 from .db import session
 from .models import User,AuthSession
-from .security import current_user,require_admin,verify_password,hash_password
+from .security import current_user,require_admin,verify_password,hash_password,CAPABILITIES
 from .audit import record
 
 router=APIRouter(prefix='/api')
@@ -19,6 +19,14 @@ class AccountChange(BaseModel):
     site:str|None=Field(default=None,max_length=100)
     role:Literal['Quality','Engineering','Production','Management']|None=None
     active:bool|None=None
+    is_admin:bool|None=None
+    capabilities:list[str]|None=None
+    @field_validator("capabilities")
+    @classmethod
+    def valid_capabilities(cls,value):
+        if value is not None and (len(value)!=len(set(value)) or any(v not in CAPABILITIES for v in value)):
+            raise ValueError("Unknown or duplicate capability")
+        return value
     @field_validator('display_name','site',mode='before')
     @classmethod
     def trim(cls,v):return v.strip() if isinstance(v,str) else v
@@ -36,38 +44,51 @@ def revoke(db,user_id):
 
 def step_up(db,manager,password):
     db.refresh(manager)
-    if manager.role!='Management' or not manager.active:raise HTTPException(403,'Active Management access required')
+    if not manager.is_admin or not manager.active:raise HTTPException(403,'Active Administrator access required')
     if not verify_password(password,manager.password_hash):raise HTTPException(403,'Current password verification failed')
 
 
 @router.get('/admin/accounts')
 def accounts(db:Session=Depends(session),manager:User=Depends(require_admin)):
-    return [{'id':u.id,'username':u.username,'display_name':u.display_name,'role':u.role,'site':u.site,'active':u.active}
+    return [{'id':u.id,'username':u.username,'display_name':u.display_name,'role':u.role,'site':u.site,'active':u.active,'is_admin':u.is_admin,'capabilities':u.capabilities or []}
             for u in db.scalars(select(User).order_by(User.display_name)).all()]
 
 
 @router.patch('/admin/accounts/{user_id}')
 def change_account(user_id:int,body:AccountChange,db:Session=Depends(session),manager:User=Depends(require_admin)):
-    db.scalars(select(User).where(User.role=='Management',User.active.is_(True)).order_by(User.id).with_for_update()).all()
+    if db.bind.dialect.name=="sqlite":
+        from sqlalchemy import text
+        db.execute(text("UPDATE users SET id=id WHERE 1=0"))
+    db.scalars(select(User).where(User.is_admin.is_(True),User.active.is_(True)).order_by(User.id).with_for_update()).all()
     step_up(db,manager,body.current_password)
     target=db.scalar(select(User).where(User.id==user_id).with_for_update().execution_options(populate_existing=True))
     if not target:raise HTTPException(404,'Account not found')
-    if target.id==manager.id and ((body.role is not None and body.role!='Management') or body.active is False):
-        raise HTTPException(409,'Management cannot deactivate or demote its own signed-in account')
+    if target.is_admin and target.active and (body.is_admin is False or body.active is False):
+        if len(db.scalars(select(User).where(User.is_admin.is_(True),User.active.is_(True))).all()) <= 1:
+            raise HTTPException(409,'Cannot remove the last active Administrator')
+    if target.id==manager.id and body.role is not None and body.role!=target.role:
+        raise HTTPException(409,'Cannot change your own department while signed in')
     changes={}
-    for key in ['display_name','site','role','active']:
+    for key in ['display_name','site','role','active','is_admin','capabilities']:
         value=getattr(body,key)
         if value is not None and value!=getattr(target,key):
             changes[key]={'before':getattr(target,key),'after':value};setattr(target,key,value)
     if changes:
-        if 'role' in changes or 'active' in changes:revoke(db,target.id)
+        if {'role','active','is_admin','capabilities'} & changes.keys():revoke(db,target.id)
+        if 'capabilities' in changes:
+            before=set(changes['capabilities']['before'] or []);after=set(changes['capabilities']['after'])
+            for capability in sorted(before ^ after):
+                record(db,manager,'permission.granted' if capability in after else 'permission.revoked','user',target.id,{'capability':capability})
         record(db,manager,'account.updated','user',target.id,changes)
-    db.commit();return {'ok':True,'session_revoked':bool({'role','active'}&changes.keys())}
+    db.commit();return {'ok':True,'session_revoked':bool({'role','active','is_admin','capabilities'}&changes.keys())}
 
 
 @router.post('/admin/accounts/{user_id}/reset-password')
 def reset_password(user_id:int,body:PasswordChange,db:Session=Depends(session),manager:User=Depends(require_admin)):
-    db.scalars(select(User).where(User.role=='Management',User.active.is_(True)).order_by(User.id).with_for_update()).all()
+    if db.bind.dialect.name=="sqlite":
+        from sqlalchemy import text
+        db.execute(text("UPDATE users SET id=id WHERE 1=0"))
+    db.scalars(select(User).where(User.is_admin.is_(True),User.active.is_(True)).order_by(User.id).with_for_update()).all()
     step_up(db,manager,body.current_password)
     target=db.scalar(select(User).where(User.id==user_id).with_for_update().execution_options(populate_existing=True))
     if not target:raise HTTPException(404,'Account not found')

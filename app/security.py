@@ -63,6 +63,21 @@ def current_user(request: Request, qwoms_token: str | None = Cookie(None),
     return user
 
 def require_admin(user: User = Depends(current_user)):
-    if user.role != "Management":
-        raise HTTPException(403, "Management access required")
+    if not user.is_admin:
+        raise HTTPException(403, "Administrator access required")
     return user
+
+IMPORT_CAPABILITIES = {
+    'part-master': 'import.part_master', 'drawing': 'import.drawings',
+    'form-template': 'import.form_masters', 'work-instruction': 'import.work_instructions',
+    'document': 'import.supporting_documents', 'other': 'import.other',
+}
+CAPABILITIES = tuple(IMPORT_CAPABILITIES.values()) + ('engineering.approve',)
+
+def has_capability(user, capability):
+    # Engineering decisions always require an explicit assignment, even for admins.
+    return (user.is_admin and capability != 'engineering.approve') or capability in (user.capabilities or [])
+
+def require_capability(user, capability):
+    if not has_capability(user, capability):
+        raise HTTPException(403, 'Explicit permission required: ' + capability)

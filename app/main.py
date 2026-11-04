@@ -23,7 +23,7 @@ from .db import Base, engine, session, DATABASE_URL
 from .imports import load_rows, process_part_import
 from .models import (ImportAudit, Message, PartAlias, PhysicalPart, ProductFamily,
                      StoredFile, User, WorkOrder, WorkOrderCounter, WorkOrderPart)
-from .security import current_user, hash_password, require_admin, token_for, verify_password
+from .security import require_capability, IMPORT_CAPABILITIES, current_user, hash_password, require_admin, token_for, verify_password
 from .schema import require_current
 from .storage import original_store, StorageConflict, DatabaseStore
 from .audit import record
@@ -170,7 +170,7 @@ def allow_roles(user: User, *allowed):
 
 
 def serialize_user(user: User):
-    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site}
+    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site, "is_admin": user.is_admin, "capabilities": user.capabilities or []}
 
 
 def serialize_part(p: PhysicalPart):
@@ -334,7 +334,7 @@ async def excel_payload(file: UploadFile):
 @app.post("/api/parts/import/preview")
 async def preview_parts(file: UploadFile = File(...), family: str = Form(""),
                         db: Session = Depends(session), user: User = Depends(current_user)):
-    allow_roles(user, "Quality", "Engineering", "Management")
+    require_capability(user, "import.part_master")
     rows, blob = await excel_payload(file)
     return process_part_import(db, rows, family_override=family, preview=True)
 
@@ -342,7 +342,7 @@ async def preview_parts(file: UploadFile = File(...), family: str = Form(""),
 @app.post("/api/parts/import/commit")
 async def import_parts(file: UploadFile = File(...), family: str = Form(""),
                        db: Session = Depends(session), user: User = Depends(current_user)):
-    allow_roles(user, "Quality", "Engineering", "Management")
+    require_capability(user, "import.part_master")
     rows, blob = await excel_payload(file)
     result = process_part_import(db, rows, family_override=family, preview=False)
     db.add(ImportAudit(actor_id=user.id, source_name=file.filename,
@@ -368,9 +368,9 @@ def safe_relative_path(raw: str):
 async def import_folder(files: list[UploadFile] = File(...), paths: list[str] = Form(...),
                         kind: str = Form("drawing"), db: Session = Depends(session),
                         user: User = Depends(current_user)):
-    allow_roles(user, "Quality", "Engineering", "Management")
-    if kind not in ("drawing", "document", "form-template"):
+    if kind not in tuple(IMPORT_CAPABILITIES.keys() - {"part-master"}):
         raise HTTPException(400, "Invalid file category")
+    require_capability(user, IMPORT_CAPABILITIES[kind])
     if len(files) != len(paths):
         raise HTTPException(400, "Each file must include its original relative path")
     report = {"stored": 0, "already_present": 0, "conflicts": [], "rejected": []}
@@ -439,7 +439,7 @@ def download_file(file_id: int, db: Session = Depends(session), user: User = Dep
 @app.put("/api/files/{file_id}/drawing-mapping")
 def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(session),
                 user: User = Depends(current_user)):
-    allow_roles(user, "Engineering", "Management")
+    require_capability(user, "import.drawings")
     f = db.get(StoredFile, file_id)
     if not f or f.kind != "drawing":
         raise HTTPException(404, "Drawing file not found")

@@ -120,6 +120,8 @@ def transition(db,revision,user,action,reason):
         if user.role not in ('Engineering','Management') or revision.status!='Draft':
             raise HTTPException(409 if user.role in ('Engineering','Management') else 403,'Only a draft can be submitted by Engineering or Management')
         event(db,revision,user,'In Review',reason);return
+    from .security import require_capability
+    require_capability(user, 'engineering.approve')
     if user.role!='Engineering':raise HTTPException(403,'Engineering review and approval required')
     if action in ('review','approve') and revision.created_by==user.id:
         raise HTTPException(403,'An author cannot review or approve their own revision')

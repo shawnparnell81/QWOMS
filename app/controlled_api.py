@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from .db import session
 from .models import ControlledDocument,ControlledRevision,RevisionEvent,StoredFile,User,WorkOrder
-from .security import current_user
+from .security import current_user,require_capability,IMPORT_CAPABILITIES
 from .controlled import KINDS,create_revision,transition,drawing_reference
 from .audit import record
 
@@ -63,7 +63,7 @@ def list_documents(db:Session=Depends(session),user:User=Depends(current_user)):
 
 @router.post('/documents',status_code=201)
 def add_document(body:DocumentInput,db:Session=Depends(session),user:User=Depends(current_user)):
-    manager(user)
+    require_capability(user, {"Drawing":"import.drawings","Work instruction":"import.work_instructions","Supporting document":"import.supporting_documents","Form template":"import.form_masters"}[body.kind])
     doc=ControlledDocument(kind=body.kind,number=body.number,identity_key=body.number.casefold(),title=body.title)
     db.add(doc)
     try:db.flush()
@@ -75,10 +75,10 @@ def add_document(body:DocumentInput,db:Session=Depends(session),user:User=Depend
 
 @router.post('/documents/{document_id}/revisions',status_code=201)
 def add_revision(document_id:int,body:RevisionInput,db:Session=Depends(session),user:User=Depends(current_user)):
-    manager(user)
     doc=db.scalar(select(ControlledDocument).where(ControlledDocument.id==document_id).with_for_update())
     file=db.get(StoredFile,body.file_id)
     if not doc or not file:raise HTTPException(404,'Controlled document or imported original not found')
+    require_capability(user, {"Drawing":"import.drawings","Work instruction":"import.work_instructions","Supporting document":"import.supporting_documents","Form template":"import.form_masters"}[doc.kind])
     revision=create_revision(db,doc,file,body.revision,user,body.change_summary,body.blank_master_confirmed)
     db.commit();return revision_json(db,revision)
 
@@ -100,6 +100,7 @@ def get_revision(revision_id:int,db:Session=Depends(session),user:User=Depends(c
 
 @router.post('/work-orders/{order_id}/resolve-drawing-references')
 def resolve_drawings(order_id:int,db:Session=Depends(session),user:User=Depends(current_user)):
+    require_capability(user, 'engineering.approve')
     if user.role!='Engineering':raise HTTPException(403,'Engineering required')
     order=db.scalar(select(WorkOrder).where(WorkOrder.id==order_id).with_for_update())
     if not order:raise HTTPException(404,'Work order not found')

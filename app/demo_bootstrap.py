@@ -2,6 +2,7 @@
 import os
 from sqlalchemy import select,func
 from .models import User, ProductFamily, PhysicalPart, PartAlias
+from .audit import record
 from .security import hash_password
 from .deployment import demo_mode,validate_settings
 
@@ -22,7 +23,9 @@ def seed(db):
         password=os.getenv(variable,'')
         if len(password)<16 or len(password)>128:
             raise RuntimeError(f'Securely configure {variable} (16–128 characters); no default password is provided')
-        db.add(User(username=username,display_name=name,role=role,site='Fictional Site',password_hash=hash_password(password)))
+        account=User(username=username,display_name=name,role=role,is_admin=(username=='demo.manager'),capabilities=['engineering.approve'] if role=='Engineering' else [],site='Fictional Site',password_hash=hash_password(password))
+        db.add(account);db.flush()
+        record(db,account,'demo.account_created','user',account.id,{'is_admin':account.is_admin,'capabilities':account.capabilities})
     if not db.scalar(select(PhysicalPart.id).limit(1)):
         family=ProductFamily(name='Fictional Shocks');db.add(family);db.flush()
         part=PhysicalPart(family_id=family.id,description='Fictional demonstration shock',drawing_number=None,drawing_revision=None)
