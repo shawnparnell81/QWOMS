@@ -30,3 +30,10 @@ Read `docs/PRODUCT_REQUIREMENTS.md` and `README.md` before coding. Implement fea
 ## Accelerated launch priority
 
 Read `docs/LAUNCH_ACCELERATION.md` at the beginning of each task. Prioritize an explicitly authorized, private synthetic-data **hosted demo** and test evidence, then approved real-data pilot and full production gates. Do not equate a running local app with a live website or approved company use. User wants fastest safe launch; do not delay a secure demo just for non-critical enhancements. Obtain authorization before provisioning chargeable services. Preserve the one-final-PR policy.
+
+## User-confirmed release scope — full functionality (2026-11-04)
+- The user expects **all previously accepted QWOMS workflows working before a company-wide production go-live**. A synthetic-data demo or limited pilot may help testing but is never described as satisfying this release.
+- Updates and improvements can follow launch, but **do not defer any accepted mandatory requirement** as a post-launch enhancement without explicit user agreement. The exact-fidelity in-app Excel forms, rules-driven template attachment, controlled revisions, labor/projects/pallets, chargebacks, six differentiated work-order types, alias Part Master and folder imports are release-critical.
+- Favor fast, integrated development and automated regression tests across workstreams. An impressive demo, local test pass, or cloud URL alone is insufficient evidence of operational readiness.
+- Do not claim the app will work perfectly without testing. Real representative workbook compatibility, security, backups/restore, and user acceptance are release gates.
+- Stay on `development/qwoms-complete-build`; multiple commits, one final PR only upon user approval. Code and tests cannot be run asynchronously outside an active Codex task.
