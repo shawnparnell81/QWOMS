@@ -1,0 +1,23 @@
+[
+  {
+    "source": "0008",
+    "unknown_grant": false,
+    "result": "PASS",
+    "normal_alembic_CLI": true,
+    "refusal_rolled_back": false
+  },
+  {
+    "source": "0009",
+    "unknown_grant": false,
+    "result": "PASS",
+    "normal_alembic_CLI": true,
+    "refusal_rolled_back": false
+  },
+  {
+    "source": "0009",
+    "unknown_grant": true,
+    "result": "PASS",
+    "normal_alembic_CLI": true,
+    "refusal_rolled_back": true
+  }
+]

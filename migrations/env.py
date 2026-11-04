@@ -10,8 +10,13 @@ target_metadata = Base.metadata
 
 def migrate(connection):
     context.configure(connection=connection, target_metadata=target_metadata,
-                      compare_type=True, render_as_batch=connection.dialect.name == "sqlite")
+                      compare_type=True, transactional_ddl=True, render_as_batch=connection.dialect.name == "sqlite")
     with context.begin_transaction():
+        # sqlite3 legacy transaction mode does not BEGIN for DDL. Explicitly
+        # start it so a refused reconciliation rolls back schema AND data.
+        if connection.dialect.name=='sqlite' and not connection.connection.driver_connection.in_transaction:
+            connection.exec_driver_sql('BEGIN IMMEDIATE')
+        config.attributes['qwoms_source_revisions']=list(context.get_context().get_current_heads())
         context.run_migrations()
 
 

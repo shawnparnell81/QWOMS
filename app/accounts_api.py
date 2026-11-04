@@ -1,4 +1,4 @@
-"""Management-controlled accounts, password lifecycle and immediate session revocation."""
+"""Administrator-controlled accounts, password lifecycle and immediate session revocation."""
 from datetime import datetime,timezone
 from typing import Literal
 from fastapi import APIRouter,Depends,HTTPException,Response
@@ -119,3 +119,10 @@ def initial_password(body:InitialPasswordChange,response:Response,db:Session=Dep
     revoke(db,target.id);record(db,target,'account.initial_password_set','user',target.id);db.commit()
     response.delete_cookie('qwoms_token',path='/');response.delete_cookie('qwoms_csrf',path='/')
     return {'ok':True,'reauthenticate':True}
+
+
+@router.get('/admin/migration-history')
+def migration_history(db:Session=Depends(session),manager:User=Depends(require_admin)):
+    from .models import SchemaReconciliation
+    return [{'id':r.id,'source_revisions':r.source_revisions,'target_revision':r.target_revision,'created_at':r.created_at,'report':r.report}
+        for r in db.scalars(select(SchemaReconciliation).order_by(SchemaReconciliation.created_at.desc()))]

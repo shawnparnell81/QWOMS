@@ -1,0 +1,30 @@
+{
+  "branch": "development/qwoms-complete-build",
+  "schema_head": "0013",
+  "sqlite_passed": 106,
+  "postgresql17_passed": 106,
+  "warnings_each": 3,
+  "previous_five_gaps_passed_each_backend": 5,
+  "previous_five_browser_passed": 5,
+  "free_workflow_browser_assertions": 46,
+  "migration_profiles": [
+    "legacy0008 local originals",
+    "legacy0008 database originals",
+    "legacy0009 local originals",
+    "legacy0009 database originals",
+    "canonical upgrade with labor PDF draft"
+  ],
+  "restore_reupgrade_verified": true,
+  "negative_cases": [
+    "unknown permission",
+    "partial operations",
+    "both permission columns",
+    "late ledger failure",
+    "misleading revision stamp"
+  ],
+  "free_editor_source_changed": false,
+  "measured_export_feature_differences": 0,
+  "live_database_or_deployment_changed": false,
+  "actual_company_data_used": false,
+  "paid_licenses_added": false
+}

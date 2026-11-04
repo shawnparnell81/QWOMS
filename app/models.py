@@ -388,3 +388,13 @@ class DispositionEvent(Base):
     actor_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     request_id: Mapped[int | None] = mapped_column(ForeignKey('disposition_events.id'),nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)
+
+
+class SchemaReconciliation(Base):
+    """System migration audit; no human account is impersonated or created."""
+    __tablename__='schema_reconciliations'
+    id: Mapped[str] = mapped_column(String(50),primary_key=True)
+    source_revisions: Mapped[list] = mapped_column(JSON)
+    target_revision: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    report: Mapped[dict] = mapped_column(JSON)

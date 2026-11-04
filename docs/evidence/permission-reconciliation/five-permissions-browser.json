@@ -1,0 +1,47 @@
+[
+  {
+    "case": "import.work_instructions",
+    "grant_ui": "PASS",
+    "default_denied": 403,
+    "allowed": 200,
+    "unrelated_denied": 403,
+    "revoked_session": 401,
+    "revoked_denied": 403
+  },
+  {
+    "case": "import.supporting_documents",
+    "grant_ui": "PASS",
+    "default_denied": 403,
+    "allowed": 200,
+    "unrelated_denied": 403,
+    "revoked_session": 401,
+    "revoked_denied": 403
+  },
+  {
+    "case": "import.other",
+    "grant_ui": "PASS",
+    "default_denied": 403,
+    "allowed": 200,
+    "unrelated_denied": 403,
+    "revoked_session": 401,
+    "revoked_denied": 403
+  },
+  {
+    "case": "folder-work-instruction",
+    "grant_ui": "PASS",
+    "default_denied": 403,
+    "allowed": 200,
+    "unrelated_denied": 403,
+    "revoked_session": 401,
+    "revoked_denied": 403
+  },
+  {
+    "case": "folder-other",
+    "grant_ui": "PASS",
+    "default_denied": 403,
+    "allowed": 200,
+    "unrelated_denied": 403,
+    "revoked_session": 401,
+    "revoked_denied": 403
+  }
+]
