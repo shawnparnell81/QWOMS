@@ -32,6 +32,7 @@ The current file store uses local disk and SQLite is the default developer datab
 python -m venv .venv
 source .venv/bin/activate  # Use the cloud/Linux terminal; no work-PC install required
 pip install -r requirements.txt
+python -m alembic upgrade head  # New database; see Phase 2 operations for existing Phase 1 data
 export QWOMS_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 export QWOMS_COOKIE_SECURE=false # local HTTP development ONLY
 python -m app.bootstrap manager --display-name "Quality Manager"
@@ -48,7 +49,7 @@ To run tests:
 python -m pytest -q
 ```
 
-For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a persistent `QWOMS_SECRET_KEY`, and configure secure cookies and approved persistent document storage **before** evaluating deployment. `Base.metadata.create_all` is only for initial development; use reviewed migrations for production.
+For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a persistent `QWOMS_SECRET_KEY`, and configure secure cookies and approved persistent document storage **before** evaluating deployment. Alembic now owns schema changes; startup refuses a stale database. See [Phase 2 operations](docs/PHASE2_OPERATIONS.md) for legacy database adoption, S3 configuration, and Docker Desktop instructions.
 
 ## Repository structure
 

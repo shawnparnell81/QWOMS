@@ -13,6 +13,8 @@ from app.main import app
 import app.main as module
 from app.models import User, PhysicalPart
 from app.security import hash_password
+from app.schema import upgrade
+from tests.db_helpers import test_engine as isolated_test_engine
 
 
 def workbook(rows):
@@ -28,27 +30,27 @@ def workbook(rows):
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False})
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as db:
-        db.add(User(username="manager", display_name="Test Manager", role="Management", site="Site A",
-                    password_hash=hash_password("SufficientlyLongPassword!")))
-        db.add(User(username="engineer", display_name="Test Engineer", role="Engineering", site="Site B",
-                    password_hash=hash_password("OtherLongPassword123!")))
-        db.commit()
-    def override():
-        db = Session()
-        try:
-            yield db
-        finally:
-            db.close()
-    app.dependency_overrides[session] = override
-    monkeypatch.setattr(module, "STORAGE_ROOT", tmp_path / "storage")
-    with TestClient(app) as test_client:
-        yield test_client, Session
-    app.dependency_overrides.clear()
-    engine.dispose()
+    with isolated_test_engine(tmp_path) as engine:
+        upgrade(engine)
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as db:
+            db.add(User(username="manager", display_name="Test Manager", role="Management", site="Site A",
+                        password_hash=hash_password("SufficientlyLongPassword!")))
+            db.add(User(username="engineer", display_name="Test Engineer", role="Engineering", site="Site B",
+                        password_hash=hash_password("OtherLongPassword123!")))
+            db.commit()
+        def override():
+            db = Session()
+            try:
+                yield db
+            finally:
+                db.close()
+        app.dependency_overrides[session] = override
+        monkeypatch.setattr(module, "STORAGE_ROOT", tmp_path / "storage")
+        monkeypatch.setattr(module, "engine", engine)
+        with TestClient(app) as test_client:
+            yield test_client, Session
+        app.dependency_overrides.clear()
 
 
 def logged_in(client):

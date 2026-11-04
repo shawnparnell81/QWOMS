@@ -8,6 +8,7 @@ import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 from typing import Annotated
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Response, UploadFile
 from fastapi.responses import FileResponse
@@ -21,6 +22,8 @@ from .imports import load_rows, process_part_import
 from .models import (ImportAudit, Message, PartAlias, PhysicalPart, ProductFamily,
                      StoredFile, User, WorkOrder, WorkOrderCounter, WorkOrderPart)
 from .security import current_user, hash_password, require_admin, token_for, verify_password
+from .schema import require_current
+from .storage import original_store, StorageConflict
 
 APP_ROOT = Path(__file__).resolve().parent
 STORAGE_ROOT = Path(os.getenv("QWOMS_STORAGE_ROOT", APP_ROOT.parent / "local-storage")).resolve()
@@ -42,9 +45,8 @@ app.mount("/static", StaticFiles(directory=str(APP_ROOT / "static")), name="stat
 
 @app.on_event("startup")
 def init_db():
-    # V1 developer convenience; replace with reviewed Alembic migrations before launch.
-    Base.metadata.create_all(bind=engine)
-    STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
+    require_current(engine)
+    original_store(STORAGE_ROOT)
 
 
 class LoginBody(BaseModel):
@@ -237,7 +239,7 @@ def safe_relative_path(raw: str):
     raw = raw.replace("\\", "/")
     parts = raw.split("/")
     if (not parts or any(p in ("", ".", "..") for p in parts)
-            or any(":" in p or "\x00" in p for p in parts)
+            or any(":" in p or any(ord(c) < 32 for c in p) for p in parts)
             or raw.startswith("/")):
         raise ValueError("Invalid relative path; folder traversal is not permitted")
     if len(raw) > 950 or len(parts[-1]) > 255:
@@ -273,15 +275,14 @@ async def import_folder(files: list[UploadFile] = File(...), paths: list[str] = 
             else:
                 report["conflicts"].append({"path": rel, "reason": "Filename/path already exists with different contents; nothing overwritten"})
             continue
-        destination = (STORAGE_ROOT / "files" / rel).resolve()
-        if not destination.is_relative_to((STORAGE_ROOT / "files").resolve()):
-            report["rejected"].append({"path": rel, "reason": "Unsafe path"})
+        try:
+            original_store(STORAGE_ROOT).put_new("files/" + rel, content)
+        except ValueError:
+            report["rejected"].append({"path": rel, "reason": "Unsafe storage path"})
             continue
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if destination.exists():
-            report["conflicts"].append({"path": rel, "reason": "File already exists on disk"})
+        except StorageConflict as exc:
+            report["conflicts"].append({"path": rel, "reason": str(exc)})
             continue
-        destination.write_bytes(content)
         db.add(StoredFile(relative_path=rel, original_name=rel.split("/")[-1],
                           kind=kind, sha256=digest, uploaded_by=user.id))
         db.commit()
@@ -305,10 +306,15 @@ def download_file(file_id: int, db: Session = Depends(session), user: User = Dep
     f = db.get(StoredFile, file_id)
     if not f:
         raise HTTPException(404, "File not found")
-    path = STORAGE_ROOT / "files" / f.relative_path
-    if not path.exists():
+    try:
+        content = original_store(STORAGE_ROOT).read("files/" + f.relative_path)
+    except FileNotFoundError:
         raise HTTPException(404, "Stored file unavailable")
-    return FileResponse(path, filename=f.original_name)
+    if hashlib.sha256(content).hexdigest() != f.sha256:
+        raise HTTPException(409, "Stored file integrity check failed")
+    return Response(content, media_type="application/octet-stream", headers={
+        "Content-Disposition": "attachment; filename*=UTF-8''" + quote(f.original_name, safe=""),
+        "X-Content-Type-Options": "nosniff"})
 
 
 @app.put("/api/files/{file_id}/drawing-mapping")

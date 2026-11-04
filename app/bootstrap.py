@@ -4,6 +4,7 @@ import getpass
 from .db import Base, engine, SessionLocal
 from .models import User
 from .security import hash_password
+from .schema import require_current
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
     confirm = getpass.getpass("Confirm password: ")
     if password != confirm:
         raise SystemExit("Passwords do not match")
-    Base.metadata.create_all(engine)
+    require_current(engine)
     with SessionLocal() as db:
         if db.query(User).filter_by(username=args.username).first():
             raise SystemExit("Username already exists")
