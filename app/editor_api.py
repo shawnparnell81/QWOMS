@@ -204,6 +204,8 @@ def wopi_draft(db,request,draft_id,write=False):
     user=db.get(User,draft.owner_id);auth=db.get(AuthSession,draft.auth_session_id)
     if not user or not user.active or not auth or auth.user_id!=user.id or auth.revoked_at or utc(auth.expires_at)<=now():raise HTTPException(401,'Workbook account session revoked')
     order=db.get(WorkOrder,draft.work_order_id);read_access(user,order);approved_attachment(db,order,draft.attachment_id)
+    from .workspace_api import access
+    access(db,order.id,user,write=write)
     if write:can_edit(user,order)
     return draft,user,order
 

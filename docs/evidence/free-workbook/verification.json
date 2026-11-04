@@ -1,0 +1,53 @@
+{
+  "branch": "development/qwoms-complete-build",
+  "sqlite": {
+    "passed": 91,
+    "warnings": 3
+  },
+  "postgresql17": {
+    "passed": 91,
+    "warnings": 3,
+    "location": "local synthetic container; disposable random schemas"
+  },
+  "chromium": {
+    "integrated_free_workflow_assertions": 46,
+    "workbook_layouts": 4,
+    "both_PASS_and_FAIL_colors": true,
+    "original_image_dropdown_PDF": true,
+    "all_four_saved_and_reopened_exports": true,
+    "engineering_reviewer_read_only_and_API_403": true,
+    "initial_password_single_login": true,
+    "regression_suites": [
+      "smoke\u2014all six types",
+      "controlled",
+      "forms",
+      "accounts",
+      "permissions",
+      "operations"
+    ]
+  },
+  "xlsx": {
+    "measured_feature_differences": 0,
+    "only_value_and_cache_worksheet_XML_changed_in_fixtures": true,
+    "other_uncompressed_package_parts_byte_identical": true,
+    "master_and_equipment_PDF_bytes_unchanged": true
+  },
+  "render_read_only_inspection": {
+    "autoDeploy": "no",
+    "autoDeployTrigger": "off",
+    "configuration_changed": false,
+    "deployment_triggered": false
+  },
+  "licenses": {
+    "paid_required": false,
+    "new_paid_or_evaluation_SDK": false,
+    "notices": "docs/licenses"
+  },
+  "not_certified": [
+    "exact browser/native Excel rendering",
+    "complete Excel function semantics",
+    "exact Excel print pagination",
+    "live schema migration compatibility",
+    "production recovery/security/scale acceptance"
+  ]
+}

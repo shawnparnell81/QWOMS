@@ -158,3 +158,13 @@ def test_text_cells_relative_validation_and_literal_xml_preservation():
     edits=[{'sheet':ws.title,'address':'A1','value':'<fictional & literal> "quoted"'}];engine.apply_values(book,edits);result=engine.patch_package(source,book,edits,engine.Calculator(book).calculate())
     assert load_workbook(BytesIO(result)).active['A1'].value=='<fictional & literal> "quoted"'
     assert compare(source,result)['difference_count']==0
+
+
+def test_independent_engineering_review_does_not_grant_measurement_write(free_attached):
+    web,Session,o,a,draft=free_attached
+    login_as(web,'engineer','OtherLongPassword123!')
+    opened=web.post(f"/api/work-orders/{o}/attachments/{a['id']}/editor",json={});assert opened.status_code==201
+    review=opened.json()['id'];base='/api/workbooks/'+review
+    assert web.get(base+'/form').json()['read_only']
+    assert web.patch(base+'/cells',json={'expected_version':1,'edits':[{'sheet':'Shock Validation','address':'B5','value':'12'}]}).status_code==403
+    assert web.post(base+'/preview',json={'expected_version':1,'edits':[]}).status_code==403

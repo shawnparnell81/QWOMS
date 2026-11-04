@@ -48,6 +48,7 @@ def form(draft_id:str,sheet:str|None=None,db:Session=Depends(session),user:User=
     draft,order=guarded(db,draft_id,user)
     data,_,_=render(draft,order,sheet)
     data['filename']=db.get(StoredFile,draft.source_file_id).original_name
+    data['read_only']=data['read_only'] or not(user.is_admin or user.role=='Management' or user.id in (order.assigned_to,order.created_by))
     return data
 
 
