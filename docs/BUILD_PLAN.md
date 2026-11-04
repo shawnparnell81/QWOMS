@@ -5,6 +5,14 @@
 
 This plan complements the approved domain requirements in `PRODUCT_REQUIREMENTS.md`. A module is **not complete** simply because an API endpoint or mock UI exists. It must function from the browser, persist data correctly, respect permissions, and pass relevant tests.
 
+## Mandatory launch gate: owner is sole initial system Administrator
+
+Production starts with exactly **one** named, owner-controlled Administrator account (secure initial bootstrap, no shared or default credentials). The owner independently imports all initial Part Master spreadsheets, folder trees, drawings, instructions, document masters/forms and sets up every employee's role/site/permissions. Production must not seed synthetic demo accounts or allow public signup.
+
+Implement a system admin privilege distinct from department roles; by default Quality, Engineering, Production and Management accounts cannot manage users or import/commit master records and files. Admin may explicitly delegate/revoke narrowly scoped import/user-management privileges and add another administrator later. Engineering revision approval stays a separately assignable duty. Provide admin portal, audit, session revocation, secure password/account lifecycle, last-active-admin protection and per-endpoint enforcement.
+
+Acceptance: production first-start has only owner/admin; user creation and role/permission assignment flow works; non-admin attempts to access account creation and all imports are denied; approved delegated privilege works then immediately stops when revoked; last admin cannot be deactivated/demoted; demo-only accounts never appear in production; security and browser tests pass. The current prototype's Management-as-admin logic and department-scoped import endpoints **must be changed before company go-live**.
+
 ## Completion gates by workstream
 
 | Area | Accepted behavior to implement and test |
