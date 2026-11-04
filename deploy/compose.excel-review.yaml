@@ -1,0 +1,18 @@
+# LOCAL SYNTHETIC REVIEW ONLY. No production services, volumes or licenses are changed.
+# First run scripts/run_excel_review.py to generate the callback origin file.
+services:
+  office:
+    image: ${QWOMS_REVIEW_OFFICE_IMAGE:-collabora/code@sha256:808410e77b8695a35b93c7638fbba07c10cf0ba8307141b460248f18ab6e5c55}
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:9980:9980"
+    cap_add:
+      - MKNOD
+    environment:
+      aliasgroup1: ${QWOMS_REVIEW_WOPI_ORIGIN:?Generate work/excel-editor/office-review.env first}
+      extra_params: >-
+        --o:ssl.enable=false --o:ssl.termination=false
+        --o:logging.level=error --o:logging.anonymize.anonymize_user_data=true
+        --o:welcome.enable=false --o:net.frame_ancestors=http://127.0.0.1:8020
+    mem_limit: 2g
+    cpus: 2

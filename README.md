@@ -9,7 +9,7 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 - Modern browser UI with employee initials as avatars, a dashboard, and role-aware navigation.
 - Separate usernames/passwords (a separate Administrator creates accounts; no default passwords).
 - Six distinct work order types with different subtype choices and job-specific fields: Validation/FAI, Inspection, Test, Repair, Parts Weighing, Photos.
-- Automatic **work order** numbers; users, not the app, name completed uploads and saved documents. In-browser workbook editing remains unavailable.
+- Automatic **work order** numbers; users, not the app, name completed uploads and saved documents. A real in-app workbook editor is implemented for configured local synthetic review; exact fidelity is not certified.
 - Assign work orders to employees and show assigned work on their dashboards.
 - Multiple parts per work order and customer-specific part-number aliases for the same physical part.
 - Excel `.xlsx` Part Master import with a preview, deduplication, conflict reporting, and blank fields retained; includes product families, UPC, drawing number, and revision.
@@ -22,7 +22,7 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 
 **Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, separate Administrator and explicit per-employee import capabilities, audit/assignment history, project links, controlled Engineering revision approvals, scoped work requirements and approved form attachments/completed-file storage are available. See [controlled workflows](docs/CONTROLLED_WORKFLOWS.md). See `docs/BUILD_STATUS.md` for exact evidence and limits.
 
-**Not complete yet:** exact-fidelity in-app Excel editing, full task/labor and supplier report/export acceptance, production-approved storage/restore, comprehensive audit/security coverage, group chat and production deployment. Initial labor/timer, pallet movement and approved chargeback ledgers are available in Labor & pallets. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
+**Not complete yet:** exact Excel fidelity/production editor acceptance, full task/labor and supplier report/export acceptance, production-approved storage/restore, comprehensive audit/security coverage, group chat and production deployment. Initial labor/timer, pallet movement and approved chargeback ledgers are available in Labor & pallets. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
 
 The current file store uses local disk and SQLite is the default developer database; neither arrangement should be treated as the final cloud-hosting design. Security review, CSRF protection, origin policy, rate limiting, backups, SSO policy if needed, object storage, database migrations, permissions testing, and Excel compatibility testing are mandatory before using company data.
 
@@ -70,3 +70,5 @@ For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a
 Follow `docs/BUILD_STATUS.md` and `docs/LAUNCH_ACCELERATION.md`. Resolve exact Excel editor licensing/fidelity, finish all remaining accepted workflows and security/storage/restore gates, and validate a hosted synthetic demo only in the authorized free Render workspace. A demo is not company-wide go-live. No PR until explicit user approval.
 
 Personal Administrator bootstrap, import grants and safe migration prerequisites: [Administration](docs/ADMINISTRATION.md). The live Render demo runs an older commit; new development here has not been deployed.
+
+Interactive workbook review: [Excel editor implementation and hands-on guide](docs/EXCEL_EDITOR_IMPLEMENTATION.md). Uses an independent approved-master working copy, real browser spreadsheet measurements/formulas, explicit filenames, saved-file reopening, XLSX export and printing. Measured fidelity differences require review; the live Render demo has not been changed.

@@ -338,3 +338,21 @@ class ChargeItem(Base):
     quantity: Mapped[int] = mapped_column(Integer)
     unit_cents: Mapped[int] = mapped_column(Integer)
     approved_by: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
+
+
+class WorkbookDraft(Base):
+    __tablename__ = 'workbook_drafts'
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'), index=True)
+    attachment_id: Mapped[int] = mapped_column(ForeignKey('work_order_attachments.id'))
+    owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    auth_session_id: Mapped[str] = mapped_column(ForeignKey('auth_sessions.id'))
+    source_file_id: Mapped[int] = mapped_column(ForeignKey('stored_files.id'))
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    token_hash: Mapped[str] = mapped_column(String(64), default='')
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    lock_value: Mapped[str] = mapped_column(String(1024), default='')
+    lock_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -63,11 +63,17 @@ async def safe_validation_error(request,exception):
 
 @app.middleware("http")
 async def origin_guard(request: Request, call_next):
-    if not demo_gate_ok(request):
+    wopi=request.url.path.startswith('/wopi/files/')
+    if wopi:
+        # The office server uses scoped WOPI credentials, not browser Basic/cookies.
+        # Remove bearer query values from the shared ASGI scope before access logging.
+        request.state.wopi_token=request.query_params.get('access_token','')
+        request.scope['query_string']=b''
+    if not wopi and not demo_gate_ok(request):
         return Response('Private synthetic demo',status_code=401,headers={
             'WWW-Authenticate':'Basic realm="QWOMS synthetic demo", charset="UTF-8"',
             'Cache-Control':'no-store','Strict-Transport-Security':'max-age=31536000'})
-    if request.method not in ("GET", "HEAD", "OPTIONS"):
+    if not wopi and request.method not in ("GET", "HEAD", "OPTIONS"):
         origin = request.headers.get("origin")
         allowed = set() if demo_mode() else {str(request.base_url).rstrip("/")}
         if public_origin():
@@ -82,7 +88,7 @@ async def origin_guard(request: Request, call_next):
     response.headers['X-Frame-Options'] = 'DENY'
     if demo_mode():
         response.headers['Strict-Transport-Security'] = 'max-age=31536000'
-    if request.url.path.startswith('/api/'):
+    if request.url.path.startswith(('/api/','/wopi/')):
         response.headers['Cache-Control'] = 'no-store'
     return response
 
@@ -743,3 +749,6 @@ app.include_router(accounts_router)
 
 from .operations_api import router as operations_router
 app.include_router(operations_router)
+
+from .editor_api import router as editor_router
+app.include_router(editor_router)
