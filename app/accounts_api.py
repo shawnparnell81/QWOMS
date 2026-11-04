@@ -37,6 +37,10 @@ class PasswordChange(BaseModel):
     new_password:str=Field(min_length=12,max_length=128)
 
 
+class InitialPasswordChange(BaseModel):
+    new_password:str=Field(min_length=12,max_length=128)
+
+
 def revoke(db,user_id):
     db.execute(update(AuthSession).where(AuthSession.user_id==user_id,AuthSession.revoked_at.is_(None))
                 .values(revoked_at=datetime.now(timezone.utc)))
@@ -86,9 +90,30 @@ def reset_password(user_id:int,body:PasswordChange,db:Session=Depends(session),m
     target=db.scalar(select(User).where(User.id==user_id).with_for_update().execution_options(populate_existing=True))
     if not target:raise HTTPException(404,'Account not found')
     if verify_password(body.new_password,target.password_hash):raise HTTPException(422,'Choose a different password')
-    target.password_hash=hash_password(body.new_password);revoke(db,target.id)
+    target.password_hash=hash_password(body.new_password)
+    target.must_change_password=False
+    revoke(db,target.id)
     record(db,manager,'account.password_reset','user',target.id)
     db.commit();return {'ok':True,'reauthenticate':True}
+
+
+@router.post('/me/set-initial-password')
+def set_initial_password(body:InitialPasswordChange,response:Response,db:Session=Depends(session),
+                         user:User=Depends(current_user)):
+    """One-time password setup after authenticating with a temporary demo credential."""
+    target=db.scalar(select(User).where(User.id==user.id).with_for_update().execution_options(populate_existing=True))
+    if not target or not target.must_change_password:
+        raise HTTPException(409,'Initial password setup is not required for this account')
+    if verify_password(body.new_password,target.password_hash):
+        raise HTTPException(422,'Choose a different password')
+    target.password_hash=hash_password(body.new_password)
+    target.must_change_password=False
+    revoke(db,target.id)
+    record(db,target,'account.initial_password_set','user',target.id)
+    db.commit()
+    response.delete_cookie('qwoms_token',path='/')
+    response.delete_cookie('qwoms_csrf',path='/')
+    return {'ok':True,'reauthenticate':True}
 
 
 @router.post('/me/change-password')
