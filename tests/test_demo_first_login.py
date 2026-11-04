@@ -43,7 +43,7 @@ def test_legacy_demo_admin_chooses_personal_password_once(client, monkeypatch):
     web.headers["X-QWOMS-CSRF"] = web.cookies["qwoms_csrf"]
     assert web.get("/api/me").status_code == 200
     assert web.get("/api/dashboard").status_code == 403
-    assert web.post("/api/parts/import/preview").status_code == 403
+    assert web.post("/api/messages", json={"recipient_id": 2, "body": "Fictional blocked message"}).status_code == 403
 
     new_password = "Fictional-Personal-Password-2026!"
     result = web.post("/api/me/set-initial-password", json={"new_password": new_password})
