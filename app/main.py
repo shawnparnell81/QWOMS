@@ -439,8 +439,14 @@ def dashboard(db: Session = Depends(session), user: User = Depends(current_user)
     assigned = db.scalars(select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
                           .where(WorkOrder.assigned_to == user.id).order_by(WorkOrder.id.desc()).limit(30)).all()
     unread = db.scalar(select(func.count()).select_from(Message).where(Message.recipient_id == user.id, Message.read_at.is_(None))) or 0
+    assigned_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
+        WorkOrder.assigned_to == user.id)) or 0
+    open_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
+        WorkOrder.assigned_to == user.id,
+        WorkOrder.status.notin_(("Completed", "Closed")))) or 0
     return {"assigned": [serialize_order(o) for o in assigned],
-            "open_count": sum(1 for o in assigned if o.status not in ("Completed", "Closed")),
+            "assigned_count": assigned_count,
+            "open_count": open_count,
             "unread_messages": unread,
             "total_work_orders": db.scalar(select(func.count()).select_from(WorkOrder)) or 0,
             "total_parts": db.scalar(select(func.count()).select_from(PhysicalPart)) or 0}
