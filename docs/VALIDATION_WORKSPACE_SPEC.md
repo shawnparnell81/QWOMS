@@ -33,6 +33,9 @@ The top-level calculated result shows failure while a separate manual final disp
 
 **Disposition and closeout** — distinguish calculated PASS/FAIL per criterion and sample from final approved Pass/Fail/Conditional Pass. Preserve any failed measurements when conditional release is approved. Require authorized approver and rationale where rule demands; retain all completed forms/files and drawing/instruction revisions. Ensure work order can be searched and reported as an immutable historical record.
 
+## Test software export — PDF attachment, no conversion (confirmed 2026-11-04)
+The user's test software produces a PDF after testing. The standard flow is simply **open the Validation/FAI work order → Test Results → Upload PDF → Save**, with the uploaded report automatically attached to that exact work order. Retain the original PDF unchanged, with its original filename and extension, original byte/hash integrity, uploader and timestamp; show it in the order with one-click preview/open/download. Reports are evidence, not Excel templates. Do not require importing test results into the validation workbook, reformatting reports, parsing metrics or implementing an instrument API. Support multiple test PDFs for different tests/samples if present; avoid silently overwriting identical names. Save atomically and only report success after the file and attachment record persist; preserve history on revisions/removal per retention policy. Enforce access control for upload and reading.
+
 ## Interaction design
 
 At desktop widths, consider a responsive **resource rail + central active editor/preview + evidence/context panel** within the same application; provide tabs or drawer switching, without opening network folders. Maintain full-size editing/preview mode for spreadsheets/drawings; link context back to order. A resource may open a focused in-app workspace while still having breadcrumbs/back navigation to the same order.
