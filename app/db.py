@@ -12,6 +12,8 @@ elif DATABASE_URL.startswith("postgresql://"):
 def make_engine(url, **kwargs):
     if str(url).startswith("sqlite"):
         kwargs.setdefault("connect_args", {"check_same_thread": False})
+    elif os.getenv('QWOMS_DATABASE_REQUIRE_TLS','').casefold() == 'true':
+        kwargs.setdefault('connect_args', {})['sslmode'] = 'require'
     result = create_engine(url, pool_pre_ping=True, **kwargs)
     if result.dialect.name == "sqlite":
         # sqlite3 legacy mode otherwise commits a released SAVEPOINT outside an

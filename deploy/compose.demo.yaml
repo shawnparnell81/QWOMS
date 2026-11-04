@@ -1,0 +1,74 @@
+# Authorized, private SYNTHETIC demo only. Run the accompanying deployment checklist first.
+x-app: &app
+  image: qwoms-demo:${QWOMS_IMAGE_TAG:?Set a tested image tag}
+  build:
+    context: ..
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  environment:
+    DATABASE_URL: postgresql+psycopg://qwoms:${QWOMS_DB_PASSWORD:?Required}@db:5432/qwoms_demo
+    QWOMS_SECRET_KEY: ${QWOMS_SECRET_KEY:?Required}
+    QWOMS_COOKIE_SECURE: "true"
+    QWOMS_DEMO_MODE: "true"
+    QWOMS_SYNTHETIC_DATA_ONLY: "true"
+    QWOMS_PUBLIC_URL: https://${QWOMS_DEMO_HOST:?Required}
+    QWOMS_STORAGE_BACKEND: local
+    QWOMS_STORAGE_ROOT: /data
+  volumes: [documents-demo:/data]
+  networks: [backend]
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: qwoms_demo
+      POSTGRES_USER: qwoms
+      POSTGRES_PASSWORD: ${QWOMS_DB_PASSWORD:?Required}
+    volumes: [database-demo:/var/lib/postgresql/data]
+    networks: [backend]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U qwoms -d qwoms_demo"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  migrate:
+    <<: *app
+    command: [python, -m, alembic, upgrade, head]
+    depends_on:
+      db: {condition: service_healthy}
+  app:
+    <<: *app
+    restart: unless-stopped
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz',timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      QWOMS_DEMO_HOST: ${QWOMS_DEMO_HOST:?Required}
+      QWOMS_DEMO_ALLOWED_CIDRS: ${QWOMS_DEMO_ALLOWED_CIDRS:?Required}
+      NO_PROXY: app,db,localhost,127.0.0.1
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - gateway-certificates:/data
+      - gateway-config:/config
+    networks: [frontend, backend]
+    depends_on:
+      app: {condition: service_healthy}
+networks:
+  frontend:
+  backend:
+    internal: true
+volumes:
+  database-demo:
+  documents-demo:
+  gateway-certificates:
+  gateway-config:

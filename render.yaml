@@ -1,0 +1,51 @@
+# Free, isolated SYNTHETIC DEMO only. No disk, worker, paid plan, or automatic schema deletion.
+services:
+  - type: web
+    name: qwoms-synthetic-demo
+    runtime: docker
+    plan: free
+    branch: development/qwoms-complete-build
+    autoDeployTrigger: "off"
+    healthCheckPath: /readyz
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: qwoms-synthetic-demo-db
+          property: connectionString
+      - key: QWOMS_SECRET_KEY
+        generateValue: true
+      - key: QWOMS_COOKIE_SECURE
+        value: "true"
+      - key: QWOMS_DATABASE_REQUIRE_TLS
+        value: "true"
+      - key: QWOMS_DEMO_MODE
+        value: "true"
+      - key: QWOMS_SYNTHETIC_DATA_ONLY
+        value: "true"
+      - key: QWOMS_STORAGE_BACKEND
+        value: database
+      - key: QWOMS_DEMO_ACCESS_MODE
+        value: basic
+      - key: QWOMS_DEMO_GATE_PASSWORD
+        generateValue: true
+      - key: QWOMS_RUN_MIGRATIONS
+        value: "true"
+      - key: QWOMS_SEED_SYNTHETIC
+        value: "true"
+      - key: QWOMS_BOOTSTRAP_PASSWORD
+        generateValue: true
+      - key: QWOMS_DEMO_QUALITY_PASSWORD
+        generateValue: true
+      - key: QWOMS_DEMO_ENGINEERING_PASSWORD
+        generateValue: true
+      - key: QWOMS_DEMO_PRODUCTION_PASSWORD
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: "1"
+databases:
+  - name: qwoms-synthetic-demo-db
+    plan: free
+    postgresMajorVersion: "17"
+    databaseName: qwoms_demo
+    user: qwoms_demo
+    ipAllowList: []

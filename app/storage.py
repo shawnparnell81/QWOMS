@@ -82,10 +82,38 @@ class S3Store:
             body.close()
 
 
-def original_store(root) -> OriginalStore:
+class DatabaseStore:
+    """Temporary synthetic demos only: bytes commit atomically with their file metadata."""
+    def __init__(self, db):
+        self.db = db
+
+    def put_new(self, key, content):
+        from sqlalchemy.dialects.postgresql import insert as pg_insert
+        from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+        from .models import DemoOriginalBlob
+        insert = pg_insert if self.db.bind.dialect.name == 'postgresql' else sqlite_insert
+        result = self.db.execute(insert(DemoOriginalBlob).values(key=validate_key(key),content=content)
+                                  .on_conflict_do_nothing(index_elements=['key']))
+        if result.rowcount == 0:
+            raise StorageConflict('Original file already exists; nothing overwritten')
+
+    def read(self, key):
+        from .models import DemoOriginalBlob
+        blob = self.db.get(DemoOriginalBlob,validate_key(key))
+        if not blob:
+            raise FileNotFoundError(key)
+        return blob.content
+
+
+def original_store(root, db=None) -> OriginalStore:
     backend = os.getenv('QWOMS_STORAGE_BACKEND', 'local')
     if backend == 'local':
         return LocalStore(root)
+    if backend == 'database':
+        from .deployment import demo_mode
+        if not demo_mode():
+            raise ValueError('Database file backend is restricted to synthetic demo mode')
+        return DatabaseStore(db)
     if backend == 's3':
         endpoint = os.getenv('QWOMS_S3_ENDPOINT_URL')
         if endpoint and urlsplit(endpoint).scheme != 'https':

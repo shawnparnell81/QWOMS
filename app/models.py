@@ -1,6 +1,6 @@
 """QWOMS domain records. V1 tables are intentionally small and migration-friendly."""
 from datetime import datetime, timezone
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -167,3 +167,17 @@ class AssignmentEvent(Base):
     previous_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     assigned_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class LoginThrottle(Base):
+    __tablename__ = "login_throttles"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    window_started: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    blocked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class DemoOriginalBlob(Base):
+    __tablename__ = "demo_original_blobs"
+    key: Mapped[str] = mapped_column(String(1024), primary_key=True)
+    content: Mapped[bytes] = mapped_column(LargeBinary)

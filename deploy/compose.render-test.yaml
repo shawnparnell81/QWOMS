@@ -1,0 +1,17 @@
+# LOCAL verification of Render's demo runtime. Uses the HTTPS-test override and isolated test DB.
+services:
+  app:
+    environment:
+      QWOMS_STORAGE_BACKEND: database
+      QWOMS_DEMO_ACCESS_MODE: basic
+      QWOMS_DEMO_GATE_PASSWORD: ${QWOMS_DEMO_GATE_PASSWORD:?Required}
+      QWOMS_SEED_SYNTHETIC: "true"
+      QWOMS_BOOTSTRAP_PASSWORD: ${QWOMS_BOOTSTRAP_PASSWORD:?Required}
+      QWOMS_DEMO_QUALITY_PASSWORD: ${QWOMS_DEMO_QUALITY_PASSWORD:?Required}
+      QWOMS_DEMO_ENGINEERING_PASSWORD: ${QWOMS_DEMO_ENGINEERING_PASSWORD:?Required}
+      QWOMS_DEMO_PRODUCTION_PASSWORD: ${QWOMS_DEMO_PRODUCTION_PASSWORD:?Required}
+  migrate:
+    environment:
+      QWOMS_STORAGE_BACKEND: database
+      QWOMS_DEMO_ACCESS_MODE: basic
+      QWOMS_DEMO_GATE_PASSWORD: ${QWOMS_DEMO_GATE_PASSWORD:?Required}

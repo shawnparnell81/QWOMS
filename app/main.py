@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
@@ -17,15 +18,19 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
-from .db import Base, engine, session
+from .db import Base, engine, session, DATABASE_URL
 from .imports import load_rows, process_part_import
 from .models import (ImportAudit, Message, PartAlias, PhysicalPart, ProductFamily,
                      StoredFile, User, WorkOrder, WorkOrderCounter, WorkOrderPart)
 from .security import current_user, hash_password, require_admin, token_for, verify_password
 from .schema import require_current
-from .storage import original_store, StorageConflict
+from .storage import original_store, StorageConflict, DatabaseStore
 from .audit import record
 from .models import AuditEvent, AssignmentEvent, AuthSession, Project
+from .deployment import validate_settings, demo_mode, public_origin, demo_gate_ok
+from .throttling import check_login, finish_login
+
+DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))
 
 APP_ROOT = Path(__file__).resolve().parent
 STORAGE_ROOT = Path(os.getenv("QWOMS_STORAGE_ROOT", APP_ROOT.parent / "local-storage")).resolve()
@@ -41,21 +46,32 @@ TYPE_CONFIG = {
     "Photos": {"code": "PHO", "subtypes": ["Ortery 360°", "Catalog Product Photos", "Detail Photos"], "fields": ["photo_requirements", "catalog_request", "return_location"]},
 }
 
-app = FastAPI(title="QWOMS", version="0.1.0")
+app = FastAPI(title="QWOMS", version="0.1.0", docs_url=None if demo_mode() else "/docs",
+              redoc_url=None if demo_mode() else "/redoc", openapi_url=None if demo_mode() else "/openapi.json")
 app.mount("/static", StaticFiles(directory=str(APP_ROOT / "static")), name="static")
 
 
 @app.middleware("http")
 async def origin_guard(request: Request, call_next):
+    if not demo_gate_ok(request):
+        return Response('Private synthetic demo',status_code=401,headers={
+            'WWW-Authenticate':'Basic realm="QWOMS synthetic demo", charset="UTF-8"',
+            'Cache-Control':'no-store','Strict-Transport-Security':'max-age=31536000'})
     if request.method not in ("GET", "HEAD", "OPTIONS"):
         origin = request.headers.get("origin")
-        allowed = {str(request.base_url).rstrip("/")}
+        allowed = set() if demo_mode() else {str(request.base_url).rstrip("/")}
+        if public_origin():
+            allowed.add(public_origin())
         allowed.update(x.strip() for x in os.getenv("QWOMS_ALLOWED_ORIGINS", "").split(",") if x.strip())
         if origin and origin not in allowed:
             return Response('Cross-origin request denied', status_code=403)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+    response.headers['X-Frame-Options'] = 'DENY'
+    if demo_mode():
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000'
     if request.url.path.startswith('/api/'):
         response.headers['Cache-Control'] = 'no-store'
     return response
@@ -63,19 +79,20 @@ async def origin_guard(request: Request, call_next):
 
 @app.on_event("startup")
 def init_db():
+    validate_settings(DATABASE_URL)
     require_current(engine)
     original_store(STORAGE_ROOT)
 
 
 class LoginBody(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=128)
 
 
 class CreateUserBody(BaseModel):
     username: str = Field(min_length=3, max_length=80)
     display_name: str = Field(min_length=2, max_length=120)
-    password: str = Field(min_length=12)
+    password: str = Field(min_length=12, max_length=128)
     role: str
     site: str = ""
 
@@ -177,14 +194,43 @@ def home():
 
 @app.get("/healthz")
 def health():
-    return {"status": "ok", "phase": "developer-foundation"}
+    return {"status": "ok", "phase": "synthetic-demo" if demo_mode() else "developer-foundation",
+            "build_commit": os.getenv("QWOMS_BUILD_COMMIT", "unknown")}
+
+
+@app.get('/api/public-config')
+def public_config():
+    return {'demo_mode': demo_mode()}
+
+
+@app.get('/readyz')
+def readiness():
+    try:
+        require_current(engine)
+        store = original_store(STORAGE_ROOT)
+        if hasattr(store, 'client'):
+            store.client.head_bucket(Bucket=store.bucket)
+        elif not isinstance(store, DatabaseStore):
+            import tempfile
+            STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
+            with tempfile.TemporaryFile(dir=STORAGE_ROOT) as probe:
+                probe.write(b'ready')
+                probe.flush()
+    except Exception:
+        return Response('{"status":"unavailable"}', status_code=503, media_type='application/json')
+    return {'status':'ready'}
 
 
 @app.post("/api/auth/login")
-def login(body: LoginBody, response: Response, db: Session = Depends(session)):
+def login(body: LoginBody, request: Request, response: Response, db: Session = Depends(session)):
+    throttle = check_login(db, request.client.host if request.client else 'unknown', body.username.strip().casefold())
     user = db.scalar(select(User).where(func.lower(User.username) == body.username.strip().casefold()))
-    if not user or not user.active or not verify_password(body.password, user.password_hash):
+    valid_password = verify_password(body.password, user.password_hash if user else DUMMY_PASSWORD_HASH)
+    if not user or not user.active or not valid_password:
+        finish_login(db, throttle, False)
+        db.commit()
         raise HTTPException(401, "Invalid username or password")
+    finish_login(db, throttle, True)
     cookie_secure = os.getenv("QWOMS_COOKIE_SECURE", "false").casefold() == "true"
     token, csrf = token_for(user.id, db)
     record(db, user, "session.login", "user", user.id)
@@ -331,7 +377,7 @@ async def import_folder(files: list[UploadFile] = File(...), paths: list[str] = 
                 report["conflicts"].append({"path": rel, "reason": "Filename/path already exists with different contents; nothing overwritten"})
             continue
         try:
-            original_store(STORAGE_ROOT).put_new("files/" + rel, content)
+            original_store(STORAGE_ROOT, db).put_new("files/" + rel, content)
         except ValueError:
             report["rejected"].append({"path": rel, "reason": "Unsafe storage path"})
             continue
@@ -364,7 +410,7 @@ def download_file(file_id: int, db: Session = Depends(session), user: User = Dep
     if not f:
         raise HTTPException(404, "File not found")
     try:
-        content = original_store(STORAGE_ROOT).read("files/" + f.relative_path)
+        content = original_store(STORAGE_ROOT, db).read("files/" + f.relative_path)
     except FileNotFoundError:
         raise HTTPException(404, "Stored file unavailable")
     if hashlib.sha256(content).hexdigest() != f.sha256:

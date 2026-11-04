@@ -1,0 +1,6 @@
+https://demo.localhost {
+    tls /etc/qwoms-tls/certificate.pem /etc/qwoms-tls/private-key.pem
+    @outside not remote_ip {$QWOMS_DEMO_ALLOWED_CIDRS}
+    respond @outside "Private synthetic demo: access restricted" 403
+    reverse_proxy app:8000
+}

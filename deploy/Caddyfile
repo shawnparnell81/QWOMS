@@ -1,0 +1,9 @@
+{$QWOMS_DEMO_HOST} {
+    @outside not remote_ip {$QWOMS_DEMO_ALLOWED_CIDRS}
+    respond @outside "Private synthetic demo: access restricted" 403
+    reverse_proxy app:8000
+    log {
+        output stdout
+        format json
+    }
+}

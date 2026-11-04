@@ -1,0 +1,13 @@
+# LOCAL TEST ONLY: overrides public ports and uses a generated test certificate. No public ACME request.
+services:
+  app:
+    environment:
+      QWOMS_PUBLIC_URL: https://demo.localhost:8443
+  migrate:
+    environment:
+      QWOMS_PUBLIC_URL: https://demo.localhost:8443
+  gateway:
+    ports: !override ["127.0.0.1:8443:443"]
+    volumes:
+      - ./Caddyfile.https-test:/etc/caddy/Caddyfile:ro
+      - ../local-storage/dev/demo-tls:/etc/qwoms-tls:ro
