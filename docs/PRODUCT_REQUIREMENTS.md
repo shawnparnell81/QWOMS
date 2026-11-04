@@ -3,6 +3,10 @@
 ## Product boundary
 A cloud-hosted, multi-site Quality Work Order Management System for an aftermarket automotive parts manufacturer/supplier. The customer has explicitly rejected a full QMS and training-document management. No email functionality under any circumstances.
 
+### All import permissions are individually assigned by the owner
+
+On initial production setup **no employee has import permissions**, including Management, Engineering and Quality employees. The sole administrator is permitted to import. No department role, group, site, or employee account creation grants imports implicitly. The administrator chooses each named employee who needs a particular import right, grants it explicitly, and may revoke it at any time. Separate rights for Part Master imports, drawing/folder imports, controlled work-document and Excel form-master imports, and other supported bulk imports. The UI must show each employee's effective import permissions, and the backend must deny imports unless the exact capability is granted. Record every grant/revocation in the audit history.
+
 ## Launch onboarding and exclusive administrator control (confirmed 2026-11-04)
 
 At company go-live, the Quality Manager who owns initial setup is the **only active system Administrator**. On first secure login they personally import Part Master spreadsheets, drawing folders, work instructions, approved blank Excel form masters and supporting files; create employee accounts; and choose employee roles, permissions, and sites. No employee is automatically provisioned in production, no default shared administrative account is allowed, and there is no public signup. Synthetic demo employees are test-only and must never be promoted/copied into production.
