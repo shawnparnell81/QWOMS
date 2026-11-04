@@ -121,7 +121,9 @@ def change_password(body:PasswordChange,response:Response,db:Session=Depends(ses
     target=db.scalar(select(User).where(User.id==user.id).with_for_update().execution_options(populate_existing=True))
     if not verify_password(body.current_password,target.password_hash):raise HTTPException(403,'Current password verification failed')
     if verify_password(body.new_password,target.password_hash):raise HTTPException(422,'Choose a different password')
-    target.password_hash=hash_password(body.new_password);revoke(db,target.id)
+    target.password_hash=hash_password(body.new_password)
+    target.must_change_password=False
+    revoke(db,target.id)
     record(db,target,'account.password_changed','user',target.id);db.commit()
     response.delete_cookie('qwoms_token',path='/');response.delete_cookie('qwoms_csrf',path='/')
     return {'ok':True,'reauthenticate':True}
