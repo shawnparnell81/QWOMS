@@ -171,7 +171,7 @@ def allow_roles(user: User, *allowed):
 
 
 def serialize_user(user: User):
-    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site,"is_admin":user.is_admin,"permissions":user.permissions}
+    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site,"is_admin":user.is_admin,"permissions":user.permissions,"must_change_password":user.must_change_password}
 
 
 def serialize_part(p: PhysicalPart):
