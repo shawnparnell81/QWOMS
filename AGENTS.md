@@ -16,3 +16,13 @@ Read `docs/PRODUCT_REQUIREMENTS.md` and `README.md` before coding. Implement fea
 - Future requirements: projects with multiple work orders, task and per-person labor tracking, elapsed vs labor-hours, repairs/replacements, pallets and inventory return, supplier chargeback summaries excluding forklift, Ortery 360 photography/catalog workflows, controlled work-instruction revisions, Word/PDF/Excel imports and exports.
 - Cloud browser application across sites. Private repository and synthetic data only. Never commit company drawings, spreadsheet masters, passwords, secrets or sensitive records.
 - The starter is a developer prototype, NOT production-ready: require migrations, approved persistent storage, robust auditing/access control and security review before real data.
+
+## Repository workflow — single final pull request (2026-11-04)
+
+- **Work only on `development/qwoms-complete-build`**. Do not commit feature work directly to `main`.
+- Implement and verify the entire accepted QWOMS scope in reviewable milestones. Multiple commits on the same development branch are encouraged; **do not create a pull request after individual milestones**.
+- Continue from the current branch and preserve accepted requirements. When starting a new Codex cloud task, select `development/qwoms-complete-build`, inspect existing commits, and avoid overwriting uncommitted task work.
+- After each milestone: run the applicable tests, inspect `git status` and diff, record results and known limitations in `docs/BUILD_STATUS.md`, and commit/push verified progress to the same branch. If Codex cannot push, provide exact commands or a patch without opening a PR.
+- Open **one PR from `development/qwoms-complete-build` to `main` only after user authorization**, all agreed features are implemented and the complete acceptance/security/test matrix passes. Do not merge without explicit user approval.
+- Never claim exact in-browser Excel fidelity, production readiness, cloud deployment, or security completion without tested evidence and representative workbooks. Show failed or blocked checks explicitly.
+- The GitHub private-repository setting does not change this branching policy. Keep production/company data out of GitHub.
