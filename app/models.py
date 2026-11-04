@@ -1,0 +1,127 @@
+"""QWOMS domain records. V1 tables are intentionally small and migration-friendly."""
+from datetime import datetime, timezone
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from .db import Base
+
+
+def utcnow():
+    return datetime.now(timezone.utc)
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    display_name: Mapped[str] = mapped_column(String(120))
+    role: Mapped[str] = mapped_column(String(30), default="Quality")
+    site: Mapped[str] = mapped_column(String(100), default="")
+    password_hash: Mapped[str] = mapped_column(String(200))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class ProductFamily(Base):
+    __tablename__ = "product_families"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(150), unique=True)
+
+
+class PhysicalPart(Base):
+    __tablename__ = "physical_parts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    family_id: Mapped[int] = mapped_column(ForeignKey("product_families.id"))
+    description: Mapped[str] = mapped_column(String(250), default="")
+    drawing_number: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    drawing_revision: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    upc: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    aliases: Mapped[list["PartAlias"]] = relationship(back_populates="part", cascade="all, delete-orphan")
+    family: Mapped[ProductFamily] = relationship()
+
+
+class PartAlias(Base):
+    __tablename__ = "part_aliases"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    part_id: Mapped[int] = mapped_column(ForeignKey("physical_parts.id"), index=True)
+    account: Mapped[str] = mapped_column(String(100))
+    part_number: Mapped[str] = mapped_column(String(150), index=True)
+    part: Mapped[PhysicalPart] = relationship(back_populates="aliases")
+    __table_args__ = (UniqueConstraint("account", "part_number", name="uq_account_number"),)
+
+
+class StoredFile(Base):
+    __tablename__ = "stored_files"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    relative_path: Mapped[str] = mapped_column(String(1000), unique=True)
+    original_name: Mapped[str] = mapped_column(String(255))
+    kind: Mapped[str] = mapped_column(String(40), default="document")
+    drawing_number: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    drawing_revision: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    sha256: Mapped[str] = mapped_column(String(64))
+    uploaded_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # Drawing identity is indexed separately from the original filename / path.
+    __table_args__ = (UniqueConstraint("drawing_number", "drawing_revision", "kind", name="uq_drawing_mapping"),)
+
+
+class WorkOrderCounter(Base):
+    __tablename__ = "work_order_counters"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(10))
+    year: Mapped[int] = mapped_column(Integer)
+    value: Mapped[int] = mapped_column(Integer, default=0)
+    __table_args__ = (UniqueConstraint("code", "year", name="uq_counter_code_year"),)
+
+
+class WorkOrder(Base):
+    __tablename__ = "work_orders"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    number: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    order_type: Mapped[str] = mapped_column(String(40))
+    subtype: Mapped[str] = mapped_column(String(100), default="")
+    title: Mapped[str] = mapped_column(String(250))
+    status: Mapped[str] = mapped_column(String(30), default="Open")
+    priority: Mapped[str] = mapped_column(String(20), default="Normal")
+    notes: Mapped[str] = mapped_column(Text, default="")
+    details: Mapped[dict] = mapped_column(JSON, default=dict)  # Work-type-specific, validated fields
+    assigned_to: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    assignee: Mapped[User | None] = relationship(foreign_keys=[assigned_to])
+    parts: Mapped[list["WorkOrderPart"]] = relationship(back_populates="work_order", cascade="all, delete-orphan")
+
+
+class WorkOrderPart(Base):
+    __tablename__ = "work_order_parts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey("work_orders.id"), index=True)
+    part_id: Mapped[int] = mapped_column(ForeignKey("physical_parts.id"))
+    selected_part_number: Mapped[str] = mapped_column(String(150))
+    quantity: Mapped[int] = mapped_column(Integer)
+    drawing_number_snapshot: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    drawing_rev_snapshot: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    drawing_file_id: Mapped[int | None] = mapped_column(ForeignKey("stored_files.id"), nullable=True)
+    drawing_status: Mapped[str] = mapped_column(String(50), default="Missing reference")
+    work_order: Mapped[WorkOrder] = relationship(back_populates="parts")
+    part: Mapped[PhysicalPart] = relationship()
+
+
+class Message(Base):
+    __tablename__ = "messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    recipient_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    work_order_id: Mapped[int | None] = mapped_column(ForeignKey("work_orders.id"), nullable=True)
+    body: Mapped[str] = mapped_column(Text)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    sender: Mapped[User] = relationship(foreign_keys=[sender_id])
+    recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])
+
+
+class ImportAudit(Base):
+    __tablename__ = "import_audits"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    actor_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    source_name: Mapped[str] = mapped_column(String(255))
+    summary: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -1,0 +1,474 @@
+"""QWOMS Phase 1 API: real database, assignments, part aliases, drawings and messages.
+
+This is a development foundation, NOT approved for company production data yet.
+"""
+import hashlib
+import json
+import os
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Annotated
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Response, UploadFile
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, selectinload
+from .db import Base, engine, session
+from .imports import load_rows, process_part_import
+from .models import (ImportAudit, Message, PartAlias, PhysicalPart, ProductFamily,
+                     StoredFile, User, WorkOrder, WorkOrderCounter, WorkOrderPart)
+from .security import current_user, hash_password, require_admin, token_for, verify_password
+
+APP_ROOT = Path(__file__).resolve().parent
+STORAGE_ROOT = Path(os.getenv("QWOMS_STORAGE_ROOT", APP_ROOT.parent / "local-storage")).resolve()
+MAX_IMPORT_BYTES = 20 * 1024 * 1024
+MAX_FILE_BYTES = 25 * 1024 * 1024
+ROLES = {"Quality", "Engineering", "Production", "Management"}
+TYPE_CONFIG = {
+    "Validation / FAI": {"code": "VAL", "subtypes": ["First Article Inspection", "Product Validation", "Development Validation"], "fields": ["validation_standard", "sample_quantity", "acceptance_criteria"]},
+    "Inspection": {"code": "INS", "subtypes": ["AQL", "Non-conformance", "Product Alert", "Customer Complaint", "Supplier Issue", "Re-inspection", "Other Inspection"], "fields": ["inspection_scope", "sampling_plan", "defect_description"]},
+    "Test": {"code": "TST", "subtypes": ["Functional Test", "Performance Test", "Durability Test", "Other Test"], "fields": ["test_method", "equipment", "acceptance_criteria"]},
+    "Repair": {"code": "REP", "subtypes": ["Repair", "Rework", "Component Replacement"], "fields": ["defect_description", "repair_instructions", "replacement_parts"]},
+    "Parts Weighing": {"code": "WGT", "subtypes": ["Individual Weighing", "Batch Weighing", "Weight Verification"], "fields": ["scale_id", "units", "weight_specification"]},
+    "Photos": {"code": "PHO", "subtypes": ["Ortery 360°", "Catalog Product Photos", "Detail Photos"], "fields": ["photo_requirements", "catalog_request", "return_location"]},
+}
+
+app = FastAPI(title="QWOMS", version="0.1.0")
+app.mount("/static", StaticFiles(directory=str(APP_ROOT / "static")), name="static")
+
+
+@app.on_event("startup")
+def init_db():
+    # V1 developer convenience; replace with reviewed Alembic migrations before launch.
+    Base.metadata.create_all(bind=engine)
+    STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
+
+
+class LoginBody(BaseModel):
+    username: str
+    password: str
+
+
+class CreateUserBody(BaseModel):
+    username: str = Field(min_length=3, max_length=80)
+    display_name: str = Field(min_length=2, max_length=120)
+    password: str = Field(min_length=12)
+    role: str
+    site: str = ""
+
+
+class PartInput(BaseModel):
+    part_id: int
+    selected_part_number: str
+    quantity: int = Field(ge=1)
+
+
+class CreateWorkOrderBody(BaseModel):
+    order_type: str
+    subtype: str
+    title: str = Field(min_length=3, max_length=250)
+    priority: str = "Normal"
+    assigned_to: int | None = None
+    notes: str = ""
+    parts: list[PartInput] = Field(min_length=1)
+    details: dict[str, str] = Field(default_factory=dict)
+
+
+class UpdateWorkOrderBody(BaseModel):
+    status: str | None = None
+    assigned_to: int | None = None
+
+
+class SendMessageBody(BaseModel):
+    recipient_id: int
+    body: str = Field(min_length=1, max_length=4000)
+    work_order_id: int | None = None
+
+
+class DrawingMapping(BaseModel):
+    drawing_number: str = Field(min_length=1, max_length=150)
+    drawing_revision: str = Field(min_length=1, max_length=50)
+
+
+def allow_roles(user: User, *allowed):
+    if user.role not in allowed:
+        raise HTTPException(status_code=403, detail="Insufficient permission")
+
+
+def serialize_user(user: User):
+    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site}
+
+
+def serialize_part(p: PhysicalPart):
+    return {"id": p.id, "family": p.family.name, "description": p.description,
+            "drawing_number": p.drawing_number, "drawing_revision": p.drawing_revision, "upc": p.upc,
+            "aliases": [{"account": a.account, "part_number": a.part_number} for a in p.aliases]}
+
+
+def serialize_order(o: WorkOrder):
+    return {"id": o.id, "number": o.number, "order_type": o.order_type, "subtype": o.subtype,
+            "title": o.title, "status": o.status, "priority": o.priority, "notes": o.notes,
+            "details": o.details, "assigned_to": o.assigned_to,
+            "assignee": serialize_user(o.assignee) if o.assignee else None,
+            "created_by": o.created_by, "created_at": o.created_at.isoformat(),
+            "parts": [{"part_id": p.part_id, "selected_part_number": p.selected_part_number,
+                       "quantity": p.quantity, "drawing_number": p.drawing_number_snapshot,
+                       "drawing_revision": p.drawing_rev_snapshot,
+                       "drawing_status": p.drawing_status,
+                       "drawing_file_id": p.drawing_file_id} for p in o.parts]}
+
+
+def query_order(db, order_id):
+    return db.scalar(select(WorkOrder).options(
+        selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
+        .where(WorkOrder.id == order_id))
+
+
+@app.get("/")
+def home():
+    return FileResponse(APP_ROOT / "static" / "index.html")
+
+
+@app.get("/healthz")
+def health():
+    return {"status": "ok", "phase": "developer-foundation"}
+
+
+@app.post("/api/auth/login")
+def login(body: LoginBody, response: Response, db: Session = Depends(session)):
+    user = db.scalar(select(User).where(func.lower(User.username) == body.username.strip().casefold()))
+    if not user or not user.active or not verify_password(body.password, user.password_hash):
+        raise HTTPException(401, "Invalid username or password")
+    cookie_secure = os.getenv("QWOMS_COOKIE_SECURE", "false").casefold() == "true"
+    response.set_cookie("qwoms_token", token_for(user.id), httponly=True,
+                        secure=cookie_secure, samesite="strict", max_age=8*60*60, path="/")
+    return serialize_user(user)
+
+
+@app.post("/api/auth/logout")
+def logout(response: Response):
+    response.delete_cookie("qwoms_token", path="/", samesite="strict")
+    return {"ok": True}
+
+
+@app.get("/api/me")
+def me(user: User = Depends(current_user)):
+    return serialize_user(user)
+
+
+@app.get("/api/users")
+def users(db: Session = Depends(session), user: User = Depends(current_user)):
+    return [serialize_user(u) for u in db.scalars(select(User).where(User.active == True).order_by(User.display_name)).all()]
+
+
+@app.post("/api/admin/users", status_code=201)
+def create_user(body: CreateUserBody, db: Session = Depends(session), manager: User = Depends(require_admin)):
+    if body.role not in ROLES:
+        raise HTTPException(400, "Unsupported role")
+    if db.scalar(select(User).where(func.lower(User.username) == body.username.strip().casefold())):
+        raise HTTPException(409, "Username already exists")
+    new = User(username=body.username.strip(), display_name=body.display_name.strip(),
+               role=body.role, site=body.site.strip(), password_hash=hash_password(body.password))
+    db.add(new)
+    db.commit()
+    db.refresh(new)
+    return serialize_user(new)
+
+
+@app.get("/api/config/work-types")
+def work_types(user: User = Depends(current_user)):
+    return TYPE_CONFIG
+
+
+@app.get("/api/parts/search")
+def search_parts(q: str = "", db: Session = Depends(session), user: User = Depends(current_user)):
+    q = q.strip()
+    if len(q) < 1:
+        return []
+    matches = db.scalars(select(PartAlias).where(PartAlias.part_number.ilike(f"%{q.replace('%', r'\%').replace('_', r'\_')}%", escape="\\")).limit(40)).all()
+    ids = list(dict.fromkeys(a.part_id for a in matches))
+    if not ids:
+        return []
+    parts = db.scalars(select(PhysicalPart).options(selectinload(PhysicalPart.aliases), selectinload(PhysicalPart.family)).where(PhysicalPart.id.in_(ids))).all()
+    return [serialize_part(part) for part in parts]
+
+
+@app.get("/api/parts/families")
+def families(db: Session = Depends(session), user: User = Depends(current_user)):
+    return [{"id": f.id, "name": f.name} for f in db.scalars(select(ProductFamily).order_by(ProductFamily.name)).all()]
+
+
+async def excel_payload(file: UploadFile):
+    if not file.filename or not file.filename.lower().endswith(".xlsx"):
+        raise HTTPException(400, "Upload an .xlsx Part Master workbook")
+    blob = await file.read(MAX_IMPORT_BYTES + 1)
+    if len(blob) > MAX_IMPORT_BYTES:
+        raise HTTPException(413, "Workbook exceeds 20 MB limit for this development version")
+    try:
+        return load_rows(blob), blob
+    except Exception as exc:
+        raise HTTPException(422, f"Cannot read Part Master: {exc}")
+
+
+@app.post("/api/parts/import/preview")
+async def preview_parts(file: UploadFile = File(...), family: str = Form(""),
+                        db: Session = Depends(session), user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    rows, blob = await excel_payload(file)
+    return process_part_import(db, rows, family_override=family, preview=True)
+
+
+@app.post("/api/parts/import/commit")
+async def import_parts(file: UploadFile = File(...), family: str = Form(""),
+                       db: Session = Depends(session), user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    rows, blob = await excel_payload(file)
+    result = process_part_import(db, rows, family_override=family, preview=False)
+    db.add(ImportAudit(actor_id=user.id, source_name=file.filename,
+                       summary=json.dumps({**result["summary"], "sha256": hashlib.sha256(blob).hexdigest()})))
+    db.commit()
+    return result
+
+
+def safe_relative_path(raw: str):
+    raw = raw.replace("\\", "/")
+    parts = raw.split("/")
+    if (not parts or any(p in ("", ".", "..") for p in parts)
+            or any(":" in p or "\x00" in p for p in parts)
+            or raw.startswith("/")):
+        raise ValueError("Invalid relative path; folder traversal is not permitted")
+    if len(raw) > 950 or len(parts[-1]) > 255:
+        raise ValueError("File path or name is too long")
+    return "/".join(parts)
+
+
+@app.post("/api/files/import-folder")
+async def import_folder(files: list[UploadFile] = File(...), paths: list[str] = Form(...),
+                        kind: str = Form("drawing"), db: Session = Depends(session),
+                        user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    if kind not in ("drawing", "document", "form-template"):
+        raise HTTPException(400, "Invalid file category")
+    if len(files) != len(paths):
+        raise HTTPException(400, "Each file must include its original relative path")
+    report = {"stored": 0, "already_present": 0, "conflicts": [], "rejected": []}
+    for upload, supplied_path in zip(files, paths):
+        try:
+            rel = safe_relative_path(supplied_path)
+        except ValueError as exc:
+            report["rejected"].append({"path": supplied_path, "reason": str(exc)})
+            continue
+        content = await upload.read(MAX_FILE_BYTES + 1)
+        if len(content) > MAX_FILE_BYTES:
+            report["rejected"].append({"path": rel, "reason": "File exceeds 25 MB limit"})
+            continue
+        digest = hashlib.sha256(content).hexdigest()
+        existing = db.scalar(select(StoredFile).where(StoredFile.relative_path == rel))
+        if existing:
+            if existing.sha256 == digest:
+                report["already_present"] += 1
+            else:
+                report["conflicts"].append({"path": rel, "reason": "Filename/path already exists with different contents; nothing overwritten"})
+            continue
+        destination = (STORAGE_ROOT / "files" / rel).resolve()
+        if not destination.is_relative_to((STORAGE_ROOT / "files").resolve()):
+            report["rejected"].append({"path": rel, "reason": "Unsafe path"})
+            continue
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            report["conflicts"].append({"path": rel, "reason": "File already exists on disk"})
+            continue
+        destination.write_bytes(content)
+        db.add(StoredFile(relative_path=rel, original_name=rel.split("/")[-1],
+                          kind=kind, sha256=digest, uploaded_by=user.id))
+        db.commit()
+        report["stored"] += 1
+    return report
+
+
+@app.get("/api/files")
+def list_files(kind: str = "", db: Session = Depends(session), user: User = Depends(current_user)):
+    query = select(StoredFile).order_by(StoredFile.relative_path)
+    if kind:
+        query = query.where(StoredFile.kind == kind)
+    files = db.scalars(query.limit(500)).all()
+    return [{"id": f.id, "relative_path": f.relative_path, "original_name": f.original_name,
+             "kind": f.kind, "drawing_number": f.drawing_number,
+             "drawing_revision": f.drawing_revision} for f in files]
+
+
+@app.get("/api/files/{file_id}/download")
+def download_file(file_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
+    f = db.get(StoredFile, file_id)
+    if not f:
+        raise HTTPException(404, "File not found")
+    path = STORAGE_ROOT / "files" / f.relative_path
+    if not path.exists():
+        raise HTTPException(404, "Stored file unavailable")
+    return FileResponse(path, filename=f.original_name)
+
+
+@app.put("/api/files/{file_id}/drawing-mapping")
+def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(session),
+                user: User = Depends(current_user)):
+    allow_roles(user, "Engineering", "Management")
+    f = db.get(StoredFile, file_id)
+    if not f or f.kind != "drawing":
+        raise HTTPException(404, "Drawing file not found")
+    # Don't derive drawing revision from filename. Match the revision recorded in Excel.
+    known = db.scalar(select(PhysicalPart).where(
+        PhysicalPart.drawing_number == body.drawing_number.strip(),
+        PhysicalPart.drawing_revision == body.drawing_revision.strip()))
+    if not known:
+        raise HTTPException(422, "Drawing number/revision must first exist in the Excel Part Master")
+    already = db.scalar(select(StoredFile).where(
+        StoredFile.kind == "drawing", StoredFile.drawing_number == body.drawing_number.strip(),
+        StoredFile.drawing_revision == body.drawing_revision.strip(), StoredFile.id != f.id))
+    if already:
+        raise HTTPException(409, "This drawing number and revision are already mapped to another file")
+    f.drawing_number = body.drawing_number.strip()
+    f.drawing_revision = body.drawing_revision.strip()
+    db.commit()
+    return {"id": f.id, "relative_path": f.relative_path, "drawing_number": f.drawing_number,
+            "drawing_revision": f.drawing_revision}
+
+
+@app.get("/api/work-orders")
+def list_orders(assigned_to_me: bool = False, db: Session = Depends(session), user: User = Depends(current_user)):
+    query = select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
+    if assigned_to_me:
+        query = query.where(WorkOrder.assigned_to == user.id)
+    query = query.order_by(WorkOrder.created_at.desc(), WorkOrder.id.desc()).limit(200)
+    return [serialize_order(o) for o in db.scalars(query).all()]
+
+
+@app.get("/api/work-orders/{order_id}")
+def get_order(order_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
+    order = query_order(db, order_id)
+    if not order:
+        raise HTTPException(404, "Work order not found")
+    return serialize_order(order)
+
+
+@app.post("/api/work-orders", status_code=201)
+def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    if body.order_type not in TYPE_CONFIG:
+        raise HTTPException(422, "Unsupported work order type")
+    config = TYPE_CONFIG[body.order_type]
+    if body.subtype not in config["subtypes"]:
+        raise HTTPException(422, "Unsupported subtype for this work order type")
+    if body.priority not in ("Low", "Normal", "High", "Urgent"):
+        raise HTTPException(422, "Unsupported priority")
+    invalid_fields = set(body.details) - set(config["fields"])
+    if invalid_fields:
+        raise HTTPException(422, "Fields do not belong to this work order type: " + ", ".join(sorted(invalid_fields)))
+    if body.assigned_to is not None:
+        assignee = db.get(User, body.assigned_to)
+        if not assignee or not assignee.active:
+            raise HTTPException(422, "Assigned employee not found")
+    resolved_parts = []
+    for p in body.parts:
+        part = db.scalar(select(PhysicalPart).options(selectinload(PhysicalPart.aliases)).where(PhysicalPart.id == p.part_id))
+        if not part or not any(a.part_number.casefold() == p.selected_part_number.strip().casefold() for a in part.aliases):
+            raise HTTPException(422, "Selected part number is not an alias of the specified physical part")
+        drawing = None
+        if part.drawing_number and part.drawing_revision:
+            drawing = db.scalar(select(StoredFile).where(
+                StoredFile.kind == "drawing", StoredFile.drawing_number == part.drawing_number,
+                StoredFile.drawing_revision == part.drawing_revision))
+        resolved_parts.append((p, part, drawing))
+    year = datetime.now(timezone.utc).year
+    counter = db.scalar(select(WorkOrderCounter).where(WorkOrderCounter.code == config["code"],
+            WorkOrderCounter.year == year).with_for_update())
+    if not counter:
+        counter = WorkOrderCounter(code=config["code"], year=year, value=0)
+        db.add(counter)
+        db.flush()
+    counter.value += 1
+    # Part number is included only in the automatically generated WORK ORDER number.
+    # User-saved documents and completed Excel forms are NEVER renamed automatically.
+    suffix = (re.sub(r"[^a-zA-Z0-9_-]", "-", body.parts[0].selected_part_number)[:36] if len(body.parts) == 1 else "MULTI")
+    number = f"{config['code']}-{year}-{counter.value:05d}-{suffix}"
+    wo = WorkOrder(number=number, order_type=body.order_type, subtype=body.subtype,
+                   title=body.title.strip(), priority=body.priority, notes=body.notes,
+                   assigned_to=body.assigned_to, created_by=user.id, details=body.details)
+    db.add(wo)
+    db.flush()
+    for entry, part, drawing in resolved_parts:
+        wo.parts.append(WorkOrderPart(part_id=part.id, selected_part_number=entry.selected_part_number.strip(),
+                                     quantity=entry.quantity, drawing_number_snapshot=part.drawing_number,
+                                     drawing_rev_snapshot=part.drawing_revision,
+                                     drawing_file_id=drawing.id if drawing else None,
+                                     drawing_status=("Matched" if drawing else
+                                                     "Needs review" if part.drawing_number else "No drawing recorded")))
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Work order number conflict; retry creation")
+    return serialize_order(query_order(db, wo.id))
+
+
+@app.patch("/api/work-orders/{order_id}")
+def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends(session),
+                 user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    order = db.get(WorkOrder, order_id)
+    if not order:
+        raise HTTPException(404, "Work order not found")
+    if body.status is not None:
+        if body.status not in ("Open", "In Progress", "On Hold", "Completed", "Closed"):
+            raise HTTPException(422, "Invalid status")
+        order.status = body.status
+    if "assigned_to" in body.model_fields_set:
+        if body.assigned_to is not None:
+            target = db.get(User, body.assigned_to)
+            if not target or not target.active:
+                raise HTTPException(422, "Assigned employee not found")
+        order.assigned_to = body.assigned_to
+    db.commit()
+    return serialize_order(query_order(db, order_id))
+
+
+@app.get("/api/dashboard")
+def dashboard(db: Session = Depends(session), user: User = Depends(current_user)):
+    assigned = db.scalars(select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
+                          .where(WorkOrder.assigned_to == user.id).order_by(WorkOrder.id.desc()).limit(30)).all()
+    unread = db.scalar(select(func.count()).select_from(Message).where(Message.recipient_id == user.id, Message.read_at.is_(None))) or 0
+    return {"assigned": [serialize_order(o) for o in assigned],
+            "open_count": sum(1 for o in assigned if o.status not in ("Completed", "Closed")),
+            "unread_messages": unread,
+            "total_work_orders": db.scalar(select(func.count()).select_from(WorkOrder)) or 0,
+            "total_parts": db.scalar(select(func.count()).select_from(PhysicalPart)) or 0}
+
+
+@app.get("/api/messages")
+def messages(db: Session = Depends(session), user: User = Depends(current_user)):
+    items = db.scalars(select(Message).options(selectinload(Message.sender), selectinload(Message.recipient)).where(
+        or_(Message.sender_id == user.id, Message.recipient_id == user.id))
+        .order_by(Message.id.desc()).limit(150)).all()
+    return [{"id": m.id, "sender_id": m.sender_id, "sender": m.sender.display_name,
+             "recipient_id": m.recipient_id, "recipient": m.recipient.display_name,
+             "body": m.body, "work_order_id": m.work_order_id,
+             "read_at": m.read_at.isoformat() if m.read_at else None,
+             "created_at": m.created_at.isoformat()} for m in items]
+
+
+@app.post("/api/messages", status_code=201)
+def send_message(body: SendMessageBody, db: Session = Depends(session), user: User = Depends(current_user)):
+    recipient = db.get(User, body.recipient_id)
+    if not recipient or not recipient.active:
+        raise HTTPException(422, "Recipient does not exist")
+    if body.work_order_id and not db.get(WorkOrder, body.work_order_id):
+        raise HTTPException(422, "Work order does not exist")
+    msg = Message(sender_id=user.id, recipient_id=body.recipient_id,
+                  work_order_id=body.work_order_id, body=body.body.strip())
+    if not msg.body:
+        raise HTTPException(422, "Message cannot be blank")
+    db.add(msg)
+    db.commit()
+    return {"id": msg.id, "ok": True}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QWOMS · Quality Operations</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-panel">
+      <div class="logo big"><span>Q</span></div>
+      <p class="eyebrow">QUALITY OPERATIONS PLATFORM</p>
+      <h1>Welcome to QWOMS</h1>
+      <p class="muted">Sign in to manage your assignments, parts, controlled drawings, and cross-site work.</p>
+      <form id="login-form" class="stack">
+        <label>Username<input name="username" autocomplete="username" required placeholder="Your username"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Your password"></label>
+        <button class="btn primary" type="submit">Sign in</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+      <p class="tiny">Accounts are provisioned by Management. No email sign-in or email notifications.</p>
+    </div>
+  </div>
+  <div id="shell" class="shell hidden">
+    <aside class="sidebar">
+      <div class="brand"><div class="logo">Q</div><div><strong>QWOMS</strong><small>QUALITY OPERATIONS</small></div></div>
+      <p class="nav-label">WORKSPACE</p>
+      <nav id="nav">
+        <button data-view="dashboard" class="nav-item active"><span>▦</span> My Dashboard</button>
+        <button data-view="orders" class="nav-item"><span>▤</span> Work Orders</button>
+        <button data-view="new" class="nav-item"><span>⊕</span> Create Work Order</button>
+        <button data-view="parts" class="nav-item"><span>◫</span> Part Master</button>
+        <button data-view="files" class="nav-item"><span>◩</span> Drawings &amp; Files</button>
+        <button data-view="messages" class="nav-item"><span>◉</span> Messages <span id="nav-unread" class="nav-count hidden">0</span></button>
+      </nav>
+      <p class="nav-label">SYSTEM</p>
+      <nav><button data-view="admin" class="nav-item"><span>⚙</span> User Administration</button></nav>
+      <div class="sidebar-foot"><div class="phase-chip">● Phase 1 · Development</div><p>Only test data should be used until hosting, security, and spreadsheet compatibility are validated.</p></div>
+    </aside>
+    <div class="main-wrap">
+      <header class="topbar"><div class="crumb">QUALITY OPERATIONS <span>/</span> <b id="crumb">My Dashboard</b></div><div class="account"><span id="site-label" class="site-label"></span><span id="user-avatar" class="avatar"></span><div><b id="user-name"></b><small id="user-role"></small></div><button id="logout" class="plain-btn" title="Sign out">⇥</button></div></header>
+      <main id="main" class="main"></main>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden" role="status"></div>
+  <script src="/static/app.js" defer></script>
+</body></html>
