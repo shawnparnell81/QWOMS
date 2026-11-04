@@ -69,3 +69,11 @@ For Validation/FAI testing-software results, the user's normal export is a **PDF
 
 ## One integrated validation work-order workspace (actual workbook reviewed)
 Read `docs/VALIDATION_WORKSPACE_SPEC.md` before implementing Validation/FAI UI, Excel, drawing/instruction auto-links, or test-software evidence attachments. A user-supplied completed validation workbook has been examined privately; it is not a blank master and must never be copied into repository or synthetic Render. The specification records worksheet structures, formulas, conditional statuses, and the single-workspace interaction. Obtain a company-approved blank master and sanitized software export fixtures before asserting exact Excel round-trip fidelity. Keep calculated PASS/FAIL distinct from Engineering-authorized final disposition.
+
+## Non-negotiable: no paid Excel editor licenses
+
+The user will not pay for SpreadJS, a commercial Collabora subscription, a per-user workbook editor fee, or any mandatory commercial editor license. Build the spreadsheet capability with legally usable free/open-source tooling, or first obtain the user's explicit approval for a genuinely zero-fee alternative. Do not put evaluation-only SDKs into a deployed app or silently rely on unsupported production licenses. Document license terms and production limits precisely.
+
+**Before further editor replacement work, examine how the user's existing separate application successfully imports/displays/edits/saves arbitrary XLSX without hardcoded forms.** Ask for an authorized source-code reference/repository only if needed; do not assume the code is available or clone unrelated projects. Reuse the *technique* if technically and legally sound; QWOMS should retain its own design and architecture. Do not claim another app's save/export fidelity is verified without comparing actual files.
+
+Keep original master XLSX bytes immutable. Prioritize building and showing the user a working dynamic in-app editing flow and compare preservation of real formulas, conditional fills, print setup, images and sheets on export. Distinguish functional/visual changes from metadata-only differences in test reports. Never alter the user's originals to make a test pass.
