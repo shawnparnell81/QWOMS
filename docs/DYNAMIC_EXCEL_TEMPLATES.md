@@ -1,6 +1,8 @@
 # QWOMS — user-managed, upload-defined Excel form library
 Status: mandatory user-confirmed product behavior (2026-11-04). Source workbooks are never embedded in source control.
 
+**Separate from spreadsheet templates:** completed equipment test reports are user-uploaded PDF evidence on the individual work order. Upload them as original files without conversion, reformatting, cell mappings or application code changes. These PDFs must not be treated as Excel masters. See `VALIDATION_WORKSPACE_SPEC.md`.
+
 ## Core principle: the uploaded workbook IS the form
 
 The owner has an existing application that accepts arbitrary Excel spreadsheets and retains their formatting/layout without hardcoded form designs. QWOMS must use the same **upload-driven, configuration-driven architecture**, but add part lookup, order linking, revision control, in-browser completion, evidence, and project/labor context.
