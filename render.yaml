@@ -24,8 +24,10 @@ services:
         value: "true"
       - key: QWOMS_STORAGE_BACKEND
         value: database
+      # One QWOMS username/password only. The application enforces authentication.
+      # Demo uses synthetic data; verify auth boundaries before any real-data use.
       - key: QWOMS_DEMO_ACCESS_MODE
-        value: basic
+        value: network
       - key: QWOMS_DEMO_GATE_PASSWORD
         generateValue: true
       - key: QWOMS_RUN_MIGRATIONS
