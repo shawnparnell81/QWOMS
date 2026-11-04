@@ -1,0 +1,300 @@
+{
+  "checks": [
+    {
+      "name": "Free editor is enabled without an office service",
+      "result": "PASS"
+    },
+    {
+      "name": "Part selection creates a matching work order in the interface",
+      "result": "PASS"
+    },
+    {
+      "name": "Approved drawing, form and instruction attach automatically",
+      "result": "PASS"
+    },
+    {
+      "name": "Drawing approval history is accessible within this order",
+      "result": "PASS"
+    },
+    {
+      "name": "Work notes persist in the audit activity",
+      "result": "PASS"
+    },
+    {
+      "name": "Employee time starts and stops from the work order",
+      "result": "PASS"
+    },
+    {
+      "name": "Multiple original test PDFs attach directly to the order",
+      "result": "PASS"
+    },
+    {
+      "name": "Unknown uploaded layout approved without source changes",
+      "result": "PASS"
+    },
+    {
+      "name": "shock opens the free workbook editor",
+      "result": "PASS"
+    },
+    {
+      "name": "shock calculates PASS with original green fill",
+      "result": "PASS"
+    },
+    {
+      "name": "shock calculates FAIL with original red fill",
+      "result": "PASS"
+    },
+    {
+      "name": "Original dropdown options render",
+      "result": "PASS"
+    },
+    {
+      "name": "Original image is visible",
+      "result": "PASS"
+    },
+    {
+      "name": "PDF viewing preserves unsaved free-editor measurements",
+      "result": "PASS"
+    },
+    {
+      "name": "shock files an employee-named completed copy",
+      "result": "PASS"
+    },
+    {
+      "name": "shock refuses a duplicate completed filename",
+      "result": "PASS"
+    },
+    {
+      "name": "shock edited-file feature comparison has zero differences",
+      "result": "PASS"
+    },
+    {
+      "name": "Free workbook print view generates an actual PDF",
+      "result": "PASS"
+    },
+    {
+      "name": "shock saved workbook reopens and exports in QWOMS",
+      "result": "PASS"
+    },
+    {
+      "name": "pump opens the free workbook editor",
+      "result": "PASS"
+    },
+    {
+      "name": "pump calculates PASS with original green fill",
+      "result": "PASS"
+    },
+    {
+      "name": "pump calculates FAIL with original red fill",
+      "result": "PASS"
+    },
+    {
+      "name": "pump files an employee-named completed copy",
+      "result": "PASS"
+    },
+    {
+      "name": "pump refuses a duplicate completed filename",
+      "result": "PASS"
+    },
+    {
+      "name": "pump edited-file feature comparison has zero differences",
+      "result": "PASS"
+    },
+    {
+      "name": "pump saved workbook reopens and exports in QWOMS",
+      "result": "PASS"
+    },
+    {
+      "name": "injector opens the free workbook editor",
+      "result": "PASS"
+    },
+    {
+      "name": "injector calculates PASS with original green fill",
+      "result": "PASS"
+    },
+    {
+      "name": "injector calculates FAIL with original red fill",
+      "result": "PASS"
+    },
+    {
+      "name": "injector files an employee-named completed copy",
+      "result": "PASS"
+    },
+    {
+      "name": "injector refuses a duplicate completed filename",
+      "result": "PASS"
+    },
+    {
+      "name": "injector edited-file feature comparison has zero differences",
+      "result": "PASS"
+    },
+    {
+      "name": "injector saved workbook reopens and exports in QWOMS",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown opens the free workbook editor",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown calculates PASS with original green fill",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown calculates FAIL with original red fill",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown files an employee-named completed copy",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown refuses a duplicate completed filename",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown edited-file feature comparison has zero differences",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown saved workbook reopens and exports in QWOMS",
+      "result": "PASS"
+    },
+    {
+      "name": "Test-result PDFs persist after workbook saves and reload",
+      "result": "PASS"
+    },
+    {
+      "name": "Equipment PDF download is byte-identical",
+      "result": "PASS"
+    },
+    {
+      "name": "Employee can complete the unified part-to-closeout workflow",
+      "result": "PASS"
+    },
+    {
+      "name": "Retired new template leaves active selections and new matching",
+      "result": "PASS"
+    },
+    {
+      "name": "Retired template retains historical completed workbook",
+      "result": "PASS"
+    },
+    {
+      "name": "No browser script errors",
+      "result": "PASS"
+    }
+  ],
+  "workbooks": [
+    {
+      "key": "shock",
+      "order": 15,
+      "revision": 4,
+      "sheet": "Shock Validation",
+      "cells": [
+        [
+          "B5",
+          "12"
+        ]
+      ],
+      "fail": [
+        "B5",
+        "8"
+      ],
+      "result": "C5",
+      "attachment": 21,
+      "completed": 16,
+      "filename": "Employee free shock 1793824314368.xlsx",
+      "draft": "afcd9521-66c9-46dc-a58c-7b6b26775b63",
+      "feature_differences": 0
+    },
+    {
+      "key": "pump",
+      "order": 3,
+      "revision": 5,
+      "sheet": "Bench readings",
+      "cells": [
+        [
+          "E5",
+          "12"
+        ],
+        [
+          "F5",
+          "11"
+        ]
+      ],
+      "fail": [
+        "E5",
+        "8"
+      ],
+      "result": "G5",
+      "attachment": 4,
+      "completed": 17,
+      "filename": "Employee free pump 1793824317332.xlsx",
+      "draft": "01628d9d-c5c6-4b32-a05a-e7267e174467",
+      "feature_differences": 0
+    },
+    {
+      "key": "injector",
+      "order": 4,
+      "revision": 6,
+      "sheet": "Flow and leak",
+      "cells": [
+        [
+          "F9",
+          "6"
+        ],
+        [
+          "G9",
+          "1"
+        ]
+      ],
+      "fail": [
+        "F9",
+        "1"
+      ],
+      "result": "J11",
+      "attachment": 5,
+      "completed": 18,
+      "filename": "Employee free injector 1793824319842.xlsx",
+      "draft": "919f3dd8-d4bd-4fbc-80f2-f2f40918104b",
+      "feature_differences": 0
+    },
+    {
+      "key": "unknown",
+      "order": 16,
+      "revision": 11,
+      "sheet": "New assembly review",
+      "cells": [
+        [
+          "Z8",
+          "42"
+        ]
+      ],
+      "fail": [
+        "Z8",
+        "41"
+      ],
+      "result": "AA8",
+      "attachment": 22,
+      "completed": 19,
+      "filename": "Employee free unknown 1793824324254.xlsx",
+      "draft": "10d2ee40-2edd-4728-b2aa-f130f2f4fc7f",
+      "feature_differences": 0
+    }
+  ],
+  "screenshots": [
+    "free-workspace-overview.png",
+    "shock-free-pass.png",
+    "shock-free-fail.png",
+    "free-workspace-original-pdf.png",
+    "pump-free-pass.png",
+    "pump-free-fail.png",
+    "injector-free-pass.png",
+    "injector-free-fail.png",
+    "unknown-free-pass.png",
+    "unknown-free-fail.png",
+    "free-completed-workspace.png"
+  ],
+  "order_id": 15
+}

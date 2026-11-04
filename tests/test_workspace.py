@@ -186,3 +186,19 @@ def test_form_library_explicit_individual_grant_and_immediate_revoke(client):
     with Session() as db:
         events=db.scalars(select(AuditEvent).where(AuditEvent.entity_id=='2',AuditEvent.action.in_(['permission.granted','permission.revoked']))).all()
         assert {e.action for e in events}=={'permission.granted','permission.revoked'}
+
+
+def test_order_comments_and_drawing_history_are_scoped_and_audited(client):
+    web,Session=client;parts=setup_parts(web);o=new_order(web,parts['P100']).json()['id']
+    assert web.post(f'/api/work-orders/{o}/comments',json={'text':'Fictional bench observations'}).status_code==201
+    workspace=web.get(f'/api/work-orders/{o}/workspace').json()
+    assert workspace['parts'][0]['quantity']==2
+    assert any(e['changes'].get('text')=='Fictional bench observations' for e in workspace['activity'])
+    assert web.get(f"/api/work-orders/{o}/drawing-history/{parts['P100']['id']}").json()['revisions']==[]
+    assert web.get(f'/api/work-orders/{o}/drawing-history/999999').status_code==404
+    assert web.post(f'/api/work-orders/{o}/comments',json={'text':'   '}).status_code==422
+    with Session() as db:
+        db.add(User(username='note-outsider',display_name='Fictional outsider',role='Quality',password_hash=hash_password('Synthetic-outsider-123!')));db.commit()
+    login_as(web,'note-outsider','Synthetic-outsider-123!')
+    assert web.post(f'/api/work-orders/{o}/comments',json={'text':'Denied note'}).status_code==403
+    assert web.get(f"/api/work-orders/{o}/drawing-history/{parts['P100']['id']}").status_code==403

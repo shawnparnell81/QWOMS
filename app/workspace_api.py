@@ -55,7 +55,7 @@ def workspace(order_id:int,db:Session=Depends(session),user:User=Depends(current
     for entry in order.parts:
         part=db.get(PhysicalPart,entry.part_id)
         revision=db.get(ControlledRevision,entry.controlled_revision_id) if entry.controlled_revision_id else None
-        parts.append({'part_id':part.id,'selected_part_number':entry.selected_part_number,'description':part.description,'family':part.family.name,
+        parts.append({'part_id':part.id,'selected_part_number':entry.selected_part_number,'quantity':entry.quantity,'description':part.description,'family':part.family.name,
             'aliases':[{'account':a.account,'part_number':a.part_number} for a in part.aliases],
             'drawing':{'number':entry.drawing_number_snapshot,'revision':entry.drawing_rev_snapshot,'status':entry.drawing_status,
                 'current_status':revision.status if revision else None,'revision_id':revision.id if revision else None,'file_id':entry.drawing_file_id,
@@ -197,3 +197,24 @@ def approve_disposition(order_id:int,event_id:int,db:Session=Depends(session),us
     if latest.actor_id==user.id:raise HTTPException(403,'Independent Engineering approval is required')
     e=DispositionEvent(work_order_id=order.id,result=latest.result,state='Approved',rationale=latest.rationale,actor_id=user.id,request_id=latest.id)
     db.add(e);db.flush();record(db,user,'disposition.approved','work_order',order.id,{'disposition_id':e.id,'request_id':latest.id});db.commit();return disposition_json(db,e)
+
+
+class CommentInput(BaseModel):
+    model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+    text:str=Field(min_length=1,max_length=2000)
+
+@router.post('/work-orders/{order_id}/comments',status_code=201)
+def comment(order_id:int,body:CommentInput,db:Session=Depends(session),user:User=Depends(current_user)):
+    access(db,order_id,user,True)
+    record(db,user,'work_order.comment_added','work_order',order_id,{'text':body.text})
+    db.commit();return {'saved':True}
+
+@router.get('/work-orders/{order_id}/drawing-history/{part_id}')
+def drawing_history(order_id:int,part_id:int,db:Session=Depends(session),user:User=Depends(current_user)):
+    order=access(db,order_id,user)
+    part=next((p for p in order.parts if p.part_id==part_id),None)
+    if not part:raise HTTPException(404,'Part not on this work order')
+    if not part.controlled_revision_id:return {'pinned_revision_id':None,'revisions':[]}
+    pinned=db.get(ControlledRevision,part.controlled_revision_id)
+    from .controlled_api import revision_json
+    return {'pinned_revision_id':pinned.id,'revisions':[revision_json(db,r) for r in db.scalars(select(ControlledRevision).where(ControlledRevision.document_id==pinned.document_id).order_by(ControlledRevision.id.desc()))]}

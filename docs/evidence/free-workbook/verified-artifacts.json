@@ -1,0 +1,214 @@
+{
+  "browser_assertions": 46,
+  "master_bytes_unchanged": true,
+  "workbooks": {
+    "shock": {
+      "edited": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 13,
+        "original_sha256": "dffb239c6054ccf6eee3802c8cb2a0ee3a7952983470490a5c23d851fe7e75a1",
+        "edited_sha256": "2e116a8f8386eefa8f6775b656fa216a16f78255fcdd74137cca86983c21c8ec",
+        "measurement_values": [
+          [
+            "B5",
+            "12"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Shock Validation",
+          "Measurements"
+        ],
+        "image_count": 1
+      },
+      "reopened": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 13,
+        "original_sha256": "dffb239c6054ccf6eee3802c8cb2a0ee3a7952983470490a5c23d851fe7e75a1",
+        "edited_sha256": "2e116a8f8386eefa8f6775b656fa216a16f78255fcdd74137cca86983c21c8ec",
+        "measurement_values": [
+          [
+            "B5",
+            "12"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Shock Validation",
+          "Measurements"
+        ],
+        "image_count": 1
+      }
+    },
+    "pump": {
+      "edited": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 9,
+        "original_sha256": "f5965e29eff91e01f20a61b2604b8c5208fd5dd2d3dc485f2fd8b3575dd2a347",
+        "edited_sha256": "e738358e1ebd65382b549ae96d786aa26c6e70996d86b6ca8e8755178e4bea8f",
+        "measurement_values": [
+          [
+            "E5",
+            "12"
+          ],
+          [
+            "F5",
+            "11"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Bench readings",
+          "Equipment context"
+        ],
+        "image_count": 0
+      },
+      "reopened": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 9,
+        "original_sha256": "f5965e29eff91e01f20a61b2604b8c5208fd5dd2d3dc485f2fd8b3575dd2a347",
+        "edited_sha256": "e738358e1ebd65382b549ae96d786aa26c6e70996d86b6ca8e8755178e4bea8f",
+        "measurement_values": [
+          [
+            "E5",
+            "12"
+          ],
+          [
+            "F5",
+            "11"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Bench readings",
+          "Equipment context"
+        ],
+        "image_count": 0
+      }
+    },
+    "injector": {
+      "edited": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 8,
+        "original_sha256": "28db7153db881914b69fa3922a79e629f71bed22676c4cd3c36c1593e29bb439",
+        "edited_sha256": "bcf63fcb7f4cb39d286d6661316f4180052b5c4c0247f1e2431978724a80fb23",
+        "measurement_values": [
+          [
+            "F9",
+            "6"
+          ],
+          [
+            "G9",
+            "1"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Flow and leak"
+        ],
+        "image_count": 0
+      },
+      "reopened": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 8,
+        "original_sha256": "28db7153db881914b69fa3922a79e629f71bed22676c4cd3c36c1593e29bb439",
+        "edited_sha256": "bcf63fcb7f4cb39d286d6661316f4180052b5c4c0247f1e2431978724a80fb23",
+        "measurement_values": [
+          [
+            "F9",
+            "6"
+          ],
+          [
+            "G9",
+            "1"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "Flow and leak"
+        ],
+        "image_count": 0
+      }
+    },
+    "unknown": {
+      "edited": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 10,
+        "original_sha256": "4b86a21a518a03ab074ac5692e39b518a4cb8d06a3de6b74008e109825a33249",
+        "edited_sha256": "1e33973f189ca835bfd611a423875fe61b115a4ba0fb5ba6f2e84d81e4dc44d2",
+        "measurement_values": [
+          [
+            "Z8",
+            "42"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "New assembly review",
+          "Trace",
+          "Notes"
+        ],
+        "image_count": 0
+      },
+      "reopened": {
+        "feature_difference_count": 0,
+        "same_parts": true,
+        "changed_parts": [
+          "xl/worksheets/sheet1.xml"
+        ],
+        "unchanged_parts": 10,
+        "original_sha256": "4b86a21a518a03ab074ac5692e39b518a4cb8d06a3de6b74008e109825a33249",
+        "edited_sha256": "1e33973f189ca835bfd611a423875fe61b115a4ba0fb5ba6f2e84d81e4dc44d2",
+        "measurement_values": [
+          [
+            "Z8",
+            "42"
+          ]
+        ],
+        "cached_result": "PASS",
+        "worksheets": [
+          "New assembly review",
+          "Trace",
+          "Notes"
+        ],
+        "image_count": 0
+      }
+    }
+  },
+  "equipment_pdf_identical": true,
+  "browser_print": {
+    "actual_pdf": true,
+    "A4_landscape": true,
+    "measurement_and_PASS": true,
+    "exact_Excel_print_equivalence": false
+  },
+  "exact_visual_fidelity": "NOT CERTIFIED: browser font metrics, wrapping, complex formats and print pagination differ; zero file-feature differences do not prove pixel equivalence."
+}

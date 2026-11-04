@@ -55,3 +55,23 @@ def test_non_management_cannot_mutate_accounts(client):
     web,_=client;login_as(web,'engineer',ENGINEER_PASSWORD)
     assert web.patch('/api/admin/accounts/1',json={'current_password':ENGINEER_PASSWORD,'active':False}).status_code==403
     assert web.post('/api/admin/accounts/1/reset-password',json={'current_password':ENGINEER_PASSWORD,'new_password':'Fictional-forbidden-password!'}).status_code==403
+
+
+def test_initial_password_blocks_access_then_revokes_temporary_sessions(client):
+    from sqlalchemy import select
+    from app.models import User,AuditEvent
+    from tests.test_foundation import logged_in
+    web,Session=client
+    with Session() as db:db.get(User,1).must_change_password=True;db.commit()
+    logged_in(web)
+    assert web.get('/api/me').json()['must_change_password']
+    assert web.get('/api/dashboard').status_code==403
+    assert web.post('/api/me/set-initial-password',json={'new_password':'SufficientlyLongPassword!'}).status_code==422
+    assert web.post('/api/me/set-initial-password',json={'new_password':'Synthetic-personal-password-123!'}).status_code==200
+    assert web.get('/api/me').status_code==401
+    from tests.test_security_history import login_as
+    login_as(web,'manager','Synthetic-personal-password-123!')
+    assert not web.get('/api/me').json()['must_change_password']
+    assert web.get('/api/dashboard').status_code==200
+    assert web.post('/api/me/set-initial-password',json={'new_password':'Another-synthetic-password-123!'}).status_code==409
+    with Session() as db:assert db.scalar(select(AuditEvent).where(AuditEvent.action=='account.initial_password_set'))

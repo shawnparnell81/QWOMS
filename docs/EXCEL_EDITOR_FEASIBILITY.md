@@ -1,5 +1,7 @@
 # Early specialized browser Excel feasibility — 2026-11-04
 
+> **Historical milestone.** The owner has ruled out paid spreadsheet licenses. The active default is the working free editor described in `FREE_WORKBOOK_EDITOR.md`; commercial pricing/experiments below are retained historical evidence, not a purchase recommendation or current dependency.
+
 **Result: candidate identified and exercised; exact fidelity FAILED in this tested configuration. In-app workbook editing is not delivered or approved for launch.** No vendor code/license key is committed or included in the QWOMS application image. The evaluation ran only on loopback with a synthetic workbook.
 
 ## Candidate and evidence

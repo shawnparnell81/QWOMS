@@ -13,6 +13,7 @@ import zipfile
 from datetime import datetime,timedelta,timezone
 from urllib.parse import urlsplit,urlencode,quote
 from urllib.request import urlopen
+from typing import Literal
 from defusedxml import ElementTree
 from fastapi import APIRouter,Depends,HTTPException,Request,Response,UploadFile
 from pydantic import BaseModel,Field,ConfigDict
@@ -86,6 +87,8 @@ def cookie_draft(db,draft_id,user,write=False,locked=False):
     if not draft or draft.owner_id!=user.id:raise HTTPException(404,'Workbook draft not found')
     if utc(draft.expires_at)<=now():raise HTTPException(410,'Workbook editing session expired; reopen the original or completed file')
     order=db.get(WorkOrder,draft.work_order_id);read_access(user,order)
+    from .workspace_api import access
+    access(db,order.id,user,write=write)
     approved_attachment(db,order,draft.attachment_id)
     if write:can_edit(user,order)
     return draft,order
@@ -93,17 +96,23 @@ def cookie_draft(db,draft_id,user,write=False,locked=False):
 
 @router.get('/api/workbook-editor/status')
 def editor_status(user:User=Depends(current_user)):
+    if os.getenv('QWOMS_WORKBOOK_ENGINE','free')=='free':return {'enabled':True,'engine':'QWOMS free workbook forms','license':'No paid editor or office service required','compatibility':'Supported measurement forms; browser rendering is not certified identical to Excel.'}
     try:office_settings()
     except HTTPException:return {'enabled':False}
     return {'enabled':True,'engine':'Collabora Online','compatibility':'Workbook compatibility testing is required; exact Excel fidelity is not certified.'}
 
 
 @router.post('/api/work-orders/{order_id}/attachments/{attachment_id}/editor',status_code=201)
-def begin(order_id:int,attachment_id:int,body:Begin,request:Request,db:Session=Depends(session),user:User=Depends(current_user)):
-    office_settings()
+def begin(order_id:int,attachment_id:int,body:Begin,request:Request,engine:Literal['free','collabora']|None=None,db:Session=Depends(session),user:User=Depends(current_user)):
+    selected=engine or os.getenv('QWOMS_WORKBOOK_ENGINE','free')
+    if selected not in ('free','collabora'):raise HTTPException(503,'Unknown workbook engine configuration')
+    if selected=='collabora':office_settings()
     order=db.get(WorkOrder,order_id)
     if not order:raise HTTPException(404,'Work order not found')
-    read_access(user,order);attachment=approved_attachment(db,order,attachment_id)
+    read_access(user,order)
+    from .workspace_api import access
+    access(db,order.id,user)
+    attachment=approved_attachment(db,order,attachment_id)
     source=db.get(StoredFile,attachment.file_id)
     if body.completed_id:
         saved=db.get(CompletedForm,body.completed_id)
@@ -115,7 +124,7 @@ def begin(order_id:int,attachment_id:int,body:Begin,request:Request,db:Session=D
     draft=WorkbookDraft(id=str(uuid.uuid4()),work_order_id=order.id,attachment_id=attachment.id,owner_id=user.id,
         auth_session_id=request.state.session_id,source_file_id=source.id,content=blob,expires_at=now()+timedelta(hours=2))
     db.add(draft);db.flush();record(db,user,'workbook.opened','workbook_draft',draft.id,{'work_order_id':order.id,'attachment_id':attachment.id,'source_file_id':source.id})
-    db.commit();return {'id':draft.id,'url':'/static/editor.html?draft='+draft.id}
+    db.commit();return {'id':draft.id,'engine':selected,'url':('/static/free-editor.html?draft=' if selected=='free' else '/static/editor.html?draft=')+draft.id}
 
 
 @router.post('/api/workbooks/{draft_id}/launch')

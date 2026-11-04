@@ -8,3 +8,4 @@
    save protocol stops responding after display:none; the working copy must stay alive. */
 #ws-editor-slot[hidden]{display:block!important;position:fixed;left:-20000px;top:0;width:1100px;height:790px;visibility:hidden;pointer-events:none}
 .ws-lower-grid{align-items:start}#workspace-history{max-height:440px;overflow:auto;padding-right:8px}.ws-closeout-card{min-height:0}
+.ws-history-link{margin:0 0 10px 46px;font-size:11px}.ws-revision-history{padding:18px;max-height:680px;overflow:auto}.ws-revision-history .card{margin-bottom:12px}.ws-comment{white-space:pre-wrap;color:#354965!important}.ws-history-card #ws-comment-form{margin-top:16px;padding-top:14px;border-top:1px solid #e6eaf2}.ws-history-card textarea{min-height:60px}

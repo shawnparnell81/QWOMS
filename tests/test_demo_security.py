@@ -115,6 +115,17 @@ def test_synthetic_bootstrap_is_idempotent_without_credential_overwrite(client,m
         before=db.scalar(select(User).where(User.username=='demo.manager')).password_hash
         seed(db);db.commit()
         assert db.scalar(select(User).where(User.username=='demo.manager')).password_hash==before
+        # Preserve the remote opt-in, one-time owner transition without ever
+        # overwriting the personal password on later starts.
+        from app.security import hash_password
+        owner=db.scalar(select(User).where(User.username=='demo.manager'));owner_id=owner.id
+        monkeypatch.setenv('QWOMS_DEMO_INITIAL_PASSWORD','Synth1234!')
+        seed(db);db.commit();db.refresh(owner)
+        assert owner.id==owner_id and owner.username=='demo' and owner.must_change_password
+        owner.password_hash=hash_password('Synthetic-personal-password-123!');owner.must_change_password=False;db.commit()
+        personal=owner.password_hash;seed(db);db.commit();db.refresh(owner)
+        assert owner.password_hash==personal and not owner.must_change_password
+
 
 
 def test_unicode_basic_credentials_are_rejected_without_server_error(client,monkeypatch):

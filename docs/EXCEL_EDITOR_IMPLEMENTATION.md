@@ -1,5 +1,7 @@
 # Interactive Excel workbook editing in QWOMS
 
+> **Historical milestone.** The owner has ruled out paid spreadsheet licenses. The active default is the working free editor described in `FREE_WORKBOOK_EDITOR.md`; commercial pricing/experiments below are retained historical evidence, not a purchase recommendation or current dependency.
+
 A real Collabora Online Calc editor now opens inside QWOMS from an approved attached blank master. This is an implemented local synthetic-test workflow, not a fidelity certification or a change to the live Render demo. Editor support is disabled unless explicitly configured; no SpreadJS trial libraries, keys or vendor binaries are included in the QWOMS image.
 
 ## Hands-on review now

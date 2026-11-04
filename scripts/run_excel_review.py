@@ -4,6 +4,7 @@ from pathlib import Path
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--review-root',type=Path,default=Path(__file__).resolve().parent.parent/'work'/'excel-editor')
 parser.add_argument('--seed-only',action='store_true')
+parser.add_argument('--engine',choices=['free','collabora'],default='free')
 args=parser.parse_args()
 root=args.review_root.resolve()
 root.mkdir(parents=True,exist_ok=True)
@@ -12,7 +13,13 @@ os.environ['QWOMS_SECRET_KEY']=secrets.token_urlsafe(48)
 os.environ['QWOMS_COOKIE_SECURE']='false'
 os.environ['QWOMS_DEMO_MODE']='false'
 os.environ['QWOMS_STORAGE_ROOT']=str(root/'files')
-os.environ['QWOMS_OFFICE_ENABLED']='true'
+if os.getenv('CODESPACE_NAME') and os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN'):
+    preview_origin='https://'+os.environ['CODESPACE_NAME']+'-8020.'+os.environ['GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN']
+    os.environ['QWOMS_PUBLIC_URL']=preview_origin
+    os.environ['QWOMS_ALLOWED_ORIGINS']=preview_origin
+    os.environ['QWOMS_COOKIE_SECURE']='true'
+os.environ['QWOMS_WORKBOOK_ENGINE']=args.engine
+os.environ['QWOMS_OFFICE_ENABLED']='true' if args.engine=='collabora' else 'false'
 os.environ['QWOMS_OFFICE_LOCAL_DEVELOPMENT']='true'
 os.environ['QWOMS_OFFICE_PUBLIC_URL']='http://127.0.0.1:9980'
 os.environ['QWOMS_OFFICE_INTERNAL_URL']='http://127.0.0.1:9980'

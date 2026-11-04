@@ -71,3 +71,25 @@ Labor and activity tracking, pallets, management-only forklift internal data, pr
 
 ### Phase 5
 Production hardening, performance/import scale tests, backup/recovery, monitoring, malware handling, role/security tests, multi-site workflow reviews and deployment after company IT approval.
+
+
+## Integrated Quality operations — clarified from existing time-tracking app (2026-11-04)
+
+The user's **other** application is primarily for tracking time; do not copy its screens or treat it as QWOMS's intended finished design. Use it only as evidence of real Quality Department work classifications and practical field needs. The existing application's navigation includes: **Open Work Orders, Validation / FAI, Repair / Rework, Inspection, Warranty, Salt Spray Test, Development, Rebox, Test, Weight, Research, Production, Completed Work Orders**. QWOMS must preserve easy access to these concepts without assuming each is a separate top-level work order type: maintain the six agreed canonical types, provide configurable subtypes, saved filters and workflow-specific views for Warranty, Salt Spray Test, Development, Rebox, Research, Production, etc. Confirm exact classification semantics with the user as needed; never discard an operational workflow merely because it was not one of the original six.
+
+QWOMS is **one connected operational record**, combining:
+- create, assign, prioritize, monitor, complete and search work orders and link them to projects;
+- time and employee-specific task/labor tracking with accurate aggregates;
+- authoritative Part Master lookup, equivalent part numbers, approved drawing number/revision, immutable drawing snapshots and applicable work instructions automatically linked by work type/subtype/family/part;
+- automatically selected approved blank Excel workbooks that employees can edit **in the browser** and save with original formulas, formatting, conditional PASS-green/FAIL-red fills and workbook features demonstrably preserved, plus a separate unchanged master;
+- add/view/download photos, user-provided documents, attachments, and **video evidence** attached to the precise work order (define size/format, secure streaming/download and storage policy during implementation);
+- job-specific inspection/test measurement fields, result histories, repairs/replacements, rebox/return, material movement/pallets, labor, complete traceability and reporting.
+
+The work-order screen must display linked parts/drawings/instructions, attachments, time entries and status in one coherent interface, **not force users to open separate applications** for each step. No customer-info work-order fields, no email and no full-QMS/training modules. The sample validation form the user plans to supply is required acceptance evidence; **do not claim exact Excel fidelity until it passes a representative edit/save/reopen/export comparison**. Use only a company-approved sanitized copy in synthetic/test infrastructure, never upload actual proprietary forms without approval.
+
+
+
+## Owner-configured Excel masters and simple test-result PDF upload (confirmed 2026-11-04)
+Every product/physical part may use a wholly different validation workbook. The owner uploads the **original blank .xlsx** master, maps the applicable part/family/type/subtype, revises and retires it through stored registry records. QWOMS must preserve uploaded layout/formulas/colors and display/edit a working copy in-app; **no part-specific Excel layout may be embedded in application code**, and no deploy is needed when a form is added/removed. A retired form disappears from active catalog and new work orders but historical work order snapshots and evidence remain immutable. See `DYNAMIC_EXCEL_TEMPLATES.md`.
+
+For equipment-generated test results, the user will export a **PDF** from testing software once the test is complete. In the work order's **Test Results** section, an authorized employee uploads the PDF and QWOMS attaches and saves it to that specific work order immediately, preserving the original filename, PDF bytes, and an auditable uploaded-by/time record. Show an in-app PDF preview plus download/open; allow multiple reports per order where needed. No PDF conversion, special report formatting, data extraction, or testing-software integration is required. Test safe file validation, permissions, duplicate handling, successful persistence, and correct order association. PDF results are supporting evidence distinct from the blank/filled Excel validation workbook.

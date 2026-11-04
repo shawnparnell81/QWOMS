@@ -1,0 +1,53 @@
+# Working free workbook editor and integrated Quality workspace
+
+The owner-approved direction is **zero paid spreadsheet-editor licenses**. QWOMS now defaults to its own workbook-derived browser form, server calculation preview and original-package measurement writer. It requires no commercial SDK, activation, office container or additional .NET service. The owner-authorized Sequfloh source at `bfe6cea` and `SEQUFLOH_EXCEL_TECHNIQUE_REVIEW.md` were read first. This adapts its technique in Python and keeps QWOMS's visual design; it does not copy its application or assume ClosedXML SaveAs proves fidelity.
+
+## Open a usable development preview
+
+In the existing attached environment the free preview is running on **port 8020**. Open `http://127.0.0.1:8020/#work-order-2` **inside that environment**, or use the private forwarded port. This is not a new public hosted site, and a loopback URL inside the environment is not a URL on another computer. Only one port is required; Collabora/port9980 is unnecessary.
+
+For a private browser-based Codespaces/development preview, install the existing requirements (the devcontainer does this) and run:
+
+```sh
+PYTHONPATH=. python scripts/run_free_preview.py
+```
+
+Open **Ports → 8020 → Open in Browser**, keeping port visibility **Private**. No work-PC install or paid editor purchase is needed. The launcher only selects isolated synthetic SQLite/storage under `work/excel-editor`, refuses account-password resets if non-synthetic accounts are present, waits for readiness and creates the synthetic fixture only if absent. Codespaces-origin/secure-cookie settings are derived from its trusted runtime environment. It does not create a Codespace or provision/purchase hosting. Credentials are privately stored in ignored `work/excel-editor/reviewer.credentials`; never paste or commit their values. Do not use this development profile with company data.
+
+The existing initial strut order2 is available for hands-on measurements; pump3 and injector4 use different originals. Further browser-run orders are real persisted synthetic records, including completed end-to-end orders. The fixture seed uses synthetic workbooks/PDFs and normal authenticated APIs. FFmpeg is optional for generating its development video; the application does not need FFmpeg. Where unavailable, no fake video is seeded; real employee upload/playback remains supported.
+
+## Employee workflow that is implemented
+
+Select a part alias → create Validation/FAI → approved drawing/form/instructions automatically attach → open the workbook in the same order → enter measurements → preview recalculated formulas and original conditional colors → upload original testing PDFs → record employee time → save under an employee-entered filename → reopen/export the completed workbook → record a separate human decision → close the order.
+
+- Original worksheets, merged ranges, existing cells, row/column sizes, fills, fonts, borders, alignment, supported number formats and raster pictures drive the view. No production form/cell maps exist. Tabs come from the upload. Formula cells stay read-only; this is a measurement/form editor rather than a general workbook designer.
+- A dropdown comes from the uploaded data-validation rule. Numeric/list/custom validations and sheet/cell protection are enforced on the server. Unsupported validation cannot silently allow invalid input. Free-text work notes and drawing approval/revision history are now available in the same order, with part quantities.
+- Live preview has no storage side effect. Saving measurement values patches the original worksheet XML values and formula caches. It does **not** call openpyxl `save()` or rewrite original styles, pictures, relationships, workbook or print settings. User-named completed files reuse existing audited, duplicate-safe order/project filing. Optimistic versions reject stale edits; original blank bytes never change.
+- Unsupported formulas are shown as `#UNSUPPORTED`, with precise sheet/address/reason. Saving is blocked rather than writing stale PASS results. No Python eval/exec, macro execution or external formula requests occur. External relationships/links, embedded programs and active content remain rejected.
+- Original PDF test results are stored unchanged, with original filename, uploader/date and optional equipment/sample. Multiple PDFs, preview/download, reload persistence, order access checks and duplicates remain supported. Photo/video/supporting evidence, labor and separate disposition remain available. Other five work-order types retain their distinct interfaces.
+
+## Verification and what zero differences means
+
+Actual browser acceptance has **46 passing assertions** on four different synthetic originals: shock/strut, pump, injector and a previously unknown three-sheet form uploaded/approved while the app stayed running. For each: measured values caused actual green PASS and red FAIL; user-named completed saving, duplicate refusal, reopening and export passed. Original dropdown/image, evidence switching with unsaved measurements retained, drawing review history, comments, raw PDFs, timer, separate final decision, closure, retirement and retained historical completed files passed. Screenshots are the running application, not mockups.
+
+The independent artifact verifier checks BOTH edited and reopened exports for all four layouts: **0 differences** in the existing structural/style comparator. Every ZIP part name remains present; only `xl/worksheets/sheet1.xml` changes in these fixtures, for measurement values and formula caches. Every other uncompressed part's bytes are identical, including styles, conditional definitions, validation, images/anchors, relationships, shared strings, workbook settings and print definitions. Values, original formulas, cached PASS, sheets/merges and immutable master checksums are independently inspected. Original equipment PDF bytes match. Actual browser printing produced an A4 landscape PDF containing the measured value and PASS.
+
+**This does not certify exact browser/Excel visual fidelity.** Font availability/metrics differ; unsupported advanced number formatting and Excel print headers/footers, automatic fit-to-page, page breaks, repeated titles and multi-sheet pagination are not fully reproduced by browser printing. The XLSX original definitions remain preserved. Native Microsoft Excel visual/print reopen has not been tested here. This export method avoids the prior serializer's measured metadata losses; it does not make HTML a pixel-identical Excel engine.
+
+Current calculation subset: IF, IFERROR, AND, OR, NOT, SUM, MIN, MAX, AVERAGE, COUNT, COUNTA, ABS, INT, SQRT, MOD, ROUND, LEN, TRIM, UPPER, LOWER, ISNUMBER, numeric arithmetic/comparisons/percent/string concatenation, finite A1 ranges, named ranges and cross-sheet references. It is a bounded subset, not complete Excel semantics. Dynamic arrays/data tables, structured/whole-column references, lookups/statistical/add-in functions outside that list are not calculated. Unsupported formulas prevent filing stale results; originals remain view/download records. Formula errors, cycles, recursion and work limits are explicit.
+
+Other limits: first visible browser window at most500 rows ×100 columns and20,000 cells;100,000 stored/merged-cell processing cap before expansion;5,000 edits per save;5MB/25-megapixel displayed raster-image cap. Unsupported picture anchors/formats, charts, shapes and controls are preserved in XLSX but not all rendered. Hidden sheets remain in the XLSX and are not editable; formulas can reference them. Rotation/complex formatting are approximate. No sheet/row/column creation or formula replacement is offered. These are specific compatibility work items, not a reason to buy an editor.
+
+Safe evidence: `docs/evidence/free-workbook/`. Synthetic workbook/PDF exports and private credentials stay ignored under `work/`. Reproduce with `node tests/browser/free-workspace.cjs` and `PYTHONPATH=. python tests/excel/verify_free_artifacts.py` after starting the private fixture. The separate `initial-password.cjs` checks preserved one-login mandatory password setup on isolated local port8012.
+
+## Permissions, history synchronization and deployment
+
+All previous local commits, including `4a1315c` and `800c451`, remain preserved. The optional old Collabora integration is retained for history/research but is not required or loaded by the default free editor. Commercial evaluation packages are not bundled. Free dependencies/notices are documented in `FREE_WORKBOOK_LICENSES.md`.
+
+New free form/preview/save APIs enforce authentication/CSRF, own-draft/order access, closed-record protection, version conflicts, original validation/protection and audit rollback. Employees need no master-import permission to perform assigned work. Departments gain no import rights; independent explicit Engineering approval and the sole initial Administrator model remain enforced.
+
+Newer remote owner requirements/research were inspected and retained. Remote one-time initial-password behavior was ported to the canonical local account implementation, including blocked access until setup, session revocation, single-login UI and opt-in synthetic owner transition without resetting later personal passwords. Migration0012 adds that flag after local0011; it does **not** solve the deployed/local0008/0009 schema divergence. The canonical development code retains the local capabilities/operations schema; the alternate remote implementation stays preserved in Git history. No existing live records or credentials were changed.
+
+Read-only Render service inspection confirmed `autoDeploy=no`, `autoDeployTrigger=off`. Current Render documentation also confirms `[skip render]` suppresses auto-deploy; development synchronization uses that marker. No Render environment/service setting, database, deploy or production resource is modified. Pushing source is not authorization to deploy it. Before any live rollout, reconcile the differing permission/operations migration histories on a backed-up isolated clone, preserve every grant and account, rehearse restore/rollback and verify production storage, session/permissions, free-editor compatibility and user acceptance. Hosting and recovery gates remain; no commercial license is required or proposed.
+
+**Next action:** use the private free preview for Quality hands-on review. Record incompatible cells/features against approved sanitized blank masters, then extend the free interpreter/renderer with regression fixtures. Complete the clone migration/rollback gate before proposing any live upgrade. No PR or main merge is authorized.

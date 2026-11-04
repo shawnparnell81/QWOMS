@@ -10,6 +10,7 @@ from app import editor_api
 @pytest.fixture
 def attached(client,monkeypatch):
     web,Session=client;logged_in(web)
+    monkeypatch.setenv('QWOMS_WORKBOOK_ENGINE','collabora')
     for name,value in {'QWOMS_OFFICE_ENABLED':'true','QWOMS_OFFICE_LOCAL_DEVELOPMENT':'true','QWOMS_OFFICE_PUBLIC_URL':'http://office.local:9980','QWOMS_OFFICE_INTERNAL_URL':'http://office.local:9980','QWOMS_OFFICE_WOPI_ORIGIN':'http://testserver'}.items():monkeypatch.setenv(name,value)
     monkeypatch.setattr(editor_api,'urlopen',lambda *a,**k:BytesIO(b'<wopi-discovery><net-zone><app name="xlsx"><action name="edit" ext="xlsx" urlsrc="http://office.local:9980/browser/test/cool.html?"/></app></net-zone></wopi-discovery>'))
     parts=prepare_parts(web);doc,master,original,_=form_master(web)

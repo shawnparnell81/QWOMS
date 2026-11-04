@@ -1,5 +1,5 @@
 """Populate only the isolated local review app with clearly fictional workspace fixtures."""
-import hashlib,json,time,subprocess
+import hashlib,json,time,subprocess,shutil
 from pathlib import Path
 from io import BytesIO
 from datetime import datetime,timedelta,timezone
@@ -60,10 +60,10 @@ for y in range(235,430,30):d.line((370,y,570,y+20),fill='#455b77',width=12)
 d.text((35,35),'FICTIONAL TEST FIXTURE - SYNTHETIC ONLY',fill='#445976');out=BytesIO();image.save(out,format='PNG');photo=out.getvalue();(assets/'Synthetic strut fixture.png').write_bytes(photo)
 request(owner,'POST',f'/api/work-orders/{main}/evidence',data={'category':'Photo','part_id':parts['S']['id'],'description':'Synthetic fixture illustration for upload and preview acceptance.'},files={'file':('Synthetic strut fixture.png',photo)})
 clip=assets/'Synthetic bench overview.mp4'
-subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=0x6474bd:s=480x270:d=1','-c:v','libx264','-pix_fmt','yuv420p','-movflags','+faststart','-y',str(clip)],check=True)
-request(owner,'POST',f'/api/work-orders/{main}/evidence',data={'category':'Video','part_id':parts['S']['id'],'description':'One-second synthetic test clip.'},files={'file':(clip.name,clip.read_bytes())})
+if shutil.which('ffmpeg'):subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=0x6474bd:s=480x270:d=1','-c:v','libx264','-pix_fmt','yuv420p','-movflags','+faststart','-y',str(clip)],check=True)
+if clip.exists():request(owner,'POST',f'/api/work-orders/{main}/evidence',data={'category':'Video','part_id':parts['S']['id'],'description':'One-second synthetic test clip.'},files={'file':(clip.name,clip.read_bytes())})
 for client,seconds in [(owner,1800),(engineer,900)]:request(client,'POST',f'/api/operations/work-orders/{main}/labor',json={'activity':'Validation','started_at':(datetime.now(timezone.utc)-timedelta(hours=3)).isoformat(),'duration_seconds':seconds,'note':'Synthetic fixture measurement setup'})
 (assets/'Unseen assembly original.xlsx').write_bytes(workbook('unknown'))
 fixture={'prefix':prefix,'main_order_id':main,'orders':{k:v['id'] for k,v in orders.items()},'parts':{k:v['id'] for k,v in parts.items()},'forms':forms,'project_id':project['id'],'assets':str(assets),'drawing_id':drawing['id'],'instruction_id':instruction['id']}
 (root/'workspace-fixture.json').write_text(json.dumps(fixture,indent=2))
-print(json.dumps({'synthetic_workspace_order':main,'url':base+'/#work-order-'+str(main),'templates':3,'evidence':4,'labor_person_hours':0.75}))
+print(json.dumps({'synthetic_workspace_order':main,'url':base+'/#work-order-'+str(main),'templates':3,'evidence':4 if clip.exists() else 3,'labor_person_hours':0.75}))

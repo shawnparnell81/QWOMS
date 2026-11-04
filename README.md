@@ -1,5 +1,7 @@
 # QWOMS — Quality Work Order Management System
 
+> **Working free Validation/FAI editor:** run `PYTHONPATH=. python scripts/run_free_preview.py` and open private port **8020**. No commercial editor or office server required. See `docs/FREE_WORKBOOK_EDITOR.md` for the tested workflow, exact compatibility limits and evidence. Original masters stay unchanged.
+
 **Development in progress. A private synthetic Render demo is live; company production use is not approved.**
 
 A browser-based Quality Work Order Management System for Quality, Engineering, Production, and Management across multiple sites. This is **not** a full QMS.

@@ -1,0 +1,9 @@
+# Workbook editor — zero paid licenses
+
+The default QWOMS workbook-form editor is original QWOMS Python and browser code. It uses existing open-source dependencies: **openpyxl (MIT)** for read-only workbook metadata, **defusedxml (PSF)** for safe XML parsing, **Pillow (MIT-CMU)** for existing image handling, and Python's standard library for the original-package patch writer and bounded formula interpreter. Included upstream license texts are under `docs/licenses/`. No new browser SDK, .NET runtime, licensed office engine, commercial evaluation package, activation key, per-user subscription or required future license purchase is used.
+
+Sequfloh was inspected as an owner-authorized technical reference at commit `bfe6cea`. Its workbook-derived view, server-side preview, conditional styles and versioned-copy techniques informed this implementation. No source code or company data was copied into QWOMS. ClosedXML itself is MIT but is **not** a QWOMS dependency. The Python implementation avoids an additional service/runtime and preserves untouched package parts instead of full `SaveAs` serialization.
+
+Prior Collabora/SpreadJS experiments and evidence remain in history for preservation. The default editor does not load them, contact an office server or depend on their licenses. Paid products are not the release plan and no purchase is recommended. Existing optional Collabora code can be selected only through explicit configuration for regression/research; it is unnecessary for the free workflow.
+
+Browser/system fonts, PDF viewers and print engines differ. No proprietary font files are supplied or installed. Using a requested font name does not certify identical font metrics. Open-source licensing permits this implementation; it does not establish perfect Excel compatibility, production storage/recovery acceptance or native Microsoft Excel visual/print equivalence.

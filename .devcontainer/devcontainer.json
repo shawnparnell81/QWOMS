@@ -3,11 +3,16 @@
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
   "postCreateCommand": "python -m pip install -r requirements.txt",
   "forwardPorts": [
-    8000
+    8000,
+    8020
   ],
   "portsAttributes": {
     "8000": {
       "label": "QWOMS browser preview",
+      "onAutoForward": "notify"
+    },
+    "8020": {
+      "label": "QWOMS free workbook review",
       "onAutoForward": "notify"
     }
   },

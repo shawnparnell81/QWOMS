@@ -86,7 +86,7 @@ async def origin_guard(request: Request, call_next):
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
     response.headers['X-Frame-Options'] = 'DENY'
-    embedded=request.url.path=='/static/editor.html' or (request.url.path.startswith('/api/work-orders/') and request.url.path.endswith('/content'))
+    embedded=request.url.path in ('/static/editor.html','/static/free-editor.html') or (request.url.path.startswith('/api/work-orders/') and request.url.path.endswith('/content'))
     if embedded:
         response.headers['Content-Security-Policy']="frame-ancestors 'self'; object-src 'none'; base-uri 'self'"
         response.headers['X-Frame-Options']='SAMEORIGIN'
@@ -180,7 +180,7 @@ def allow_roles(user: User, *allowed):
 
 
 def serialize_user(user: User):
-    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site, "is_admin": user.is_admin, "capabilities": user.capabilities or []}
+    return {"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role, "site": user.site, "is_admin": user.is_admin, "capabilities": user.capabilities or [],"must_change_password":user.must_change_password}
 
 
 def serialize_part(p: PhysicalPart):
@@ -764,3 +764,6 @@ from .workspace_api import router as workspace_router
 from .template_api import router as template_router
 app.include_router(workspace_router)
 app.include_router(template_router)
+
+from .free_editor_api import router as free_editor_router
+app.include_router(free_editor_router)

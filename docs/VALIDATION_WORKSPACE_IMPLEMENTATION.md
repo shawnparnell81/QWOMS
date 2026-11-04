@@ -1,5 +1,7 @@
 # Integrated Validation/FAI workspace — working synthetic review
 
+> **Historical milestone.** The owner has ruled out paid spreadsheet licenses. The active default is the working free editor described in `FREE_WORKBOOK_EDITOR.md`; commercial pricing/experiments below are retained historical evidence, not a purchase recommendation or current dependency.
+
 The implementation is on `development/qwoms-complete-build`, following the uploaded workspace, dynamic-template and redesign requirements. The actual local application is running with a real Collabora office engine; it is not a spreadsheet mockup or a remotely deployed release.
 
 ## Open the working application

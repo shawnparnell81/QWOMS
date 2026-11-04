@@ -53,3 +53,31 @@ Read `docs/LAUNCH_ACCELERATION.md` at the beginning of each task. Prioritize an 
 - Favor fast, integrated development and automated regression tests across workstreams. An impressive demo, local test pass, or cloud URL alone is insufficient evidence of operational readiness.
 - Do not claim the app will work perfectly without testing. Real representative workbook compatibility, security, backups/restore, and user acceptance are release gates.
 - Stay on `development/qwoms-complete-build`; multiple commits, one final PR only upon user approval. Code and tests cannot be run asynchronously outside an active Codex task.
+
+## One login only — user requirement (2026-11-04)
+
+- The QWOMS website must show **one username/password login only**. No separate browser HTTP Basic prompt, demo-gate password, secondary employee portal login or extra authentication layer before the app's login screen.
+- For the synthetic Render demo, remove the HTTP Basic gate while preserving individual QWOMS sessions, HTTPS, CSRF protection, permission checks and login throttling. A public login screen is acceptable for **synthetic test data only**; no real company content until independent production security approval.
+- For production, each user signs in once using their individual QWOMS account. Sole initial Administrator sets up all employees and grants permissions explicitly. Do not reintroduce double login through future Blueprint sync/deploy.
+
+## Visual quality is a launch requirement — QWOMS look and feel
+Read `docs/UI_REDESIGN_BRIEF.md` before UI development. The user is dissatisfied with the present appearance relative to the polished original concept visuals. A functional prototype does **not** satisfy design acceptance. Restore the analytics-first dashboard, high-quality visual hierarchy and differentiated type/part workflows; obtain user review from actual screenshots rather than assuming the current design is acceptable. Never invent illustrated metrics. Do not substitute styling work for the Excel/editor and security acceptance gates.
+
+## Uploaded Excel masters + direct PDF test evidence (2026-11-04)
+Read `docs/DYNAMIC_EXCEL_TEMPLATES.md`: every part-specific validation workbook is **uploaded data**, never a hardcoded layout, sheet or formula. The owner assigns, replaces and retires approved blank templates without code changes. Retired masters disappear from active picks/automatic attachments, while previously completed order evidence and controlled revision snapshots are preserved.
+For Validation/FAI testing-software results, the user's normal export is a **PDF**. Provide a simple **Upload Test Results PDF** action directly in each work order. Save the unmodified original PDF bytes and filename attached to that order immediately on successful upload. Show it in the same order's Test Results section with an inline PDF preview/open and authorized download. No conversion, extraction, format mapping, or spreadsheet rewriting is needed. Verify no overwrite, secure access and persistence. Keep the separate blank validation Excel workbook behavior unchanged.
+
+## One integrated validation work-order workspace (actual workbook reviewed)
+Read `docs/VALIDATION_WORKSPACE_SPEC.md` before implementing Validation/FAI UI, Excel, drawing/instruction auto-links, or test-software evidence attachments. A user-supplied completed validation workbook has been examined privately; it is not a blank master and must never be copied into repository or synthetic Render. The specification records worksheet structures, formulas, conditional statuses, and the single-workspace interaction. Obtain a company-approved blank master and sanitized software export fixtures before asserting exact Excel round-trip fidelity. Keep calculated PASS/FAIL distinct from Engineering-authorized final disposition.
+
+## Non-negotiable: no paid Excel editor licenses
+
+The user will not pay for SpreadJS, a commercial Collabora subscription, a per-user workbook editor fee, or any mandatory commercial editor license. Build the spreadsheet capability with legally usable free/open-source tooling, or first obtain the user's explicit approval for a genuinely zero-fee alternative. Do not put evaluation-only SDKs into a deployed app or silently rely on unsupported production licenses. Document license terms and production limits precisely.
+
+**Before further editor replacement work, examine how the user's existing separate application successfully imports/displays/edits/saves arbitrary XLSX without hardcoded forms.** Ask for an authorized source-code reference/repository only if needed; do not assume the code is available or clone unrelated projects. Reuse the *technique* if technically and legally sound; QWOMS should retain its own design and architecture. Do not claim another app's save/export fidelity is verified without comparing actual files.
+
+Keep original master XLSX bytes immutable. Prioritize building and showing the user a working dynamic in-app editing flow and compare preservation of real formulas, conditional fills, print setup, images and sheets on export. Distinguish functional/visual changes from metadata-only differences in test reports. Never alter the user's originals to make a test pass.
+
+## Reviewed existing open-source workbook approach (Sequfloh)
+
+Read `docs/SEQUFLOH_EXCEL_TECHNIQUE_REVIEW.md` before implementing another spreadsheet editor. The user owns the GitHub repository `shawnparnell81/Sequfloh` and authorized its review. Its custom React HTML grid + .NET/ClosedXML (MIT) reader/preview/conditional format/calculation/save/versioning flow is a strong zero-paid-license approach for QWOMS. Adapt the **technique** with a sensible FastAPI ↔ workbook-processing boundary, keeping the unique QWOMS interface. Do not confuse preserving the untouched master with guaranteeing perfect fidelity of edited XLSX files: its ClosedXML `SaveAs` rewrites the workbook and its grid has finite limits. Test original vs edited workbook feature preservation and Excel reopen on permitted samples. Do not blindly copy the entire application or introduce extra costs. Preserve any ongoing, unpushed Codex work.

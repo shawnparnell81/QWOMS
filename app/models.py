@@ -18,6 +18,7 @@ class User(Base):
     site: Mapped[str] = mapped_column(String(100), default="")
     password_hash: Mapped[str] = mapped_column(String(200))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    must_change_password: Mapped[bool] = mapped_column(Boolean,default=False,server_default=false())
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     capabilities: Mapped[list] = mapped_column(JSON, default=list, server_default="[]")
 
