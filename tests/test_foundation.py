@@ -113,6 +113,13 @@ def test_folder_import_mapping_and_revision_snapshot(client):
     assert file_info["relative_path"] == "Engineering Drawings/Shocks/56789abc rev C.PDF"
     mapped = web.put(f"/api/files/{file_info['id']}/drawing-mapping", json={"drawing_number":"56789abc", "drawing_revision":"C"})
     assert mapped.status_code == 200, mapped.text
+    revision_id=mapped.json()['controlled_revision_id']
+    assert web.post(f'/api/controlled/revisions/{revision_id}/actions',json={'action':'submit','reason':'Fictional release review'}).status_code==200
+    assert web.post('/api/auth/login',json={'username':'engineer','password':'OtherLongPassword123!'}).status_code==200
+    web.headers['X-QWOMS-CSRF']=web.cookies['qwoms_csrf']
+    for action in ['review','approve']:
+        assert web.post(f'/api/controlled/revisions/{revision_id}/actions',json={'action':action,'reason':'Fictional Engineering review'}).status_code==200
+    logged_in(web)
     physical = web.get("/api/parts/search?q=123").json()[0]
     new = web.post("/api/work-orders", json={"order_type":"Validation / FAI", "subtype":"First Article Inspection",
                     "title":"Initial shock validation", "assigned_to":1,
@@ -121,7 +128,7 @@ def test_folder_import_mapping_and_revision_snapshot(client):
     assert new.status_code == 201, new.text
     order = new.json()
     assert order["number"].startswith("VAL-") and order["number"].endswith("-321")
-    assert order["parts"][0]["drawing_status"] == "Matched"
+    assert order["parts"][0]["drawing_status"] == "Approved"
     assert order["parts"][0]["drawing_revision"] == "C"
     with Session() as db:
         part = db.get(PhysicalPart, physical["id"])

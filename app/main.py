@@ -29,6 +29,8 @@ from .audit import record
 from .models import AuditEvent, AssignmentEvent, AuthSession, Project
 from .deployment import validate_settings, demo_mode, public_origin, demo_gate_ok
 from .throttling import check_login, finish_login
+from .controlled import mapped_draft, drawing_reference
+from .models import ControlledRevision,WorkOrderPart
 
 DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))
 
@@ -178,6 +180,7 @@ def serialize_order(o: WorkOrder):
                        "quantity": p.quantity, "drawing_number": p.drawing_number_snapshot,
                        "drawing_revision": p.drawing_rev_snapshot,
                        "drawing_status": p.drawing_status,
+                       "controlled_revision_id":p.controlled_revision_id,
                        "drawing_file_id": p.drawing_file_id} for p in o.parts]}
 
 
@@ -427,6 +430,10 @@ def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(sessio
     f = db.get(StoredFile, file_id)
     if not f or f.kind != "drawing":
         raise HTTPException(404, "Drawing file not found")
+    if (f.drawing_number,f.drawing_revision)!=(body.drawing_number.strip(),body.drawing_revision.strip()):
+        pinned=db.scalar(select(WorkOrderPart.id).where(WorkOrderPart.drawing_file_id==f.id))
+        controlled=db.scalar(select(ControlledRevision.id).where(ControlledRevision.file_id==f.id))
+        if pinned or controlled:raise HTTPException(409,'A referenced original mapping is immutable; import a new revision')
     # Don't derive drawing revision from filename. Match the revision recorded in Excel.
     known = db.scalar(select(PhysicalPart).where(
         PhysicalPart.drawing_number == body.drawing_number.strip(),
@@ -440,11 +447,12 @@ def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(sessio
         raise HTTPException(409, "This drawing number and revision are already mapped to another file")
     f.drawing_number = body.drawing_number.strip()
     f.drawing_revision = body.drawing_revision.strip()
+    revision=mapped_draft(db,f,f.drawing_number,f.drawing_revision,user)
     record(db, user, "drawing.mapped", "file", f.id,
            {"drawing_number": f.drawing_number, "drawing_revision": f.drawing_revision})
     db.commit()
     return {"id": f.id, "relative_path": f.relative_path, "drawing_number": f.drawing_number,
-            "drawing_revision": f.drawing_revision}
+            "drawing_revision": f.drawing_revision,"controlled_revision_id":revision.id,"status":revision.status}
 
 
 @app.get("/api/work-orders")
@@ -488,12 +496,8 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
         part = db.scalar(select(PhysicalPart).options(selectinload(PhysicalPart.aliases)).where(PhysicalPart.id == p.part_id))
         if not part or not any(a.part_number.casefold() == p.selected_part_number.strip().casefold() for a in part.aliases):
             raise HTTPException(422, "Selected part number is not an alias of the specified physical part")
-        drawing = None
-        if part.drawing_number and part.drawing_revision:
-            drawing = db.scalar(select(StoredFile).where(
-                StoredFile.kind == "drawing", StoredFile.drawing_number == part.drawing_number,
-                StoredFile.drawing_revision == part.drawing_revision))
-        resolved_parts.append((p, part, drawing))
+        revision,drawing,drawing_state=drawing_reference(db,part.drawing_number,part.drawing_revision)
+        resolved_parts.append((p, part, drawing,revision,drawing_state))
     year = datetime.now(timezone.utc).year
     counter = db.scalar(select(WorkOrderCounter).where(WorkOrderCounter.code == config["code"],
             WorkOrderCounter.year == year).with_for_update())
@@ -512,13 +516,13 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
                    project_id=body.project_id)
     db.add(wo)
     db.flush()
-    for entry, part, drawing in resolved_parts:
+    for entry, part, drawing, revision, drawing_state in resolved_parts:
         wo.parts.append(WorkOrderPart(part_id=part.id, selected_part_number=entry.selected_part_number.strip(),
                                      quantity=entry.quantity, drawing_number_snapshot=part.drawing_number,
                                      drawing_rev_snapshot=part.drawing_revision,
                                      drawing_file_id=drawing.id if drawing else None,
-                                     drawing_status=("Matched" if drawing else
-                                                     "Needs review" if part.drawing_number else "No drawing recorded")))
+                                     controlled_revision_id=revision.id if revision else None,
+                                     drawing_status=drawing_state))
     try:
         db.add(AssignmentEvent(work_order_id=wo.id, actor_id=user.id,
                                previous_user_id=None, assigned_user_id=body.assigned_to))
@@ -547,6 +551,11 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
     if body.status is not None:
         if body.status not in ("Open", "In Progress", "On Hold", "Completed", "Closed"):
             raise HTTPException(422, "Invalid status")
+        if body.status in ('In Progress','Completed','Closed'):
+            if any(p.drawing_number_snapshot and (p.drawing_status!='Approved' or not p.controlled_revision_id) for p in order.parts):
+                raise HTTPException(409,'Engineering must resolve missing, unapproved or superseded drawing references before execution')
+            if any(p.controlled_revision_id and db.get(ControlledRevision,p.controlled_revision_id).status=='Obsolete' for p in order.parts):
+                raise HTTPException(409,'An obsolete pinned drawing requires Engineering review before execution')
         if order.status != body.status:
             changes["status"] = {"before": order.status, "after": body.status}
             order.status = body.status
@@ -680,3 +689,6 @@ def send_message(body: SendMessageBody, db: Session = Depends(session), user: Us
     db.add(msg)
     db.commit()
     return {"id": msg.id, "ok": True}
+
+from .controlled_api import router as controlled_router
+app.include_router(controlled_router)

@@ -111,6 +111,7 @@ class WorkOrderPart(Base):
     drawing_number_snapshot: Mapped[str | None] = mapped_column(String(150), nullable=True)
     drawing_rev_snapshot: Mapped[str | None] = mapped_column(String(50), nullable=True)
     drawing_file_id: Mapped[int | None] = mapped_column(ForeignKey("stored_files.id"), nullable=True)
+    controlled_revision_id: Mapped[int | None] = mapped_column(ForeignKey('controlled_revisions.id'),nullable=True)
     drawing_status: Mapped[str] = mapped_column(String(50), default="Missing reference")
     work_order: Mapped[WorkOrder] = relationship(back_populates="parts")
     part: Mapped[PhysicalPart] = relationship()
@@ -181,3 +182,42 @@ class DemoOriginalBlob(Base):
     __tablename__ = "demo_original_blobs"
     key: Mapped[str] = mapped_column(String(1024), primary_key=True)
     content: Mapped[bytes] = mapped_column(LargeBinary)
+
+
+class ControlledDocument(Base):
+    __tablename__ = 'controlled_documents'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    number: Mapped[str] = mapped_column(String(150))
+    identity_key: Mapped[str] = mapped_column(String(150))
+    title: Mapped[str] = mapped_column(String(200))
+    __table_args__ = (UniqueConstraint('kind','identity_key',name='uq_controlled_identity'),)
+
+
+class ControlledRevision(Base):
+    __tablename__ = 'controlled_revisions'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey('controlled_documents.id'),index=True)
+    file_id: Mapped[int] = mapped_column(ForeignKey('stored_files.id'),unique=True)
+    revision: Mapped[str] = mapped_column(String(50))
+    sha256: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(30),default='Draft')
+    created_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey('users.id'),nullable=True)
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey('users.id'),nullable=True)
+    change_summary: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),nullable=True)
+    blank_master_confirmed: Mapped[bool] = mapped_column(Boolean,default=False)
+    __table_args__ = (UniqueConstraint('document_id','revision',name='uq_controlled_revision'),)
+
+
+class RevisionEvent(Base):
+    __tablename__ = 'revision_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    revision_id: Mapped[int] = mapped_column(ForeignKey('controlled_revisions.id'),index=True)
+    actor_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    previous_status: Mapped[str] = mapped_column(String(30))
+    status: Mapped[str] = mapped_column(String(30))
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)
