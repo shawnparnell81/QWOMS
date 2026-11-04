@@ -31,6 +31,12 @@ Read `docs/PRODUCT_REQUIREMENTS.md` and `README.md` before coding. Implement fea
 
 Read `docs/LAUNCH_ACCELERATION.md` at the beginning of each task. Prioritize an explicitly authorized, private synthetic-data **hosted demo** and test evidence, then approved real-data pilot and full production gates. Do not equate a running local app with a live website or approved company use. User wants fastest safe launch; do not delay a secure demo just for non-critical enhancements. Obtain authorization before provisioning chargeable services. Preserve the one-final-PR policy.
 
+### Explicit, owner-granted import permissions — zero inherited grants
+- **All import permissions default to DENIED for every non-administrator employee**, regardless of Quality, Engineering, Production, Management, site, job title or work-order assignment. Never grant them via a role template, account creation default, group membership, promotion, or department inheritance.
+- Only the sole initial system Administrator may grant or revoke **specific import capabilities to named employee accounts**, based on who needs them. Examples: Part Master spreadsheet preview/commit; drawings/folder upload; work-instruction/supporting-document import; blank Excel form/master template import; other data/file imports. Keep read/view, edit, controlled Engineering approval, and import permissions separate.
+- Permission grants and revocations must be explicit actions in an administrative interface, immediately enforced server-side on every import API and relevant bulk import path, and recorded in an audit trail (actor, recipient, capability, timestamp).
+- Default employee-role templates carry **zero** import grants. Only the administrator has all import permissions at production first-start. No implicit grants even to Management or Engineering. Test grant, deny, revoke, direct API bypass attempts, and employee account creation defaults.
+
 ## Sole initial administrator and owner-controlled onboarding — REQUIRED (2026-11-04)
 
 - **Production launch starts with exactly one authorized administrator: the user's own individually credentialed account.** Never create other administrator accounts by default; the user creates and enables all employee accounts after first login. No public self-registration, no shared admin account, no seeded fictional employee accounts in a real-data environment. Demo-only fictional bootstrap must be isolated and disabled in production.
