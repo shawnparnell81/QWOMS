@@ -29,3 +29,9 @@ The owner has an existing application that accepts arbitrary Excel spreadsheets 
 7. Exercise no-import-permission, unsupported workbook features and insecure workbook content; denial or errors do not mutate source files or leave phantom templates.
 
 The completed validation form supplied privately is **reference evidence only**, not a hardcoded canonical design, not the approved blank master and not permitted in GitHub or the synthetic demo. Production company-data use remains blocked on verified fidelity/licensing, access control and durable storage.
+
+## Zero-fee implementation route confirmed by owner
+
+The owner has ruled out any paid spreadsheet-editor license, subscription or per-seat costs. This is a product constraint, not an open procurement decision. Codex should compare against the successful implementation approach in the user's **other owned application** (source to be provided or identified with permission). Do not copy that app's design or non-relevant modules. The goal is an original QWOMS workflow using upload-defined, format-preserving workbook editing.
+
+Engineering must separate (a) original template file-byte preservation, (b) accurate on-screen rendering and formula/conditional-rule evaluation, and (c) export/save fidelity after user edits. Assess proven open-source approaches and carefully scoped XLSX package editing without rewriting unrelated parts where appropriate. Do not promise a ZIP/XML patch alone evaluates arbitrary Excel formulas or renders every Excel feature. Report remaining incompatibilities clearly rather than suggesting a $1,500 license.
