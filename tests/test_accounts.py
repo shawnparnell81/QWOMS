@@ -39,7 +39,9 @@ def test_manager_deactivation_reactivation_role_and_session_revocation(client):
 def test_management_cannot_lock_out_self_and_reset_requires_step_up(client):
     web,Session=client;logged_in(web)
     assert web.patch('/api/admin/accounts/1',json={'current_password':MANAGER_PASSWORD,'active':False}).status_code==409
-    assert web.patch('/api/admin/accounts/1',json={'current_password':MANAGER_PASSWORD,'role':'Production'}).status_code==409
+    assert web.patch('/api/admin/accounts/1',json={'current_password':MANAGER_PASSWORD,'role':'Production'}).status_code==200
+    logged_in(web)
+    assert web.get('/api/me').json()['is_admin'] is True
     assert web.post('/api/admin/accounts/2/reset-password',json={'current_password':'wrong','new_password':'Fictional-reset-password!'}).status_code==403
     assert web.post('/api/admin/accounts/2/reset-password',json={'current_password':MANAGER_PASSWORD,'new_password':'Fictional-reset-password!'}).status_code==200
     assert web.post('/api/auth/login',json={'username':'engineer','password':ENGINEER_PASSWORD}).status_code==401

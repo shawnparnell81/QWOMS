@@ -277,3 +277,64 @@ class CompletedForm(Base):
     project_id: Mapped[int | None]=mapped_column(ForeignKey('projects.id'),nullable=True)
     saved_by: Mapped[int]=mapped_column(ForeignKey('users.id'))
     saved_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+
+
+class LaborEntry(Base):
+    __tablename__ = 'labor_entries'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'), index=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    activity: Mapped[str] = mapped_column(String(40))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    stopped_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    note: Mapped[str] = mapped_column(Text, default='')
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
+    rate_cents: Mapped[int] = mapped_column(Integer, default=0)
+    department_snapshot: Mapped[str] = mapped_column(String(30))
+
+
+class Pallet(Base):
+    __tablename__ = 'pallets'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    identifier: Mapped[str] = mapped_column(String(100), unique=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'), index=True)
+    quantity: Mapped[int] = mapped_column(Integer)
+    original_bin: Mapped[str] = mapped_column(String(200))
+    location: Mapped[str] = mapped_column(String(200))
+    disposition: Mapped[str] = mapped_column(String(40), default='Pending')
+    condition: Mapped[str] = mapped_column(String(500), default='')
+
+
+class PalletMovement(Base):
+    __tablename__ = 'pallet_movements'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    pallet_id: Mapped[int] = mapped_column(ForeignKey('pallets.id'), index=True)
+    actor_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    previous_location: Mapped[str] = mapped_column(String(200))
+    location: Mapped[str] = mapped_column(String(200))
+    disposition: Mapped[str] = mapped_column(String(40))
+    reason: Mapped[str] = mapped_column(String(1000))
+
+
+class ForkliftEntry(Base):
+    __tablename__ = 'forklift_entries'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'), index=True)
+    recorded_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    duration_seconds: Mapped[int] = mapped_column(Integer)
+    estimated: Mapped[bool] = mapped_column(Boolean)
+    note: Mapped[str] = mapped_column(String(1000))
+
+
+class ChargeItem(Base):
+    __tablename__ = 'charge_items'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'), index=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    category: Mapped[str] = mapped_column(String(40))
+    description: Mapped[str] = mapped_column(String(1000))
+    quantity: Mapped[int] = mapped_column(Integer)
+    unit_cents: Mapped[int] = mapped_column(Integer)
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)

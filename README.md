@@ -1,13 +1,13 @@
 # QWOMS — Quality Work Order Management System
 
-**Phase 2 development in progress — not a deployed or production-approved company application.**
+**Development in progress. A private synthetic Render demo is live; company production use is not approved.**
 
 A browser-based Quality Work Order Management System for Quality, Engineering, Production, and Management across multiple sites. This is **not** a full QMS.
 
 ## What works in this starter
 
 - Modern browser UI with employee initials as avatars, a dashboard, and role-aware navigation.
-- Separate usernames/passwords (management creates accounts; no default passwords).
+- Separate usernames/passwords (a separate Administrator creates accounts; no default passwords).
 - Six distinct work order types with different subtype choices and job-specific fields: Validation/FAI, Inspection, Test, Repair, Parts Weighing, Photos.
 - Automatic **work order** numbers; users, not the app, name completed uploads and saved documents. In-browser workbook editing remains unavailable.
 - Assign work orders to employees and show assigned work on their dashboards.
@@ -20,9 +20,9 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 
 ## Important limitations
 
-**Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, initial department permissions, audit/assignment history, project links, controlled Engineering revision approvals, scoped work requirements and approved form attachments/completed-file storage are available. See [controlled workflows](docs/CONTROLLED_WORKFLOWS.md). See `docs/BUILD_STATUS.md` for exact evidence and limits.
+**Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, separate Administrator and explicit per-employee import capabilities, audit/assignment history, project links, controlled Engineering revision approvals, scoped work requirements and approved form attachments/completed-file storage are available. See [controlled workflows](docs/CONTROLLED_WORKFLOWS.md). See `docs/BUILD_STATUS.md` for exact evidence and limits.
 
-**Not built yet:** advanced Excel forms editing inside the app with exact Excel fidelity, time/labor, pallet tracking, supplier chargebacks, production-approved storage, comprehensive audit/security coverage, group chat, and cloud deployment. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
+**Not complete yet:** exact-fidelity in-app Excel editing, full task/labor and supplier report/export acceptance, production-approved storage/restore, comprehensive audit/security coverage, group chat and production deployment. Initial labor/timer, pallet movement and approved chargeback ledgers are available in Labor & pallets. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
 
 The current file store uses local disk and SQLite is the default developer database; neither arrangement should be treated as the final cloud-hosting design. Security review, CSRF protection, origin policy, rate limiting, backups, SSO policy if needed, object storage, database migrations, permissions testing, and Excel compatibility testing are mandatory before using company data.
 
@@ -37,7 +37,7 @@ pip install -r requirements.txt
 python -m alembic upgrade head  # New database; see Phase 2 operations for existing Phase 1 data
 export QWOMS_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 export QWOMS_COOKIE_SECURE=false # local HTTP development ONLY
-python -m app.bootstrap manager --display-name "Quality Manager"
+python -m app.bootstrap PERSONAL_USERNAME --display-name "Your name"
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -68,3 +68,5 @@ For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a
 ## Next milestone for Codex
 
 Follow `docs/BUILD_STATUS.md` and `docs/LAUNCH_ACCELERATION.md`. Resolve exact Excel editor licensing/fidelity, finish all remaining accepted workflows and security/storage/restore gates, and validate a hosted synthetic demo only in the authorized free Render workspace. A demo is not company-wide go-live. No PR until explicit user approval.
+
+Personal Administrator bootstrap, import grants and safe migration prerequisites: [Administration](docs/ADMINISTRATION.md). The live Render demo runs an older commit; new development here has not been deployed.

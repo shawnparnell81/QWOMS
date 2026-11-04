@@ -58,7 +58,8 @@ def create_revision(db,document,file,label,user,summary,blank=False):
     if db.scalar(select(ControlledRevision.id).where(ControlledRevision.document_id==document.id,ControlledRevision.revision==label)):
         raise HTTPException(409,'Revision label already exists; original revisions cannot be replaced')
     expected_kind='drawing' if document.kind=='Drawing' else 'form-template' if document.kind=='Form template' else 'document'
-    if file.kind!=expected_kind:
+    allowed_kinds={expected_kind,'work-instruction'} if document.kind=='Work instruction' else {expected_kind}
+    if file.kind not in allowed_kinds:
         raise HTTPException(422,'Original file category does not match the controlled document kind')
     if document.kind=='Drawing':
         known=db.scalar(select(PhysicalPart.id).where(func.lower(PhysicalPart.drawing_number)==document.identity_key,
@@ -117,8 +118,10 @@ def transition(db,revision,user,action,reason):
     db.scalar(select(ControlledDocument).where(ControlledDocument.id==revision.document_id).with_for_update())
     db.refresh(revision)
     if action=='submit':
-        if user.role not in ('Engineering','Management') or revision.status!='Draft':
-            raise HTTPException(409 if user.role in ('Engineering','Management') else 403,'Only a draft can be submitted by Engineering or Management')
+        from .security import require_capability
+        doc=db.get(ControlledDocument,revision.document_id)
+        require_capability(user, {'Drawing':'import.drawings','Work instruction':'import.work_instructions','Supporting document':'import.supporting_documents','Form template':'import.form_masters'}[doc.kind])
+        if revision.status!='Draft':raise HTTPException(409,'Only a draft can be submitted')
         event(db,revision,user,'In Review',reason);return
     from .security import require_capability
     require_capability(user, 'engineering.approve')

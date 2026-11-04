@@ -66,8 +66,6 @@ def change_account(user_id:int,body:AccountChange,db:Session=Depends(session),ma
     if target.is_admin and target.active and (body.is_admin is False or body.active is False):
         if len(db.scalars(select(User).where(User.is_admin.is_(True),User.active.is_(True))).all()) <= 1:
             raise HTTPException(409,'Cannot remove the last active Administrator')
-    if target.id==manager.id and body.role is not None and body.role!=target.role:
-        raise HTTPException(409,'Cannot change your own department while signed in')
     changes={}
     for key in ['display_name','site','role','active','is_admin','capabilities']:
         value=getattr(body,key)

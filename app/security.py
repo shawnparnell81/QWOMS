@@ -44,6 +44,11 @@ def current_user(request: Request, qwoms_token: str | None = Cookie(None),
                  x_qwoms_csrf: str | None = Header(None), db: Session = Depends(session)):
     if not qwoms_token or not SECRET:
         raise HTTPException(401, "Please sign in")
+    # SQLite cannot upgrade a stale read snapshot to a write lock. Serialize
+    # authenticated mutations before reading account/session state.
+    if request.method not in ('GET','HEAD','OPTIONS') and db.bind.dialect.name=='sqlite':
+        from sqlalchemy import text
+        db.execute(text('UPDATE users SET id=id WHERE 1=0'))
     try:
         payload = jwt.decode(qwoms_token, SECRET, algorithms=["HS256"])
         user = db.get(User, int(payload["sub"]))

@@ -580,6 +580,10 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
     else:
         allow_roles(user, "Quality", "Engineering", "Management")
     changes = {}
+    if body.status in ('Completed','Closed'):
+        from .models import LaborEntry
+        if db.scalar(select(LaborEntry.id).where(LaborEntry.work_order_id==order.id,LaborEntry.stopped_at.is_(None))):
+            raise HTTPException(409,'Stop active labor timers before completing this work order')
     if body.status is not None:
         if body.status not in ("Open", "In Progress", "On Hold", "Completed", "Closed"):
             raise HTTPException(422, "Invalid status")
@@ -736,3 +740,6 @@ app.include_router(workflow_router)
 
 from .accounts_api import router as accounts_router
 app.include_router(accounts_router)
+
+from .operations_api import router as operations_router
+app.include_router(operations_router)
