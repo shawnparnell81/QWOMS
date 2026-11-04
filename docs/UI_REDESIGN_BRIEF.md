@@ -31,3 +31,16 @@ The numerical examples from the initial illustration were only concept art; use 
 - Do **not** rush to deploy a speculative redesign to the only live demo. Build it on `development/qwoms-complete-build`, retain the one-final-PR policy and coordinate with other Codex tasks.
 - Show an updated actual-browser preview/screenshot for feedback before broad styling passes. Ask the user to provide one or more original concept images if available; text-only reconstruction cannot guarantee visual fidelity.
 - The user also wants a single login, complete QWOMS workflows and immediate testing. Fixing appearance must not cause functionality regression or postpone the Excel blocker indefinitely.
+
+## Confirmed visual personality — modern, professional, subtly fun (2026-11-04)
+
+The user clarified that the original visual references appealed to them because they add **a little fun** to an otherwise professional operations system. Do not turn QWOMS into a sterile enterprise tool or a childish, gamified app. The target is a modern, approachable, credible product people enjoy using daily.
+
+- **Light, crisp workspace:** white cards, soft neutral/blue-gray canvas, modest depth, clean borders, readable sans-serif typography and generous but efficient spacing; balanced density for operators and managers.
+- **Restrained personality:** tasteful indigo/blue primary accents with a small set of complementary, purposeful colors (e.g., green for complete/pass, amber for pending/review, red for failure/blockers, violet for validation/testing). Bright accents only where they convey work type, actions or status.
+- **Engaging elements:** clear refined icons, polished task tiles, human avatars, subtle hover/selection feedback, well-crafted empty states, friendly labels and occasional micro-interactions. Avoid distracting animations, novelty emojis, mascot overload, meaningless gradients or excessive decoration.
+- **Informative visuals:** functional Kanban/task lanes, concise charts, progress bars, status chips, completion percentages and activity timelines **only when actual persisted data supports them**. Never invent totals, labor hours, deadlines or trend percentages to replicate illustrative artwork.
+- **High-fidelity modules:** dashboard can feel visually energetic; controlled-document approvals, drawings and validation forms must still feel rigorous, trustworthy and easy to audit. Chat should be familiar, clear and human, while remaining work-appropriate.
+- **Consistency:** use one coherent design system across Dashboard, Work Orders, Projects, Parts & Drawings, Documents, Messaging and Administration, with distinctive but coordinated work-type treatments. Preserve keyboard access, contrast, responsive behavior and real task efficiency.
+- **Design review:** compare actual browser screenshots against the six original user-supplied visual references (workspace Kanban, controlled-doc feature table, split-pane QMS documents, chat, module map, revision control). Use the references for creative direction, not for copying trademarks, branding or unsupported features. The screenshots show training and broader QMS controls that are outside the approved QWOMS scope.
+
