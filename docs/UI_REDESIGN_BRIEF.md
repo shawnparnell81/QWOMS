@@ -2,6 +2,12 @@
 Date: 2026-11-04
 Status: Design requirement for review, **not yet implemented or user approved**.
 
+## Original product distinction — important user clarification
+
+The user's existing software has a dense row of work-category tabs and is **primarily a time-tracking application**. QWOMS must be original rather than a visual or structural copy. It is a connected Quality Department operations platform bringing together work-order creation and tracking, employee labor, parts/drawings, work instructions, document revisions, Excel forms in-app, photographs, files and **videos**. Use the old app's categories as a real-world work taxonomy, not as a screenshot to reproduce. Support accessible classifications/filters for Validation/FAI, Repair/Rework, Inspection, Warranty, Salt Spray Test, Development, Rebox, Test, Weight, Research, Production, Open and Completed Work Orders, while retaining the six accepted canonical top-level types with flexible subtypes and purpose-built layouts.
+
+The signature UI should be a usable **single work-order workspace**: assignment/status, parts and approved drawing references, correctly selected instructions and Excel form, photo/file/video evidence, timeline, recorded time/measurements, and completion/reporting. This integrated experience differentiates QWOMS from the old time tracker. Keep the modern, slightly playful but rigorously professional visual direction. Wait for the user's sample validation workbook before claiming Excel visual or functional parity.
+
 ## Why this matters
 
 The user specifically reports that the live Render interface is substantially less polished than the visuals shown in the **original QWOMS concept discussion** and that the original images inspired the entire project. The current UI may be functional but does not meet their appearance expectations. Treat visual quality and visual acceptance as an essential part of QWOMS, not an optional cosmetic cleanup.
