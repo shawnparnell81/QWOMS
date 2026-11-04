@@ -20,10 +20,10 @@ Updated: 2026-11-04. This is the development record, not a certification.
 
 | Gate | Status |
 |---|---|
-| Starter smoke/API tests | 20 passed on SQLite and PostgreSQL; see milestone records below |
-| Dashboard/browser manual acceptance | Automated Chromium checks passed through stage 3; manual user acceptance still pending |
+| Starter smoke/API tests | 43 passed on SQLite and PostgreSQL; see milestone records below |
+| Dashboard/browser manual acceptance | Authenticated Chromium checks pass over local HTTPS, including control/forms; hosted/manual acceptance pending |
 | Work-order/part/drawing workflows beyond starter | Partial |
-| Controlled forms and exact Excel editing | Not built |
+| Controlled forms and exact Excel editing | Registry/attachments/filing verified; exact editor trial FAILED fidelity gate |
 | Projects, labor, pallets, chargebacks | Project linking verified; labor/pallets/chargebacks not built |
 | Production cloud storage, deployment and security review | Not built |
 | Final PR | **Not opened** |
@@ -108,3 +108,12 @@ See `BUILD_PLAN.md` for detailed feature and test criteria.
 - Security diagnostic correction: one local browser-request failure printed a synthetic JWT/CSRF cookie in Playwright's request log. Revoked all sessions in that isolated synthetic demo immediately; no real credentials/company data or external service was involved. Browser error reporting now removes authentication-cookie/header lines; the corrected browser workflow passed. No session values were committed to Git.
 - Render target is now confirmed as `my workspace`, **free services only**. Actual runtime status still exposes no configured Render secret/identity, so API authentication and owner-ID resolution remain blocked. `RENDER_API_KEY` is pending secure settings entry/review/save/publish. No paid services, remote resources, real data, main commits or PRs were created.
 - Release status: temporary-demo candidate prepared/tested locally; **not live and not an operational pilot**. Remote free Blueprint acceptance, actual provider HTTPS/database TLS, deploy URL/commit, expiry/storage limits and hosted browser acceptance remain unverified. Exact Excel editing, all accepted P2/full-release functionality, durable S3/restore, security/isolation/audit lifecycle, import reconciliation/scale/concurrency and IT/user approval remain mandatory before company-wide go-live. None is silently moved post-launch.
+
+## 2026-11-04 — Early specialized Excel feasibility investigation
+
+- Evaluated official MESCIUS SpreadJS 19.2.5 + Excel IO 19.2.5 locally under evaluation terms, with no purchase or deployment integration. Vendor libraries/license files remain outside Git and outside the app image; only our synthetic generator, test harness and observations are committed.
+- Actual Chromium import and export ran. Named-range IF formula returned PASS at 12 and FAIL at 8. Compared the exported XLSX against a two-sheet synthetic original with conditional colors, merge geometry, validations, image and print properties. This was a real external-editor round-trip; openpyxl only created/inspected fixtures.
+- **Fidelity gate FAILED: 26 measured feature differences**, including the trial Evaluation Version sheet, changed widths/fonts/row metadata, conditional fill changes, lost image and lost print setup/titles. Named-range/formula text, merges, validation and freeze panes survived in this sample. Source six-digit colors serialized with `00` alpha, so opaque-color cases and required vendor modules/options need further diagnosis. Do not extrapolate to every possible licensed configuration; equally, do not normalize these differences away or claim exact fidelity.
+- The EULA inspected in the official packages describes developer/automated-device seats, deployment/domain licensing and separately licensed add-ons; evaluation is limited to 30 days and is not a commercial distribution license. Exact pricing/license configuration remains unverified, and no charge is authorized by the free Render decision. Direct vendor sites were network-denied; an attempted ONLYOFFICE README path returned 404, so that editor has not been evaluated.
+- Evidence: `docs/EXCEL_EDITOR_FEASIBILITY.md`, `docs/evidence/excel-trial-roundtrip.json`, and `tests/excel`. In-app Excel editing remains explicitly unavailable. Operational users needing it cannot launch on the offline upload/demo workflow as a hidden replacement. Representative original-form/Excel reopen/render/calculation acceptance and licensing are mandatory go-live gates.
+- Functional/regression status remains **43 passed SQLite / 43 passed PostgreSQL**, with successful local HTTPS browser smoke/control/forms checks. No hosted Render resource/URL, real-data pilot, company-wide release or final PR is claimed.

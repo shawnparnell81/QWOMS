@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="spread/package/styles/gc.spread.sheets.excel2016colorful.css"></head><body>
+<p>LOCAL EVALUATION ONLY — SYNTHETIC WORKBOOK. NOT PART OF QWOMS DEPLOYMENT.</p><input type="file" id="input"><button id="export">Export evaluation workbook</button><div id="sheet" style="width:1200px;height:800px"></div>
+<script src="spread/package/dist/gc.spread.sheets.all.min.js"></script><script src="io/package/dist/gc.spread.excelio.min.js"></script>
+<script>
+const workbook=new GC.Spread.Sheets.Workbook(document.getElementById('sheet'));const io=new GC.Spread.Excel.IO();window.loaded=false;window.problem=null;
+document.getElementById('input').onchange=e=>io.open(e.target.files[0],json=>{workbook.fromJSON(json);window.loaded=true},error=>window.problem=String(error));
+document.getElementById('export').onclick=()=>io.save(workbook.toJSON(),blob=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Synthetic round-trip.xlsx';a.click()},error=>window.problem=String(error));
+</script></body></html>
