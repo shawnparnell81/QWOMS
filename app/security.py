@@ -1,3 +1,4 @@
+from sqlalchemy import select
 import base64
 import hashlib
 import hmac
@@ -63,6 +64,24 @@ def current_user(request: Request, qwoms_token: str | None = Cookie(None),
     return user
 
 def require_admin(user: User = Depends(current_user)):
-    if user.role != "Management":
-        raise HTTPException(403, "Management access required")
+    if not user.is_admin:
+        raise HTTPException(403, "System Administrator access required")
     return user
+
+
+CAPABILITIES = ('import.parts','import.drawings','import.documents','import.templates','revision.approve')
+IMPORT_CAPABILITIES = {'drawing':'import.drawings','document':'import.documents','form-template':'import.templates'}
+
+
+def permitted(user,capability):
+    return bool(capability in CAPABILITIES and user.active and ((user.is_admin and capability.startswith('import.')) or capability in (user.permissions or [])))
+
+
+def require_capability(user,capability):
+    if not permitted(user,capability):
+        raise HTTPException(403,'Explicit permission required: '+capability)
+
+
+def authority_lock(db):
+    from .models import SystemAuthority
+    return db.scalar(select(SystemAuthority).where(SystemAuthority.id==1).with_for_update().execution_options(populate_existing=True))

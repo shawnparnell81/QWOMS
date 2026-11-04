@@ -118,6 +118,6 @@ def test_department_permission_matrix(client, role):
     assert project.status_code == (403 if role == 'Production' else 201)
     if role == 'Production':
         assert web.patch(f'/api/work-orders/{order_id}', json={'project_id':99999}).status_code == 403
-    assert web.get('/api/admin/audit').status_code == (200 if role == 'Management' else 403)
+    assert web.get('/api/admin/audit').status_code == 403
     response = web.patch(f'/api/work-orders/{order_id}', json={'assigned_to': 1})
     assert response.status_code == (403 if role == 'Production' else 200)

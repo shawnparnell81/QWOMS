@@ -1,4 +1,4 @@
-"""Management-controlled accounts, password lifecycle and immediate session revocation."""
+"""Administrator-controlled accounts, password lifecycle and immediate session revocation."""
 from datetime import datetime,timezone
 from typing import Literal
 from fastapi import APIRouter,Depends,HTTPException,Response
@@ -7,7 +7,7 @@ from sqlalchemy import select,update
 from sqlalchemy.orm import Session
 from .db import session
 from .models import User,AuthSession
-from .security import current_user,require_admin,verify_password,hash_password
+from .security import current_user,require_admin,verify_password,hash_password,authority_lock,CAPABILITIES
 from .audit import record
 
 router=APIRouter(prefix='/api')
@@ -19,6 +19,14 @@ class AccountChange(BaseModel):
     site:str|None=Field(default=None,max_length=100)
     role:Literal['Quality','Engineering','Production','Management']|None=None
     active:bool|None=None
+    is_admin:bool|None=None
+    permissions:list[str]|None=None
+    @field_validator("permissions")
+    @classmethod
+    def valid_permissions(cls,value):
+        if value is not None and (len(set(value))!=len(value) or any(v not in CAPABILITIES for v in value)):
+            raise ValueError("Unknown or duplicate permission")
+        return value
     @field_validator('display_name','site',mode='before')
     @classmethod
     def trim(cls,v):return v.strip() if isinstance(v,str) else v
@@ -36,38 +44,44 @@ def revoke(db,user_id):
 
 def step_up(db,manager,password):
     db.refresh(manager)
-    if manager.role!='Management' or not manager.active:raise HTTPException(403,'Active Management access required')
+    if not manager.is_admin or not manager.active:raise HTTPException(403,'Active Administrator access required')
     if not verify_password(password,manager.password_hash):raise HTTPException(403,'Current password verification failed')
 
 
 @router.get('/admin/accounts')
 def accounts(db:Session=Depends(session),manager:User=Depends(require_admin)):
-    return [{'id':u.id,'username':u.username,'display_name':u.display_name,'role':u.role,'site':u.site,'active':u.active}
+    return [{'id':u.id,'username':u.username,'display_name':u.display_name,'role':u.role,'site':u.site,'active':u.active,'is_admin':u.is_admin,'permissions':u.permissions}
             for u in db.scalars(select(User).order_by(User.display_name)).all()]
 
 
 @router.patch('/admin/accounts/{user_id}')
 def change_account(user_id:int,body:AccountChange,db:Session=Depends(session),manager:User=Depends(require_admin)):
-    db.scalars(select(User).where(User.role=='Management',User.active.is_(True)).order_by(User.id).with_for_update()).all()
+    authority_lock(db)
     step_up(db,manager,body.current_password)
     target=db.scalar(select(User).where(User.id==user_id).with_for_update().execution_options(populate_existing=True))
     if not target:raise HTTPException(404,'Account not found')
-    if target.id==manager.id and ((body.role is not None and body.role!='Management') or body.active is False):
-        raise HTTPException(409,'Management cannot deactivate or demote its own signed-in account')
+    if target.is_admin and (body.active is False or body.is_admin is False):
+        other=db.scalar(select(User.id).where(User.id!=target.id,User.is_admin.is_(True),User.active.is_(True)))
+        if not other:raise HTTPException(409,'The last active Administrator cannot be removed')
+    if target.id==manager.id and ((body.role is not None and body.role!=target.role) or body.active is False or body.is_admin is False):
+        raise HTTPException(409,'Cannot remove your own signed-in access; use another Administrator')
     changes={}
-    for key in ['display_name','site','role','active']:
+    for key in ['display_name','site','role','active','is_admin','permissions']:
         value=getattr(body,key)
         if value is not None and value!=getattr(target,key):
             changes[key]={'before':getattr(target,key),'after':value};setattr(target,key,value)
     if changes:
-        if 'role' in changes or 'active' in changes:revoke(db,target.id)
+        if {'role','active','is_admin','permissions'}&changes.keys():revoke(db,target.id)
+        if 'permissions' in changes:
+            before=set(changes['permissions']['before']);after=set(changes['permissions']['after'])
+            for capability in sorted(before^after):record(db,manager,'permission.granted' if capability in after else 'permission.revoked','user',target.id,{'capability':capability})
         record(db,manager,'account.updated','user',target.id,changes)
-    db.commit();return {'ok':True,'session_revoked':bool({'role','active'}&changes.keys())}
+    db.commit();return {'ok':True,'session_revoked':bool({'role','active','is_admin','permissions'}&changes.keys())}
 
 
 @router.post('/admin/accounts/{user_id}/reset-password')
 def reset_password(user_id:int,body:PasswordChange,db:Session=Depends(session),manager:User=Depends(require_admin)):
-    db.scalars(select(User).where(User.role=='Management',User.active.is_(True)).order_by(User.id).with_for_update()).all()
+    authority_lock(db)
     step_up(db,manager,body.current_password)
     target=db.scalar(select(User).where(User.id==user_id).with_for_update().execution_options(populate_existing=True))
     if not target:raise HTTPException(404,'Account not found')

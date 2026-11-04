@@ -1,6 +1,6 @@
 """QWOMS domain records. V1 tables are intentionally small and migration-friendly."""
 from datetime import datetime, timezone
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import false, Boolean, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -18,6 +18,14 @@ class User(Base):
     site: Mapped[str] = mapped_column(String(100), default="")
     password_hash: Mapped[str] = mapped_column(String(200))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    permissions: Mapped[list] = mapped_column(JSON, default=list, server_default="[]")
+
+
+class SystemAuthority(Base):
+    __tablename__ = "system_authority"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    initialized: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class ProductFamily(Base):

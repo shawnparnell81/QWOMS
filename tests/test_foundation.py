@@ -34,9 +34,9 @@ def client(tmp_path, monkeypatch):
         upgrade(engine)
         Session = sessionmaker(bind=engine, expire_on_commit=False)
         with Session() as db:
-            db.add(User(username="manager", display_name="Test Manager", role="Management", site="Site A",
+            db.add(User(username="manager", display_name="Test Manager", role="Management", site="Site A", is_admin=True,
                         password_hash=hash_password("SufficientlyLongPassword!")))
-            db.add(User(username="engineer", display_name="Test Engineer", role="Engineering", site="Site B",
+            db.add(User(username="engineer", display_name="Test Engineer", role="Engineering", site="Site B", permissions=["revision.approve"],
                         password_hash=hash_password("OtherLongPassword123!")))
             db.commit()
         def override():

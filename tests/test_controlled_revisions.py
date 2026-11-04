@@ -96,7 +96,10 @@ def test_work_related_document_history_and_permissions(client,kind):
 
 
 def test_author_cannot_self_review_and_approval_cannot_skip_review(client):
-    web,_=client;logged_in(web)
+    web,Session=client;logged_in(web)
+    with Session() as db:
+        from app.models import User
+        user=db.get(User,2);user.permissions=[*user.permissions,'import.documents'];db.commit()
     file=upload(web,'Synthetic/Engineering authored.pdf','document')
     login_as(web,'engineer','OtherLongPassword123!')
     doc=web.post('/api/controlled/documents',json={'kind':'Work instruction','number':'WI-SELF','title':'Fictional self review test'}).json()

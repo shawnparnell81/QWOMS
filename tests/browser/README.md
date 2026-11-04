@@ -17,3 +17,18 @@ Additional browser checks:
 - `controlled.cjs`: set `QWOMS_TEST_ENGINEERING_CREDENTIAL_FILE` for the independently authenticated Engineering reviewer; verifies actual original import/registration/submission/review/approval screens.
 - `forms.cjs`: also set `QWOMS_TEST_MASTER_WORKBOOK_FILE` and `QWOMS_TEST_COMPLETED_WORKBOOK_FILE` to representative synthetic `.xlsx` files. Tests the blank master/rule/field/attachment/completed filename/duplicate/immutability/completion flow. It retires only prior synthetic rules named `Fictional part-specific shock validation ...` before creating its own, preserving existing order snapshots. Never point this fixture at company records.
 - Error output filters authentication-cookie/header lines. API download validation uses browser fetch so localhost name resolution and TLS trust stay in the browser. Test sessions are still disposable; revoke them after a diagnostic exposure. No TLS verification bypass is enabled.
+
+## Managed hosted acceptance (synthetic demo only)
+
+The secure runtime bindings `QWOMS_DEMO_GATE_PASSWORD`, `QWOMS_BOOTSTRAP_PASSWORD`, `QWOMS_DEMO_QUALITY_PASSWORD`, `QWOMS_DEMO_ENGINEERING_PASSWORD` and `QWOMS_DEMO_PRODUCTION_PASSWORD` can replace private credential files. Usernames are fixed to the documented `demo.*` accounts and HTTP Basic `demo`. Do not print values or export them in shell commands. The launcher preserves the configured HTTP proxy for hosted URLs and keeps TLS verification enabled. Do not enable Playwright trace/video/network-body logging on credential workflows.
+
+Generate fictional fixtures with `.venv/bin/python -m tests.browser.synthetic_fixtures /tmp/qwoms-hosted-fixtures`. Set `QWOMS_TEST_BASE_URL` to the actual authorized synthetic deployment and `QWOMS_CHROMIUM_PATH` if needed. Run suites sequentially where they share rule fixtures:
+
+- `smoke.cjs`: six types, assignments, aliases, project linking and messages. Waits for the save-detail refresh before navigating, including on older deployed builds.
+- `permissions.cjs`: four independent employee logins, current audit permissions, unauthenticated access and CSRF denial. Optional `QWOMS_TEST_EVIDENCE_FILE` writes only named checks/status codes. Passing this suite does not establish every new owner/import authorization gate.
+- `controlled.cjs`: independent work-instruction approval.
+- `forms.cjs`: set `QWOMS_TEST_MASTER_WORKBOOK_FILE` and `QWOMS_TEST_COMPLETED_WORKBOOK_FILE` to the two generated XLSX paths. Registry, approval, correct attachment, filing/duplicates and master hash. This does not exercise an in-app Excel editor.
+- `drawings.cjs`: set `QWOMS_TEST_DRAWING_FIXTURE_FILE` to the generated JSON path. Drawing approvals, missing/superseded blocking, historical pins and mapping immutability. Generates unique fictional parts/documents; leaves auditable synthetic evidence.
+- `accounts.cjs`: **requires the newer account/owner-permission UI**; creates a synthetic disabled employee, verifies zero initial grants, explicit grant/revoke, role/access changes and password reset. Use an isolated local service until its source commit is confirmed deployed.
+
+These tests create persistent synthetic records and are not a production-data test plan. The forms suite retires matching prior synthetic test rules only; it never changes historical order snapshots. Screenshots must be taken after login, never while password fields are filled. `credentials.cjs` and `safe-error.cjs` redact loaded or generated credential values and authentication headers on errors.

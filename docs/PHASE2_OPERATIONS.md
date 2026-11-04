@@ -45,3 +45,15 @@ Still required before real use: login throttling, password reset/change and cred
 ## Projects (migration 0003)
 
 Projects use employee-entered names and link any number of independent work orders. Create and review projects through the Projects navigation item, choose a project during work-order creation, or link/unlink it in work-order detail. Project totals count its linked orders and distinguish open from completed/closed work. Production can view projects but cannot create or relink them. Project links are audited; older orders retain null links when upgraded. Project labor, costs, status/approval lifecycle, exports and chargebacks remain later development work.
+
+## Owner authority migration (0008)
+
+Back up and test restore before upgrading any non-disposable database. `python -m alembic upgrade head` adds `is_admin=false` and an empty explicit permission list to **every existing account**. No Management/Engineering/Quality role is promoted or granted imports. Existing user IDs, assignments, files and revision references remain intact. Production has no demo bootstrap and no public claim endpoint.
+
+For an empty production database, an authorized operator runs `python -m app.bootstrap your.personal.username --display-name 'Your Personal Name'` in a private terminal. Passwords are entered through a non-echoing prompt, never as arguments. This claims one named Administrator, creates no employees and cannot be repeated. For an existing unclaimed database, use `--claim-existing` with the exact personal username and its existing password; the claim requires no prior admin/claim and verifies that password. Do not claim a shared/demo identity for production. Provider console/shell access must be restricted to authorized operators; this CLI does not replace provider access controls or recovery policy.
+
+The owner creates employees through the admin screen. All departments start without system authority or import grants. Explicitly grant only needed `import.parts`, `import.drawings`, `import.documents`, `import.templates` rights; each change records actor, recipient, capability and timestamp, and revokes sessions. Engineering `revision.approve` is separate, requires the Engineering department, and is **not** inherited from Administrator status. Removing the last active Administrator is blocked. The owner may appoint another administrator explicitly after password verification.
+
+Synthetic bootstrap is still restricted to acknowledged demo mode. Once, it assigns authority to `demo.manager` and the explicit review duty to `demo.engineer`, never employee import grants; subsequent restarts do not regrant revoked authority. This is a test-only path and is not production onboarding.
+
+Remaining security gates include independently reviewed recovery, failed step-up throttling, forced temporary-password changes, site/record isolation, audit retention and backup/restore proof. Do not approve real-data use based on this migration alone.

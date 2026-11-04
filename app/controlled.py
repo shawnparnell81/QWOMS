@@ -11,6 +11,7 @@ from fastapi import HTTPException
 from sqlalchemy import select,func
 from .models import ControlledDocument,ControlledRevision,RevisionEvent,PhysicalPart,StoredFile
 from .audit import record
+from .security import require_capability
 
 KINDS=('Drawing','Work instruction','Supporting document','Form template')
 
@@ -121,6 +122,7 @@ def transition(db,revision,user,action,reason):
             raise HTTPException(409 if user.role in ('Engineering','Management') else 403,'Only a draft can be submitted by Engineering or Management')
         event(db,revision,user,'In Review',reason);return
     if user.role!='Engineering':raise HTTPException(403,'Engineering review and approval required')
+    require_capability(user,'revision.approve')
     if action in ('review','approve') and revision.created_by==user.id:
         raise HTTPException(403,'An author cannot review or approve their own revision')
     if action=='review' and revision.status=='In Review':

@@ -1,0 +1,90 @@
+{
+  "base": "https://qwoms-synthetic-demo.onrender.com",
+  "checked_at": "2026-11-04T16:48:41.261Z",
+  "results": [
+    {
+      "name": "Unauthenticated dashboard denied",
+      "actual": 401,
+      "expected": 401,
+      "passed": true
+    },
+    {
+      "name": "manager dashboard accessible",
+      "actual": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "name": "manager audit permission",
+      "actual": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "name": "manager mutation without CSRF denied",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "quality dashboard accessible",
+      "actual": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "name": "quality audit permission",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "quality mutation without CSRF denied",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "engineering dashboard accessible",
+      "actual": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "name": "engineering audit permission",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "engineering mutation without CSRF denied",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "production dashboard accessible",
+      "actual": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "name": "production audit permission",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "production mutation without CSRF denied",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "name": "Production account creation denied",
+      "actual": 403,
+      "expected": 403,
+      "passed": true
+    }
+  ]
+}
