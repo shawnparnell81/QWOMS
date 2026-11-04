@@ -3,6 +3,14 @@
 ## Product boundary
 A cloud-hosted, multi-site Quality Work Order Management System for an aftermarket automotive parts manufacturer/supplier. The customer has explicitly rejected a full QMS and training-document management. No email functionality under any circumstances.
 
+## Launch onboarding and exclusive administrator control (confirmed 2026-11-04)
+
+At company go-live, the Quality Manager who owns initial setup is the **only active system Administrator**. On first secure login they personally import Part Master spreadsheets, drawing folders, work instructions, approved blank Excel form masters and supporting files; create employee accounts; and choose employee roles, permissions, and sites. No employee is automatically provisioned in production, no default shared administrative account is allowed, and there is no public signup. Synthetic demo employees are test-only and must never be promoted/copied into production.
+
+Administrator is a **separate privilege** from department/job roles. Quality, Engineering, Production and Management role membership alone grants no ability to create/manage accounts or perform administrator-restricted imports. Initial file imports and user/role/permission administration are **admin-only**; the owner can explicitly delegate and revoke specific privileges later, including appointing another admin if desired. Engineering-controlled revision review/approval is a separate explicitly assigned duty; it must not implicitly grant account administration or file import privileges.
+
+Provide a secure owner-account bootstrap, admin portal for employee creation/activation/deactivation and granular permission assignment, audit trail of all admin actions and imports, proper credential reset/lifecycle, and protection against removal of the last active administrator. Users should see only actions authorized to them. Test unauthorized access even when UI controls are hidden.
+
 ## Foundation
 - Secure individual user accounts for Quality, Engineering, Production and Management. No forklift-driver accounts.
 - Employee avatars/initials and internal in-app direct messaging for all authorized employees, including across sites, with possible link to work order. Future group messaging and attachment options.
