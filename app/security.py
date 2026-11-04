@@ -13,9 +13,12 @@ from .models import User, AuthSession
 
 SECRET = os.getenv("QWOMS_SECRET_KEY", "")
 
-def hash_password(password):
-    if len(password) < 12:
-        raise ValueError("Password must have at least 12 characters")
+def hash_password(password, *, demo_initial=False):
+    # The one-time synthetic demo credential is explicitly chosen by the user.
+    # Normal/production passwords keep the 12-character minimum.
+    minimum = 10 if demo_initial and os.getenv("QWOMS_DEMO_MODE", "").casefold() == "true" else 12
+    if len(password) < minimum:
+        raise ValueError(f"Password must have at least {minimum} characters")
     salt = secrets.token_bytes(16)
     dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 450_000)
     return "pbkdf2_sha256$450000$" + base64.b64encode(salt).decode() + "$" + base64.b64encode(dk).decode()
@@ -56,6 +59,8 @@ def current_user(request: Request, qwoms_token: str | None = Cookie(None),
         raise HTTPException(401, "Inactive account")
     if not active_session or active_session.user_id != user.id or active_session.revoked_at:
         raise HTTPException(401, "Session revoked")
+    if user.must_change_password and request.url.path not in ("/api/me", "/api/me/set-initial-password", "/api/me/change-password", "/api/auth/logout"):
+        raise HTTPException(403, "Choose a new password before using QWOMS")
     if request.method not in ("GET", "HEAD", "OPTIONS"):
         supplied = hashlib.sha256((x_qwoms_csrf or "").encode()).hexdigest()
         if not x_qwoms_csrf or not hmac.compare_digest(supplied, active_session.csrf_hash):
