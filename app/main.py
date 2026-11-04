@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 from typing import Annotated
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Response, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
@@ -24,6 +24,8 @@ from .models import (ImportAudit, Message, PartAlias, PhysicalPart, ProductFamil
 from .security import current_user, hash_password, require_admin, token_for, verify_password
 from .schema import require_current
 from .storage import original_store, StorageConflict
+from .audit import record
+from .models import AuditEvent, AssignmentEvent, AuthSession
 
 APP_ROOT = Path(__file__).resolve().parent
 STORAGE_ROOT = Path(os.getenv("QWOMS_STORAGE_ROOT", APP_ROOT.parent / "local-storage")).resolve()
@@ -41,6 +43,22 @@ TYPE_CONFIG = {
 
 app = FastAPI(title="QWOMS", version="0.1.0")
 app.mount("/static", StaticFiles(directory=str(APP_ROOT / "static")), name="static")
+
+
+@app.middleware("http")
+async def origin_guard(request: Request, call_next):
+    if request.method not in ("GET", "HEAD", "OPTIONS"):
+        origin = request.headers.get("origin")
+        allowed = {str(request.base_url).rstrip("/")}
+        allowed.update(x.strip() for x in os.getenv("QWOMS_ALLOWED_ORIGINS", "").split(",") if x.strip())
+        if origin and origin not in allowed:
+            return Response('Cross-origin request denied', status_code=403)
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    if request.url.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.on_event("startup")
@@ -61,6 +79,11 @@ class CreateUserBody(BaseModel):
     role: str
     site: str = ""
 
+    @field_validator("username", "display_name", mode="before")
+    @classmethod
+    def trim_identity(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
 
 class PartInput(BaseModel):
     part_id: int
@@ -77,6 +100,11 @@ class CreateWorkOrderBody(BaseModel):
     notes: str = ""
     parts: list[PartInput] = Field(min_length=1)
     details: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def trim_title(cls, value):
+        return value.strip() if isinstance(value, str) else value
 
 
 class UpdateWorkOrderBody(BaseModel):
@@ -145,14 +173,25 @@ def login(body: LoginBody, response: Response, db: Session = Depends(session)):
     if not user or not user.active or not verify_password(body.password, user.password_hash):
         raise HTTPException(401, "Invalid username or password")
     cookie_secure = os.getenv("QWOMS_COOKIE_SECURE", "false").casefold() == "true"
-    response.set_cookie("qwoms_token", token_for(user.id), httponly=True,
+    token, csrf = token_for(user.id, db)
+    record(db, user, "session.login", "user", user.id)
+    db.commit()
+    response.set_cookie("qwoms_token", token, httponly=True,
+                        secure=cookie_secure, samesite="strict", max_age=8*60*60, path="/")
+    response.set_cookie("qwoms_csrf", csrf, httponly=False,
                         secure=cookie_secure, samesite="strict", max_age=8*60*60, path="/")
     return serialize_user(user)
 
 
 @app.post("/api/auth/logout")
-def logout(response: Response):
+def logout(request: Request, response: Response, db: Session = Depends(session),
+           user: User = Depends(current_user)):
+    active_session = db.get(AuthSession, request.state.session_id)
+    active_session.revoked_at = datetime.now(timezone.utc)
+    record(db, user, "session.logout", "user", user.id)
+    db.commit()
     response.delete_cookie("qwoms_token", path="/", samesite="strict")
+    response.delete_cookie("qwoms_csrf", path="/", samesite="strict")
     return {"ok": True}
 
 
@@ -175,6 +214,8 @@ def create_user(body: CreateUserBody, db: Session = Depends(session), manager: U
     new = User(username=body.username.strip(), display_name=body.display_name.strip(),
                role=body.role, site=body.site.strip(), password_hash=hash_password(body.password))
     db.add(new)
+    db.flush()
+    record(db, manager, "user.created", "user", new.id, {"role": new.role, "site": new.site})
     db.commit()
     db.refresh(new)
     return serialize_user(new)
@@ -231,6 +272,7 @@ async def import_parts(file: UploadFile = File(...), family: str = Form(""),
     result = process_part_import(db, rows, family_override=family, preview=False)
     db.add(ImportAudit(actor_id=user.id, source_name=file.filename,
                        summary=json.dumps({**result["summary"], "sha256": hashlib.sha256(blob).hexdigest()})))
+    record(db, user, "part_master.imported", "import", file.filename, result["summary"])
     db.commit()
     return result
 
@@ -285,6 +327,8 @@ async def import_folder(files: list[UploadFile] = File(...), paths: list[str] = 
             continue
         db.add(StoredFile(relative_path=rel, original_name=rel.split("/")[-1],
                           kind=kind, sha256=digest, uploaded_by=user.id))
+        db.flush()
+        record(db, user, "file.imported", "file", rel, {"sha256": digest, "kind": kind})
         db.commit()
         report["stored"] += 1
     return report
@@ -337,6 +381,8 @@ def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(sessio
         raise HTTPException(409, "This drawing number and revision are already mapped to another file")
     f.drawing_number = body.drawing_number.strip()
     f.drawing_revision = body.drawing_revision.strip()
+    record(db, user, "drawing.mapped", "file", f.id,
+           {"drawing_number": f.drawing_number, "drawing_revision": f.drawing_revision})
     db.commit()
     return {"id": f.id, "relative_path": f.relative_path, "drawing_number": f.drawing_number,
             "drawing_revision": f.drawing_revision}
@@ -412,6 +458,10 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
                                      drawing_status=("Matched" if drawing else
                                                      "Needs review" if part.drawing_number else "No drawing recorded")))
     try:
+        db.add(AssignmentEvent(work_order_id=wo.id, actor_id=user.id,
+                               previous_user_id=None, assigned_user_id=body.assigned_to))
+        record(db, user, "work_order.created", "work_order", wo.id,
+               {"number": wo.number, "assigned_to": body.assigned_to, "order_type": body.order_type})
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -422,22 +472,61 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
 @app.patch("/api/work-orders/{order_id}")
 def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends(session),
                  user: User = Depends(current_user)):
-    allow_roles(user, "Quality", "Engineering", "Management")
-    order = db.get(WorkOrder, order_id)
+    order = db.scalar(select(WorkOrder).where(WorkOrder.id == order_id).with_for_update())
     if not order:
         raise HTTPException(404, "Work order not found")
+    if user.role == "Production":
+        if order.assigned_to != user.id or "assigned_to" in body.model_fields_set:
+            raise HTTPException(403, "Production may update status only on its own assignments")
+    else:
+        allow_roles(user, "Quality", "Engineering", "Management")
+    changes = {}
     if body.status is not None:
         if body.status not in ("Open", "In Progress", "On Hold", "Completed", "Closed"):
             raise HTTPException(422, "Invalid status")
-        order.status = body.status
+        if order.status != body.status:
+            changes["status"] = {"before": order.status, "after": body.status}
+            order.status = body.status
     if "assigned_to" in body.model_fields_set:
         if body.assigned_to is not None:
             target = db.get(User, body.assigned_to)
             if not target or not target.active:
                 raise HTTPException(422, "Assigned employee not found")
-        order.assigned_to = body.assigned_to
+        if order.assigned_to != body.assigned_to:
+            changes["assigned_to"] = {"before": order.assigned_to, "after": body.assigned_to}
+            db.add(AssignmentEvent(work_order_id=order.id, actor_id=user.id,
+                                   previous_user_id=order.assigned_to, assigned_user_id=body.assigned_to))
+            order.assigned_to = body.assigned_to
+    if changes:
+        record(db, user, "work_order.updated", "work_order", order.id, changes)
     db.commit()
     return serialize_order(query_order(db, order_id))
+
+
+@app.get("/api/work-orders/{order_id}/assignment-history")
+def assignment_history(order_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
+    if not db.get(WorkOrder, order_id):
+        raise HTTPException(404, "Work order not found")
+    entries = db.scalars(select(AssignmentEvent).where(AssignmentEvent.work_order_id == order_id)
+                         .order_by(AssignmentEvent.id)).all()
+    def name(user_id):
+        employee = db.get(User, user_id) if user_id else None
+        return employee.display_name if employee else "Unassigned"
+    return [{"id": e.id, "actor": name(e.actor_id), "previous_user_id": e.previous_user_id,
+             "assigned_user_id": e.assigned_user_id, "previous_employee": name(e.previous_user_id),
+             "assigned_employee": name(e.assigned_user_id), "created_at": e.created_at.isoformat()}
+            for e in entries]
+
+
+@app.get("/api/admin/audit")
+def audit_history(before_id: int | None = None, db: Session = Depends(session),
+                  manager: User = Depends(require_admin)):
+    query = select(AuditEvent).order_by(AuditEvent.id.desc()).limit(100)
+    if before_id is not None:
+        query = query.where(AuditEvent.id < before_id)
+    return [{"id": e.id, "actor_id": e.actor_id, "action": e.action, "entity_type": e.entity_type,
+             "entity_id": e.entity_id, "changes": e.changes, "created_at": e.created_at.isoformat()}
+            for e in db.scalars(query).all()]
 
 
 @app.get("/api/dashboard")

@@ -3,6 +3,9 @@ from alembic import command
 from app.schema import upgrade, require_current, configuration, adopt_phase1
 import pytest
 from tests.db_helpers import test_engine as isolated_test_engine
+from alembic.autogenerate import compare_metadata
+from alembic.migration import MigrationContext
+from app.db import Base
 
 
 def test_upgrade_downgrade_and_repeat(tmp_path):
@@ -12,6 +15,8 @@ def test_upgrade_downgrade_and_repeat(tmp_path):
         upgrade(engine)
         upgrade(engine)
         require_current(engine)
+        with engine.connect() as connection:
+            assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
         assert 'work_order_parts' in inspect(engine).get_table_names()
         config = configuration()
         with engine.begin() as connection:

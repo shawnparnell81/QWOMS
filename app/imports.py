@@ -154,7 +154,7 @@ def process_part_import(db: Session, rows: list[dict], family_override: str = ""
             nested.rollback()
         else:
             nested.commit()
-            db.commit()
+            # The request commits data together with its audit records.
     except Exception:
         nested.rollback()
         db.rollback()

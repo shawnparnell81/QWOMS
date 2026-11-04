@@ -1,7 +1,7 @@
 """Migrations use DATABASE_URL; credentials are never saved in alembic.ini."""
 from alembic import context
 from sqlalchemy import create_engine
-from app.db import Base, DATABASE_URL
+from app.db import Base, DATABASE_URL, make_engine
 from app import models  # register all models
 
 config = context.config
@@ -24,7 +24,7 @@ else:
     if connection is not None:
         migrate(connection)
     else:
-        engine = create_engine(DATABASE_URL)
+        engine = make_engine(DATABASE_URL)
         with engine.connect() as connection:
             migrate(connection)
         engine.dispose()

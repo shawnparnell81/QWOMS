@@ -14,3 +14,5 @@ local-storage/
 *.xls
 *.pdf
 *.docx
+node_modules/
+qwoms-browser-review.png

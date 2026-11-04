@@ -3,6 +3,7 @@ import os
 from contextlib import contextmanager
 from uuid import uuid4
 from sqlalchemy import create_engine, text
+from app.db import make_engine
 
 
 @contextmanager
@@ -18,8 +19,7 @@ def test_engine(tmp_path):
             connection.execute(text(f'CREATE SCHEMA "{schema}"'))
         engine = create_engine(url, connect_args={'options': '-csearch_path=' + schema})
     else:
-        engine = create_engine(f'sqlite:///{tmp_path / "test.db"}',
-                               connect_args={'check_same_thread': False})
+        engine = make_engine(f'sqlite:///{tmp_path / "test.db"}')
     try:
         yield engine
     finally:

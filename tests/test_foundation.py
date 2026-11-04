@@ -56,6 +56,7 @@ def client(tmp_path, monkeypatch):
 def logged_in(client):
     r = client.post("/api/auth/login", json={"username": "manager", "password": "SufficientlyLongPassword!"})
     assert r.status_code == 200, r.text
+    client.headers["X-QWOMS-CSRF"] = client.cookies["qwoms_csrf"]
 
 
 def part_import(client, rows, url="commit"):
