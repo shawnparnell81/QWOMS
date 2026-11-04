@@ -3,6 +3,17 @@ import hashlib,json,sys
 from openpyxl import load_workbook
 
 
+def anchor_signature(image):
+    anchor=image.anchor
+    def marker(value):
+        return {key:getattr(value,key) for key in ['col','colOff','row','rowOff']} if value is not None else None
+    extent=getattr(anchor,'ext',None)
+    return {'type':type(anchor).__name__,'from':marker(getattr(anchor,'_from',None)),
+            'to':marker(getattr(anchor,'to',None)),
+            'extent':{'cx':extent.cx,'cy':extent.cy} if extent is not None else None,
+            'edit_as':getattr(anchor,'editAs',None)}
+
+
 def signature(filename):
     wb=load_workbook(filename)
     result={'sheet_names':wb.sheetnames,'defined_names':{k:v.attr_text for k,v in wb.defined_names.items()},'sheets':{}}
@@ -21,7 +32,7 @@ def signature(filename):
             'rows':{str(k):v.height for k,v in ws.row_dimensions.items() if v.height is not None},
             'print':{'orientation':ws.page_setup.orientation,'paper':ws.page_setup.paperSize,'fitWidth':ws.page_setup.fitToWidth,'fitHeight':ws.page_setup.fitToHeight,'area':str(ws.print_area),'titles':ws.print_title_rows,'margins':str(ws.page_margins),'fitToPage':ws.sheet_properties.pageSetUpPr.fitToPage},
             'freeze':ws.freeze_panes,
-            'images':[{'width':i.width,'height':i.height,'sha256':hashlib.sha256(i._data()).hexdigest()} for i in ws._images],
+            'images':[{'width':i.width,'height':i.height,'sha256':hashlib.sha256(i._data()).hexdigest(),'anchor':anchor_signature(i)} for i in ws._images],
             'important_styles':{coordinate:{'font':str(ws[coordinate].font),'fill':str(ws[coordinate].fill),'alignment':str(ws[coordinate].alignment),'number_format':ws[coordinate].number_format} for coordinate in ['A1','B5','C5']},
         }
     return result
@@ -39,4 +50,4 @@ def differences(a,b,path=''):
 
 if __name__=='__main__':
     result=differences(signature(sys.argv[1]),signature(sys.argv[2]))
-    print(json.dumps({'difference_count':len(result),'differences':result},indent=2,default=str))
+    print(json.dumps({'comparison_version':2,'difference_count':len(result),'differences':result},indent=2,default=str))
