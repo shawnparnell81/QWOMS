@@ -1,11 +1,27 @@
 """Idempotent, synthetic-only free-tier bootstrap. Never log or rotate existing credentials."""
 import os
+import base64
 from datetime import datetime, timezone
 from sqlalchemy import select,func,update
 from .models import User, ProductFamily, PhysicalPart, PartAlias, AuthSession
 from .security import hash_password,authority_lock
 from .audit import record
 from .deployment import demo_mode,validate_settings
+
+
+def initial_demo_password():
+    """Read a Render secret; encoding avoids provider handling of dollar signs.
+
+    Base64 is only a transport encoding, not encryption. Keep this value in
+    Render's private environment settings, never in Git or startup logs.
+    """
+    encoded = os.getenv('QWOMS_DEMO_INITIAL_PASSWORD_B64', '')
+    if encoded:
+        try:
+            return base64.b64decode(encoded,validate=True).decode('utf-8')
+        except (ValueError, UnicodeDecodeError) as exc:
+            raise RuntimeError('Invalid private encoded demo credential') from exc
+    return os.getenv('QWOMS_DEMO_INITIAL_PASSWORD','')
 
 
 def seed(db):
@@ -19,7 +35,7 @@ def seed(db):
     if legacy and owner:
         raise RuntimeError('Conflicting demo owner accounts; manual review required')
     if legacy:
-        initial=os.getenv('QWOMS_DEMO_INITIAL_PASSWORD','')
+        initial=initial_demo_password()
         if not 10 <= len(initial) <= 128:
             raise RuntimeError('Set a private 10–128 character temporary demo password in Render')
         legacy.username='demo'
@@ -39,7 +55,7 @@ def seed(db):
             if existing.role!=role or not existing.active:
                 raise RuntimeError('Reserved synthetic account conflicts with an existing account; review required')
             continue
-        password=os.getenv(variable,'')
+        password=initial_demo_password() if username=='demo' else os.getenv(variable,'')
         minimum = 10 if username=='demo' else 16
         if not minimum<=len(password)<=128:
             raise RuntimeError(f'Securely configure {variable} ({minimum}–128 characters); no default password is provided')
