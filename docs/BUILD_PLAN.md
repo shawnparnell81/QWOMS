@@ -5,6 +5,12 @@
 
 This plan complements the approved domain requirements in `PRODUCT_REQUIREMENTS.md`. A module is **not complete** simply because an API endpoint or mock UI exists. It must function from the browser, persist data correctly, respect permissions, and pass relevant tests.
 
+### Import permission acceptance: deny by default, owner approval only
+- Every non-admin employee starts with zero import permissions regardless of assigned department role; only the owner's individual admin account may import by default.
+- The owner explicitly grants selected import rights per named employee, separately for Part Master spreadsheets, drawing/folder imports, form masters and other supporting document imports.
+- Role changes and new account creation never silently grant any import permission. Admin revocation takes immediate effect.
+- Verify exact backend endpoint enforcement, unauthorized direct API calls, grant/revoke audit, and the administrator's view of effective individual permissions.
+
 ## Mandatory launch gate: owner is sole initial system Administrator
 
 Production starts with exactly **one** named, owner-controlled Administrator account (secure initial bootstrap, no shared or default credentials). The owner independently imports all initial Part Master spreadsheets, folder trees, drawings, instructions, document masters/forms and sets up every employee's role/site/permissions. Production must not seed synthetic demo accounts or allow public signup.
