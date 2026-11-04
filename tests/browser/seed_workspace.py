@@ -14,6 +14,10 @@ owner=httpx.Client(base_url=base,timeout=30);engineer=httpx.Client(base_url=base
 def login(client,name):
  r=client.post('/api/auth/login',json={'username':name,'password':password});assert r.status_code==200
  client.headers['X-QWOMS-CSRF']=client.cookies['qwoms_csrf']
+ # This fixture talks only to its fixed loopback review app. Codespaces uses
+ # Secure browser cookies; explicitly carry the issued session over this local
+ # seed connection without weakening the browser cookie settings.
+ client.headers['Cookie']='qwoms_token='+client.cookies['qwoms_token']+'; qwoms_csrf='+client.cookies['qwoms_csrf']
 def request(client,method,path,**kwargs):
  r=client.request(method,path,**kwargs)
  if not r.is_success:raise RuntimeError(f'Synthetic setup {method} {path}: HTTP {r.status_code}')

@@ -5,6 +5,11 @@ import httpx
 root=Path(__file__).resolve().parent.parent
 os.chdir(root)
 os.environ['PYTHONPATH']=str(root)
+try:
+    httpx.get('http://127.0.0.1:8020/readyz',timeout=1)
+except httpx.ConnectError:pass
+except httpx.HTTPError:raise SystemExit('Cannot verify that local port8020 is free; keep the existing preview unchanged')
+else:raise SystemExit('Port8020 already has a running service; open the existing preview instead')
 server=subprocess.Popen([sys.executable,'scripts/run_excel_review.py','--engine','free'])
 try:
     for _ in range(120):
