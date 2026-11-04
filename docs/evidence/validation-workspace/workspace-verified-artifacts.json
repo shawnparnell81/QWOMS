@@ -1,0 +1,64 @@
+{
+  "originals_unchanged": true,
+  "workbooks": {
+    "workspace": {
+      "reopened_checked_here": false,
+      "measurement_values": {
+        "B5": 14
+      },
+      "cached_formula_result": "PASS",
+      "original_formula_retained": true,
+      "worksheets": [
+        "Shock Validation",
+        "Measurements"
+      ],
+      "merged_ranges_retained": true,
+      "fidelity_differences": 30
+    },
+    "pump": {
+      "reopened_checked_here": true,
+      "measurement_values": {
+        "E5": 12,
+        "F5": 11
+      },
+      "cached_formula_result": "PASS",
+      "original_formula_retained": true,
+      "worksheets": [
+        "Bench readings",
+        "Equipment context"
+      ],
+      "merged_ranges_retained": true,
+      "fidelity_differences": 21
+    },
+    "injector": {
+      "reopened_checked_here": true,
+      "measurement_values": {
+        "F9": 6,
+        "G9": 1
+      },
+      "cached_formula_result": "PASS",
+      "original_formula_retained": true,
+      "worksheets": [
+        "Flow and leak"
+      ],
+      "merged_ranges_retained": true,
+      "fidelity_differences": 15
+    },
+    "unknown": {
+      "reopened_checked_here": true,
+      "measurement_values": {
+        "Z8": 42
+      },
+      "cached_formula_result": "PASS",
+      "original_formula_retained": true,
+      "worksheets": [
+        "New assembly review",
+        "Trace",
+        "Notes"
+      ],
+      "merged_ranges_retained": true,
+      "fidelity_differences": 25
+    }
+  },
+  "equipment_pdf_byte_identical": true
+}

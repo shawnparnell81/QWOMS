@@ -86,6 +86,10 @@ async def origin_guard(request: Request, call_next):
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
     response.headers['X-Frame-Options'] = 'DENY'
+    embedded=request.url.path=='/static/editor.html' or (request.url.path.startswith('/api/work-orders/') and request.url.path.endswith('/content'))
+    if embedded:
+        response.headers['Content-Security-Policy']="frame-ancestors 'self'; object-src 'none'; base-uri 'self'"
+        response.headers['X-Frame-Options']='SAMEORIGIN'
     if demo_mode():
         response.headers['Strict-Transport-Security'] = 'max-age=31536000'
     if request.url.path.startswith(('/api/','/wopi/')):
@@ -587,6 +591,9 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
         allow_roles(user, "Quality", "Engineering", "Management")
     changes = {}
     if body.status in ('Completed','Closed'):
+        from .models import DispositionEvent
+        latest=db.scalar(select(DispositionEvent).where(DispositionEvent.work_order_id==order.id).order_by(DispositionEvent.id.desc()))
+        if latest and latest.state=='Pending Engineering':raise HTTPException(409,'Engineering must approve the pending conditional disposition before completion')
         from .models import LaborEntry
         if db.scalar(select(LaborEntry.id).where(LaborEntry.work_order_id==order.id,LaborEntry.stopped_at.is_(None))):
             raise HTTPException(409,'Stop active labor timers before completing this work order')
@@ -752,3 +759,8 @@ app.include_router(operations_router)
 
 from .editor_api import router as editor_router
 app.include_router(editor_router)
+
+from .workspace_api import router as workspace_router
+from .template_api import router as template_router
+app.include_router(workspace_router)
+app.include_router(template_router)

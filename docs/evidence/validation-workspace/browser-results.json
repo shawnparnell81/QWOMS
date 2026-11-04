@@ -1,0 +1,109 @@
+{
+  "checks": [
+    {
+      "name": "Selected alias, equivalents and project share one screen",
+      "result": "PASS"
+    },
+    {
+      "name": "Pinned approved drawing, instruction and workbook visible",
+      "result": "PASS"
+    },
+    {
+      "name": "1280 viewport has no horizontal clipping",
+      "result": "PASS"
+    },
+    {
+      "name": "Drawing opens inside the work-order viewer",
+      "result": "PASS"
+    },
+    {
+      "name": "Approved work instruction opens in the same viewer",
+      "result": "PASS"
+    },
+    {
+      "name": "Start/stop validation timer persists ledger",
+      "result": "PASS"
+    },
+    {
+      "name": "Real editor is embedded without leaving the work order",
+      "result": "PASS"
+    },
+    {
+      "name": "Duplicate PDF upload rejected in the work-order dialog",
+      "result": "PASS"
+    },
+    {
+      "name": "Evidence upload preserves live editor session",
+      "result": "PASS"
+    },
+    {
+      "name": "PDF metadata lists uploader, filename and sample",
+      "result": "PASS"
+    },
+    {
+      "name": "Downloaded PDF byte/hash identical to equipment export",
+      "result": "PASS"
+    },
+    {
+      "name": "PDF preview and workbook context coexist",
+      "result": "PASS"
+    },
+    {
+      "name": "Original editor draft reused after viewing PDF",
+      "result": "PASS"
+    },
+    {
+      "name": "Completed workbook files from integrated editor",
+      "result": "PASS"
+    },
+    {
+      "name": "Parent workspace refreshes saved file without destroying editor",
+      "result": "PASS"
+    },
+    {
+      "name": "Photo preview uses uploaded original",
+      "result": "PASS"
+    },
+    {
+      "name": "Video byte-range playback metadata loads",
+      "result": "PASS"
+    },
+    {
+      "name": "Evidence persists across full application reload",
+      "result": "PASS"
+    },
+    {
+      "name": "Fourth unknown workbook uploads and maps without code/deployment",
+      "result": "PASS"
+    },
+    {
+      "name": "Retired master disappears from active form library",
+      "result": "PASS"
+    },
+    {
+      "name": "Retired template history is retained",
+      "result": "PASS"
+    },
+    {
+      "name": "No browser script errors",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "validation-workspace-1440.png",
+    "validation-workspace-1280.png",
+    "drawing-in-workspace.png",
+    "workbook-integrated-focus.png",
+    "original-test-pdf-preview.png",
+    "work-order-test-results.png",
+    "upload-defined-form-library.png"
+  ],
+  "workbook": {
+    "filename": "Workspace employee chosen 1793821987405.xlsx",
+    "draft": "05610bc9-f796-4ac9-b965-88d5fe5150de"
+  },
+  "uploaded_unknown": {
+    "id": 7,
+    "revision_id": 7
+  }
+}

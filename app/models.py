@@ -190,6 +190,7 @@ class DemoOriginalBlob(Base):
 
 class ControlledDocument(Base):
     __tablename__ = 'controlled_documents'
+    retired: Mapped[bool] = mapped_column(Boolean,default=False,server_default=false())
     id: Mapped[int] = mapped_column(primary_key=True)
     kind: Mapped[str] = mapped_column(String(30))
     number: Mapped[str] = mapped_column(String(150))
@@ -356,3 +357,33 @@ class WorkbookDraft(Base):
     lock_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class WorkOrderEvidence(Base):
+    __tablename__ = 'work_order_evidence'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'),index=True)
+    part_id: Mapped[int | None] = mapped_column(ForeignKey('physical_parts.id'),nullable=True)
+    filename: Mapped[str] = mapped_column(String(255))
+    category: Mapped[str] = mapped_column(String(30))
+    media_type: Mapped[str] = mapped_column(String(100))
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    sha256: Mapped[str] = mapped_column(String(64))
+    uploaded_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)
+    description: Mapped[str] = mapped_column(String(2000),default='')
+    equipment: Mapped[str] = mapped_column(String(200),default='')
+    sample: Mapped[str] = mapped_column(String(100),default='')
+    __table_args__ = (UniqueConstraint('work_order_id','filename',name='uq_order_evidence_filename'),)
+
+
+class DispositionEvent(Base):
+    __tablename__ = 'disposition_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    work_order_id: Mapped[int] = mapped_column(ForeignKey('work_orders.id'),index=True)
+    result: Mapped[str] = mapped_column(String(30))
+    state: Mapped[str] = mapped_column(String(30))
+    rationale: Mapped[str] = mapped_column(Text)
+    actor_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    request_id: Mapped[int | None] = mapped_column(ForeignKey('disposition_events.id'),nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)

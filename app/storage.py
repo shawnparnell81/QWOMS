@@ -49,6 +49,9 @@ class LocalStore:
     def read(self, key):
         return self.path(key).read_bytes()
 
+    def discard_new(self,key):
+        self.path(key).unlink(missing_ok=True)
+
 
 class S3Store:
     def __init__(self, bucket, prefix='', client=None):
@@ -67,6 +70,9 @@ class S3Store:
             if exc.response['Error']['Code'] in ('PreconditionFailed', 'ConditionalRequestConflict', '412', '409'):
                 raise StorageConflict('Original object already exists or conflicts; nothing overwritten') from exc
             raise
+
+    def discard_new(self,key):
+        self.client.delete_object(Bucket=self.bucket,Key=self.prefix+validate_key(key))
 
     def read(self, key):
         try:

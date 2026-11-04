@@ -55,9 +55,11 @@ def revision_json(db,revision):
 
 
 @router.get('/documents')
-def list_documents(db:Session=Depends(session),user:User=Depends(current_user)):
-    documents=db.scalars(select(ControlledDocument).order_by(ControlledDocument.id.desc())).all()
-    return [{'id':d.id,'kind':d.kind,'number':d.number,'title':d.title,
+def list_documents(include_retired:bool=False,db:Session=Depends(session),user:User=Depends(current_user)):
+    query=select(ControlledDocument).order_by(ControlledDocument.id.desc())
+    if not include_retired:query=query.where(ControlledDocument.retired.is_(False))
+    documents=db.scalars(query).all()
+    return [{'id':d.id,'kind':d.kind,'number':d.number,'title':d.title,'retired':d.retired,
              'revisions':[revision_json(db,r) for r in db.scalars(select(ControlledRevision).where(ControlledRevision.document_id==d.id).order_by(ControlledRevision.id.desc())).all()]} for d in documents]
 
 
@@ -78,6 +80,7 @@ def add_revision(document_id:int,body:RevisionInput,db:Session=Depends(session),
     doc=db.scalar(select(ControlledDocument).where(ControlledDocument.id==document_id).with_for_update())
     file=db.get(StoredFile,body.file_id)
     if not doc or not file:raise HTTPException(404,'Controlled document or imported original not found')
+    if doc.retired:raise HTTPException(409,'Restore the retired template before registering another revision')
     require_capability(user, {"Drawing":"import.drawings","Work instruction":"import.work_instructions","Supporting document":"import.supporting_documents","Form template":"import.form_masters"}[doc.kind])
     revision=create_revision(db,doc,file,body.revision,user,body.change_summary,body.blank_master_confirmed)
     db.commit();return revision_json(db,revision)

@@ -13,6 +13,9 @@ def resolve(db,part,order_type,subtype):
                         WorkflowRule.subtype.in_(['',subtype]),
                         (WorkflowRule.family_id.is_(None))|(WorkflowRule.family_id==part.family_id),
                         (WorkflowRule.part_id.is_(None))|(WorkflowRule.part_id==part.id))).all()
+    candidate_ids={i for r in rules for i in r.document_ids}
+    retired_ids=set(db.scalars(select(ControlledDocument.id).where(ControlledDocument.id.in_(candidate_ids),ControlledDocument.retired.is_(True))))
+    rules=[r for r in rules if r.fields or r.instructions.strip() or any(i not in retired_ids for i in r.document_ids)]
     def score(rule):return (8 if rule.part_id else 0)+(4 if rule.family_id else 0)+(2 if rule.subtype else 0)
     rules.sort(key=lambda r:(score(r),r.id))
     fields={};scores={};instructions=[];documents=set()
@@ -24,6 +27,16 @@ def resolve(db,part,order_type,subtype):
             fields[key]=definition;scores[key]=score(rule)
         if rule.instructions:instructions.append({'rule_id':rule.id,'name':rule.name,'text':rule.instructions})
         documents.update(rule.document_ids)
+    active={d.id:d for d in db.scalars(select(ControlledDocument).where(ControlledDocument.id.in_(documents),ControlledDocument.retired.is_(False)))}
+    documents={i for i in documents if i not in retired_ids}
+    form_candidates=[]
+    for rule in rules:
+        forms={i for i in rule.document_ids if i in active and active[i].kind=='Form template'}
+        if forms:form_candidates.append((score(rule),forms))
+    if form_candidates:
+        best=max(s for s,forms in form_candidates);sets=[forms for s,forms in form_candidates if s==best]
+        if any(forms!=sets[0] for forms in sets):raise HTTPException(409,'Conflicting equally specific form-template mappings; reconcile the matching rules')
+        documents={i for i in documents if i not in active or active[i].kind!='Form template'}|sets[0]
     return {'rule_ids':[r.id for r in rules],'fields':list(fields.values()),'instructions':instructions,'document_ids':sorted(documents)}
 
 
@@ -63,7 +76,8 @@ def folder_for(db,order_type,subtype):
 def approved_documents(db,requirements):
     result=[]
     for document_id in requirements.get('document_ids',[]):
-        doc=db.get(ControlledDocument,document_id)
+        doc=db.scalar(select(ControlledDocument).where(ControlledDocument.id==document_id).with_for_update().execution_options(populate_existing=True))
+        if doc and doc.retired:raise HTTPException(409,'A selected form template was retired; refresh the work requirements')
         revision=db.scalar(select(ControlledRevision).where(ControlledRevision.document_id==document_id,ControlledRevision.status=='Approved'))
         if not doc or not revision:
             raise HTTPException(409,'A mandatory work instruction/form has no approved current revision')

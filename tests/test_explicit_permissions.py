@@ -15,6 +15,8 @@ def test_zero_inherited_imports_and_admin_authority(client):
         assert not web.get('/api/me').json()['is_admin']
         assert web.get('/api/me').json()['capabilities']==[]
         assert web.get('/api/admin/accounts').status_code==403
+        assert web.post('/api/form-templates',data={'number':'DENIED','title':'Denied upload','revision':'1','blank_master_confirmed':'true'},files={'file':('Denied.xlsx',b'synthetic')}).status_code==403
+        assert web.post('/api/form-templates/1/retire').status_code==403
         assert part_import(web,[], 'preview').status_code==403
         assert part_import(web,[]).status_code==403
         for kind in ['drawing','document','form-template','work-instruction','other']:

@@ -1,0 +1,606 @@
+{
+  "master_sha256_unchanged": true,
+  "source_original_sha256": "f17665198442928441e14a33b2c4141a339171bd9c1753e5e10fe35428848585",
+  "exports": {
+    "editor-export.xlsx": {
+      "measurement": 12,
+      "cached_formula_result": "PASS",
+      "validation_value": "PASS",
+      "sheet_count": 2,
+      "image_count": 1,
+      "landscape_A4_fit_width_1": true,
+      "difference_count": 31,
+      "differences": [
+        {
+          "feature": ".sheets.Measurements.cell_styles.A1",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.A2",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.B1",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.B2",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitHeight",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitToPage",
+          "before": null,
+          "after": false
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitWidth",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.print.margins",
+          "before": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.5, footer=0.5",
+          "after": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.511811023622047, footer=0.511811023622047"
+        },
+        {
+          "feature": ".sheets.Measurements.print.orientation",
+          "before": null,
+          "after": "portrait"
+        },
+        {
+          "feature": ".sheets.Measurements.print.paper",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.rows.1",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Measurements.rows.2",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='center', vertical=None, textRotation=0, wrapText=None, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='center', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.fill",
+          "before": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='0017365D', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+          "after": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF17365D', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF333333', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=None, b=True, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00FFFFFF', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', extend=None, sz=14.0, u=None, vertAlign=None, scheme=None",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=0.0, b=True, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FFFFFFFF', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', extend=None, sz=14.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A3",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A8.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal=None, vertical='top', textRotation=0, wrapText=True, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='top', textRotation=0, wrapText=True, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A8.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme='minor'",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B3",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B5.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal=None, vertical=None, textRotation=0, wrapText=None, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B5.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme='minor'",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.C5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.D5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.conditional",
+          "before": [
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"PASS\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='0000B050', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            },
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"FAIL\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00FF0000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            }
+          ],
+          "after": [
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"PASS\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF00B050', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            },
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"FAIL\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FFFF0000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            }
+          ]
+        },
+        {
+          "feature": ".sheets.Shock Validation.images",
+          "before": [
+            {
+              "width": 40,
+              "height": 20,
+              "anchor": "<oneCellAnchor xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><from><col>4</col><colOff>0</colOff><row>2</row><rowOff>0</rowOff></from><ext cx=\"381000\" cy=\"190500\" /><pic><nvPicPr><cNvPr id=\"1\" name=\"Image 1\" descr=\"Picture\" /><cNvPicPr /></nvPicPr><blipFill><a:blip cstate=\"print\" r:embed=\"rId1\" /><a:stretch><a:fillRect /></a:stretch></blipFill><spPr><a:prstGeom prst=\"rect\" /><a:ln><a:prstDash val=\"solid\" /></a:ln></spPr></pic><clientData /></oneCellAnchor>",
+              "sha256": "e87826b36a8b301a6650688af46510fabf4a950a096a0a27f57ca9eee3b1db78"
+            }
+          ],
+          "after": [
+            {
+              "width": 40,
+              "height": 20,
+              "anchor": "<twoCellAnchor xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" editAs=\"oneCell\"><from><col>4</col><colOff>0</colOff><row>2</row><rowOff>0</rowOff></from><to><col>4</col><colOff>380520</colOff><row>2</row><rowOff>190080</rowOff></to><pic><nvPicPr><cNvPr id=\"1\" name=\"Image 1\" descr=\"Picture\" /><cNvPicPr /></nvPicPr><blipFill><a:blip r:embed=\"rId1\" /><a:stretch><a:fillRect /></a:stretch></blipFill><spPr><a:xfrm><a:off x=\"5263560\" y=\"571680\" /><a:ext cx=\"380520\" cy=\"190080\" /></a:xfrm><a:prstGeom prst=\"rect\"><avLst /></a:prstGeom><a:noFill /><a:ln w=\"0\"><a:noFill /><a:prstDash val=\"solid\" /></a:ln></spPr></pic><clientData /></twoCellAnchor>",
+              "sha256": "e87826b36a8b301a6650688af46510fabf4a950a096a0a27f57ca9eee3b1db78"
+            }
+          ]
+        },
+        {
+          "feature": ".sheets.Shock Validation.print.margins",
+          "before": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.5, footer=0.5",
+          "after": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.511811023622047, footer=0.511811023622047"
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.3",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.5",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.8",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.9",
+          "before": null,
+          "after": 15.0
+        }
+      ]
+    },
+    "editor-reopened.xlsx": {
+      "measurement": 12,
+      "cached_formula_result": "PASS",
+      "validation_value": "PASS",
+      "sheet_count": 2,
+      "image_count": 1,
+      "landscape_A4_fit_width_1": true,
+      "difference_count": 31,
+      "differences": [
+        {
+          "feature": ".sheets.Measurements.cell_styles.A1",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.A2",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.B1",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.cell_styles.B2",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitHeight",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitToPage",
+          "before": null,
+          "after": false
+        },
+        {
+          "feature": ".sheets.Measurements.print.fitWidth",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.print.margins",
+          "before": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.5, footer=0.5",
+          "after": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.511811023622047, footer=0.511811023622047"
+        },
+        {
+          "feature": ".sheets.Measurements.print.orientation",
+          "before": null,
+          "after": "portrait"
+        },
+        {
+          "feature": ".sheets.Measurements.print.paper",
+          "before": null,
+          "after": 1
+        },
+        {
+          "feature": ".sheets.Measurements.rows.1",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Measurements.rows.2",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='center', vertical=None, textRotation=0, wrapText=None, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='center', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.fill",
+          "before": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='0017365D', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+          "after": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF17365D', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF333333', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A1.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=None, b=True, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00FFFFFF', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', extend=None, sz=14.0, u=None, vertAlign=None, scheme=None",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=0.0, b=True, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FFFFFFFF', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', extend=None, sz=14.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A3",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A8.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal=None, vertical='top', textRotation=0, wrapText=True, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='top', textRotation=0, wrapText=True, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.A8.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme='minor'",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B3",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B5.alignment",
+          "before": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal=None, vertical=None, textRotation=0, wrapText=None, shrinkToFit=None, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+          "after": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.B5.font",
+          "before": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=None, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme='minor'",
+          "after": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None"
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.C5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.cell_styles.D5",
+          "before": null,
+          "after": {
+            "font": "<openpyxl.styles.fonts.Font object>\nParameters:\nname='Calibri', charset=1, family=2.0, b=False, i=False, strike=None, outline=None, shadow=None, condense=None, color=<openpyxl.styles.colors.Color object>\nParameters:\nrgb=None, indexed=None, auto=None, theme=1, tint=0.0, type='theme', extend=None, sz=11.0, u=None, vertAlign=None, scheme=None",
+            "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'",
+            "alignment": "<openpyxl.styles.alignment.Alignment object>\nParameters:\nhorizontal='general', vertical='bottom', textRotation=0, wrapText=False, shrinkToFit=False, indent=0.0, relativeIndent=0.0, justifyLastLine=None, readingOrder=0.0",
+            "border": "<openpyxl.styles.borders.Border object>\nParameters:\noutline=True, diagonalUp=False, diagonalDown=False, start=None, end=None, left=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, right=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, top=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, bottom=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, diagonal=<openpyxl.styles.borders.Side object>\nParameters:\nstyle=None, color=None, vertical=None, horizontal=None",
+            "protection": "<openpyxl.styles.protection.Protection object>\nParameters:\nlocked=True, hidden=False",
+            "number_format": "General"
+          }
+        },
+        {
+          "feature": ".sheets.Shock Validation.conditional",
+          "before": [
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"PASS\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='0000B050', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            },
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"FAIL\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType='solid', fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00FF0000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            }
+          ],
+          "after": [
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"PASS\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FF00B050', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            },
+            {
+              "range": "C5",
+              "type": "cellIs",
+              "operator": "equal",
+              "formula": [
+                "\"FAIL\""
+              ],
+              "fill": "<openpyxl.styles.fills.PatternFill object>\nParameters:\npatternType=None, fgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='00000000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb', bgColor=<openpyxl.styles.colors.Color object>\nParameters:\nrgb='FFFF0000', indexed=None, auto=None, theme=None, tint=0.0, type='rgb'"
+            }
+          ]
+        },
+        {
+          "feature": ".sheets.Shock Validation.images",
+          "before": [
+            {
+              "width": 40,
+              "height": 20,
+              "anchor": "<oneCellAnchor xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><from><col>4</col><colOff>0</colOff><row>2</row><rowOff>0</rowOff></from><ext cx=\"381000\" cy=\"190500\" /><pic><nvPicPr><cNvPr id=\"1\" name=\"Image 1\" descr=\"Picture\" /><cNvPicPr /></nvPicPr><blipFill><a:blip cstate=\"print\" r:embed=\"rId1\" /><a:stretch><a:fillRect /></a:stretch></blipFill><spPr><a:prstGeom prst=\"rect\" /><a:ln><a:prstDash val=\"solid\" /></a:ln></spPr></pic><clientData /></oneCellAnchor>",
+              "sha256": "e87826b36a8b301a6650688af46510fabf4a950a096a0a27f57ca9eee3b1db78"
+            }
+          ],
+          "after": [
+            {
+              "width": 40,
+              "height": 20,
+              "anchor": "<twoCellAnchor xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" editAs=\"oneCell\"><from><col>4</col><colOff>0</colOff><row>2</row><rowOff>0</rowOff></from><to><col>4</col><colOff>380160</colOff><row>2</row><rowOff>189720</rowOff></to><pic><nvPicPr><cNvPr id=\"1\" name=\"Image 1\" descr=\"Picture\" /><cNvPicPr /></nvPicPr><blipFill><a:blip r:embed=\"rId1\" /><a:stretch><a:fillRect /></a:stretch></blipFill><spPr><a:xfrm><a:off x=\"5263560\" y=\"571680\" /><a:ext cx=\"380160\" cy=\"189720\" /></a:xfrm><a:prstGeom prst=\"rect\"><avLst /></a:prstGeom><a:noFill /><a:ln w=\"0\"><a:noFill /><a:prstDash val=\"solid\" /></a:ln></spPr></pic><clientData /></twoCellAnchor>",
+              "sha256": "e87826b36a8b301a6650688af46510fabf4a950a096a0a27f57ca9eee3b1db78"
+            }
+          ]
+        },
+        {
+          "feature": ".sheets.Shock Validation.print.margins",
+          "before": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.5, footer=0.5",
+          "after": "<openpyxl.worksheet.page.PageMargins object>\nParameters:\nleft=0.75, right=0.75, top=1.0, bottom=1.0, header=0.511811023622047, footer=0.511811023622047"
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.3",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.5",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.8",
+          "before": null,
+          "after": 15.0
+        },
+        {
+          "feature": ".sheets.Shock Validation.rows.9",
+          "before": null,
+          "after": 15.0
+        }
+      ]
+    }
+  },
+  "visible_colors": {
+    "pass": {
+      "colored_cell_pixels": 1842,
+      "dominant_RGB": [
+        0,
+        176,
+        80
+      ]
+    },
+    "fail": {
+      "colored_cell_pixels": 1861,
+      "dominant_RGB": [
+        255,
+        0,
+        0
+      ]
+    },
+    "final": {
+      "colored_cell_pixels": 1842,
+      "dominant_RGB": [
+        0,
+        176,
+        80
+      ]
+    }
+  },
+  "print": {
+    "actual_office_pdf": true,
+    "pages": 2,
+    "first_page_landscape_A4": true,
+    "measurement_and_PASS_in_print": true
+  },
+  "completed_link": {
+    "work_order_id": 1,
+    "project_id": 1,
+    "filename": "Employee synthetic shock 1793821675774.xlsx",
+    "relative_path": "Completed forms/Validation/Shocks/Employee synthetic shock 1793821675774.xlsx"
+  }
+}

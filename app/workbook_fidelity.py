@@ -24,7 +24,7 @@ def signature(filename):
             'print':{'orientation':ws.page_setup.orientation,'paper':ws.page_setup.paperSize,'fitWidth':ws.page_setup.fitToWidth,'fitHeight':ws.page_setup.fitToHeight,'area':str(ws.print_area),'titles':ws.print_title_rows,'margins':str(ws.page_margins),'fitToPage':ws.sheet_properties.pageSetUpPr.fitToPage},
             'freeze':ws.freeze_panes,
             'images':[{'width':i.width,'height':i.height,'anchor':tostring(i.anchor.to_tree()).decode(),'sha256':hashlib.sha256(i._data()).hexdigest()} for i in ws._images],
-            'important_styles':{coordinate:{'font':str(ws[coordinate].font),'fill':str(ws[coordinate].fill),'alignment':str(ws[coordinate].alignment),'number_format':ws[coordinate].number_format} for coordinate in ['A1','B5','C5']},
+            'cell_styles':{cell.coordinate:{'font':str(cell.font),'fill':str(cell.fill),'alignment':str(cell.alignment),'border':str(cell.border),'protection':str(cell.protection),'number_format':cell.number_format} for cell in ws._cells.values() if cell.has_style},
         }
     return result
 

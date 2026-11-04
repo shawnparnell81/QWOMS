@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from .db import session
-from .security import current_user
+from .security import current_user,require_capability
 from .models import (User,WorkflowRule,ControlledDocument,ControlledRevision,PhysicalPart,ProductFamily,
                      WorkOrder,WorkOrderPart,WorkOrderAttachment,CompletedForm,StoredFile,FormFilingRule)
 from .workflows import resolve,validate_values
@@ -76,7 +76,7 @@ class ValuesInput(BaseModel):
 
 
 def manage(user):
-    if user.role not in ('Engineering','Management'):raise HTTPException(403,'Engineering or Management required')
+    if not user.is_admin and user.role not in ('Engineering','Management'):raise HTTPException(403,'Engineering or Management required')
 
 
 def scope(order_type,subtype,allow_all=True):
@@ -87,8 +87,11 @@ def scope(order_type,subtype,allow_all=True):
 
 @router.get('/workflow/rules')
 def rules(db:Session=Depends(session),user:User=Depends(current_user)):
+    retired=set(db.scalars(select(ControlledDocument.id).where(ControlledDocument.retired.is_(True))))
     return [{'id':r.id,'name':r.name,'order_type':r.order_type,'subtype':r.subtype,'family_id':r.family_id,'part_id':r.part_id,
-             'fields':r.fields,'instructions':r.instructions,'document_ids':r.document_ids,'active':r.active}
+             'fields':r.fields,'instructions':r.instructions,'document_ids':[i for i in r.document_ids if i not in retired],
+             'retired_document_ids':[i for i in r.document_ids if i in retired],
+             'active':bool(r.active and (r.fields or r.instructions.strip() or any(i not in retired for i in r.document_ids)))}
             for r in db.scalars(select(WorkflowRule).order_by(WorkflowRule.id.desc())).all()]
 
 
@@ -105,7 +108,8 @@ def add_rule(body:RuleInput,db:Session=Depends(session),user:User=Depends(curren
         if not part or (body.family_id and part.family_id!=body.family_id):raise HTTPException(422,'Physical part/family scope does not match')
     for doc_id in body.document_ids:
         doc=db.get(ControlledDocument,doc_id)
-        if not doc or doc.kind=='Drawing':raise HTTPException(422,'Attach only controlled forms, work instructions or supporting documents; drawings come from Part Master')
+        if not doc or doc.retired or doc.kind=='Drawing':raise HTTPException(422,'Attach only active controlled forms, work instructions or supporting documents; drawings come from Part Master')
+        require_capability(user,{'Form template':'import.form_masters','Work instruction':'import.work_instructions','Supporting document':'import.supporting_documents'}[doc.kind])
     data=body.model_dump();data['fields']=[f.model_dump() for f in body.fields];data['document_ids']=sorted(set(body.document_ids))
     rule=WorkflowRule(**data,created_by=user.id);db.add(rule);db.flush()
     record(db,user,'workflow_rule.created','workflow_rule',rule.id,{'name':rule.name,'order_type':rule.order_type})
@@ -162,7 +166,7 @@ def attachments(order_id:int,db:Session=Depends(session),user:User=Depends(curre
     rows=db.scalars(select(WorkOrderAttachment).where(WorkOrderAttachment.work_order_id==order_id)).all()
     return [{'id':a.id,'part_id':a.part_id,'kind':a.kind,'number':a.number,'revision':a.revision,'revision_id':a.revision_id,
              'file_id':a.file_id,'filename':a.filename,'sha256':a.sha256,'category_folder':a.category_folder,
-             'current_status':db.get(ControlledRevision,a.revision_id).status,
+             'current_status':db.get(ControlledRevision,a.revision_id).status,'template_retired':db.get(ControlledDocument,db.get(ControlledRevision,a.revision_id).document_id).retired,
              'completed':[{'id':c.id,'file_id':c.file_id,'filename':db.get(StoredFile,c.file_id).original_name,'project_id':c.project_id,'saved_at':c.saved_at.isoformat()}
                           for c in db.scalars(select(CompletedForm).where(CompletedForm.attachment_id==a.id)).all()]}
             for a in rows]

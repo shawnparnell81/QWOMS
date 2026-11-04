@@ -1,0 +1,34 @@
+{
+  "environment": "isolated local synthetic review only",
+  "branch": "development/qwoms-complete-build",
+  "sqlite": {
+    "passed": 75,
+    "warnings": 3
+  },
+  "postgresql17": {
+    "passed": 75,
+    "warnings": 3,
+    "isolation": "random disposable schemas; existing local container database"
+  },
+  "chromium": {
+    "workspace_assertions": 22,
+    "dynamic_layouts": [
+      "pump",
+      "injector",
+      "previously unknown assembly"
+    ],
+    "reopen_exports": 3,
+    "regression_suites": [
+      "smoke (all six types)",
+      "controlled",
+      "forms",
+      "accounts",
+      "permissions",
+      "operations",
+      "editor"
+    ]
+  },
+  "exact_fidelity": "FAILED; compare raw differences in artifact JSON",
+  "hosted_render_changed": false,
+  "license_purchase": false
+}
