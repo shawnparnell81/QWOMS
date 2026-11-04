@@ -148,3 +148,46 @@ def test_folder_traversal_messages_and_type_fields(client):
     assert "sampling_plan" in config["Inspection"]["fields"]
     assert "photo_requirements" in config["Photos"]["fields"]
     assert "sampling_plan" not in config["Photos"]["fields"]
+
+
+def test_dashboard_counts_all_assignments_beyond_recent_list(client):
+    from app.models import WorkOrder
+    web, Session = client
+    logged_in(web)
+    with Session() as db:
+        for i in range(35):
+            db.add(WorkOrder(number=f"INS-FICTIONAL-{i}", order_type="Inspection",
+                             subtype="AQL", title=f"Fictional inspection {i}",
+                             assigned_to=1, created_by=1, status="Open"))
+        db.commit()
+    data = web.get("/api/dashboard").json()
+    assert len(data["assigned"]) == 30  # Recent list is intentionally bounded.
+    assert data["open_count"] == 35
+    assert data["assigned_count"] == 35
+    with Session() as db:
+        orders = db.query(WorkOrder).order_by(WorkOrder.id).all()
+        orders[0].status = "Completed"
+        orders[1].status = "Closed"
+        orders[2].assigned_to = 2
+        db.commit()
+    data = web.get("/api/dashboard").json()
+    assert data["assigned_count"] == 34
+    assert data["open_count"] == 32
+
+
+def test_import_case_variants_in_one_row_are_idempotent(client):
+    web, _ = client
+    logged_in(web)
+    w = Workbook()
+    s = w.active
+    s.append(["Product Family", "Demo PN", "demo PN"])
+    s.append(["Fictional Shocks", "DEMO-001", "demo-001"])
+    stream = BytesIO()
+    w.save(stream)
+    for endpoint in ("preview", "commit", "commit"):
+        response = web.post(f"/api/parts/import/{endpoint}",
+                            files={"file": ("fictional.xlsx", stream.getvalue())})
+        assert response.status_code == 200, response.text
+    parts = web.get("/api/parts/search?q=DEMO-001").json()
+    assert len(parts) == 1
+    assert len(parts[0]["aliases"]) == 1
