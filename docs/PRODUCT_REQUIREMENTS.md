@@ -22,6 +22,20 @@ Provide a secure owner-account bootstrap, admin portal for employee creation/act
 - Numbering automatically assigned by the application based on order type, year/sequence and part number or multi-part designation; final pattern configurable later. **Only work orders get automatic numbers**.
 - Work orders can contain one or multiple parts, quantity, configurable supporting attachments, priority, status, user assignments and project association. No customer information fields on work orders. Supplier references may be relevant but are not customer fields.
 
+## Integrated Quality operations — clarified from existing time-tracking app (2026-11-04)
+
+The user's **other** application is primarily for tracking time; do not copy its screens or treat it as QWOMS's intended finished design. Use it only as evidence of real Quality Department work classifications and practical field needs. The existing application's navigation includes: **Open Work Orders, Validation / FAI, Repair / Rework, Inspection, Warranty, Salt Spray Test, Development, Rebox, Test, Weight, Research, Production, Completed Work Orders**. QWOMS must preserve easy access to these concepts without assuming each is a separate top-level work order type: maintain the six agreed canonical types, provide configurable subtypes, saved filters and workflow-specific views for Warranty, Salt Spray Test, Development, Rebox, Research, Production, etc. Confirm exact classification semantics with the user as needed; never discard an operational workflow merely because it was not one of the original six.
+
+QWOMS is **one connected operational record**, combining:
+- create, assign, prioritize, monitor, complete and search work orders and link them to projects;
+- time and employee-specific task/labor tracking with accurate aggregates;
+- authoritative Part Master lookup, equivalent part numbers, approved drawing number/revision, immutable drawing snapshots and applicable work instructions automatically linked by work type/subtype/family/part;
+- automatically selected approved blank Excel workbooks that employees can edit **in the browser** and save with original formulas, formatting, conditional PASS-green/FAIL-red fills and workbook features demonstrably preserved, plus a separate unchanged master;
+- add/view/download photos, user-provided documents, attachments, and **video evidence** attached to the precise work order (define size/format, secure streaming/download and storage policy during implementation);
+- job-specific inspection/test measurement fields, result histories, repairs/replacements, rebox/return, material movement/pallets, labor, complete traceability and reporting.
+
+The work-order screen must display linked parts/drawings/instructions, attachments, time entries and status in one coherent interface, **not force users to open separate applications** for each step. No customer-info work-order fields, no email and no full-QMS/training modules. The sample validation form the user plans to supply is required acceptance evidence; **do not claim exact Excel fidelity until it passes a representative edit/save/reopen/export comparison**. Use only a company-approved sanitized copy in synthetic/test infrastructure, never upload actual proprietary forms without approval.
+
 ## Six work order types, differentiated experience
 1. **Validation / FAI:** first article, product validation, development validation. Sample sizes, validation plans, test/inspection criteria, controlled product-family form.
 2. **Inspection:** AQL, Non-conformance, Product Alert, Customer Complaint, Supplier Issue, Re-inspection and expandable subtypes. Sampling, defect types, counts, disposition, photos.
