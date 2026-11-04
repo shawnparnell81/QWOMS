@@ -20,11 +20,11 @@ Updated: 2026-11-04. This is the development record, not a certification.
 
 | Gate | Status |
 |---|---|
-| Starter smoke/API tests | 4 passed as reported by user's prior Codex response; rerun needed |
-| Dashboard/browser manual acceptance | Not run |
+| Starter smoke/API tests | 20 passed on SQLite and PostgreSQL; see milestone records below |
+| Dashboard/browser manual acceptance | Automated Chromium checks passed through stage 3; manual user acceptance still pending |
 | Work-order/part/drawing workflows beyond starter | Partial |
 | Controlled forms and exact Excel editing | Not built |
-| Projects, labor, pallets, chargebacks | Not built |
+| Projects, labor, pallets, chargebacks | Project linking verified; labor/pallets/chargebacks not built |
 | Production cloud storage, deployment and security review | Not built |
 | Final PR | **Not opened** |
 
@@ -59,3 +59,14 @@ See `BUILD_PLAN.md` for detailed feature and test criteria.
 - Compose rebuilt/upgraded the existing synthetic PostgreSQL database and passed health checks. Committed repeatable Chromium smoke test (`tests/browser`) created/assigned all six types, saved status, rendered assignment/audit history, searched aliases, and sent/rendered messaging: passed with no page/HTTP 5xx errors. Exact drawing filename/bytes, authoritative mapped revision A despite filename Z, and work-order counts survived app/database container restart. This proves local volume persistence, not disaster recovery or live S3 durability.
 - Test harness error: initial persistence script reused an already-open httpx client context; corrected the helper and reran successfully. No application workaround required.
 - Remaining security work includes throttling, password lifecycle, active-account admin UI, comprehensive event coverage, session cleanup, tamper-evident audit retention and independent review. Remaining Phase 2 includes controlled drawing/work-instruction approvals, projects, configurable fields, and controlled template rules. Exact Excel editing still awaits editor licensing and representative-workbook compatibility evidence; later accepted workstreams remain pending. No PR opened.
+
+## 2026-11-04 — Phase 2 stage 3: projects linking independent work orders
+
+- Added Alembic revision 0003: employee-named projects and nullable indexed project links on work orders. No automatic project/document naming. Existing orders survive upgrades with unchanged fields and null project links.
+- Added project creation/list/detail APIs and browser screens, linked-order totals/open totals, project selection during order creation, and audited link/unlink in order detail. Every linked work order retains its own number, type, status, assignee and part/drawing revision snapshots. Department permissions cover project creation/linking; Production remains read-only for projects.
+- Tests: full `.venv/bin/python -m pytest -q` **20 passed** on SQLite and the same suite **20 passed** on PostgreSQL 17 via isolated schemas. Includes migration/schema parity, downgrade/re-upgrade, preservation of pre-Phase-2 orders, project counts, creation/link/unlink, invalid links, blank-name rejection, audit and department boundaries. JavaScript syntax and `git diff --check` passed. Three previously recorded non-failing deprecation warnings remain.
+- Compose rebuilt and migrated the populated synthetic PostgreSQL environment successfully; app/database healthy. Committed Chromium smoke check passed all six type-specific creation/assignment flows, status, Part Master, drawing screen, internal message send/render, employee/audit/assignment history, and project create/link/aggregate display. No page errors or server 5xx responses in the final run.
+- Browser failures investigated: fetching project choices on every type selection could rerender and clear newly entered fields. Moved asynchronous project loading before the editable form, retaining cached options during type switches; reran all six browser flows successfully. Repeat-run message assertion also needed a unique synthetic body to distinguish existing messages; test corrected and passed.
+- Reviewed local Docker Desktop operations are in `docs/PHASE2_OPERATIONS.md`. Work is saved in the cloud workspace, not automatically downloaded to the user's work laptop. Personal-laptop execution remains synthetic-data development only; pgAdmin is optional.
+- Phase 2 **not complete**: controlled drawing/work-instruction revision state/approval and immutable references; configurable family/part/type fields; versioned blank form registry and automatic attachments remain next. Security and durable cloud operations limitations from stages 1–2 also remain open. Project editing/status lifecycle, task/labor aggregates and chargebacks are not implemented by this project-link milestone.
+- Later plan remains pending: exact-fidelity specialized workbook editor, copy-on-use/completed files with employee filenames, labor/pallets/forklift exclusion, photography, group messaging and reports. No Excel editor/license selected or representative original workbook round-trip evidence available; no fidelity or licensing completion claimed. No PR opened; explicit user approval remains required.

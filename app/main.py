@@ -25,7 +25,7 @@ from .security import current_user, hash_password, require_admin, token_for, ver
 from .schema import require_current
 from .storage import original_store, StorageConflict
 from .audit import record
-from .models import AuditEvent, AssignmentEvent, AuthSession
+from .models import AuditEvent, AssignmentEvent, AuthSession, Project
 
 APP_ROOT = Path(__file__).resolve().parent
 STORAGE_ROOT = Path(os.getenv("QWOMS_STORAGE_ROOT", APP_ROOT.parent / "local-storage")).resolve()
@@ -97,6 +97,7 @@ class CreateWorkOrderBody(BaseModel):
     title: str = Field(min_length=3, max_length=250)
     priority: str = "Normal"
     assigned_to: int | None = None
+    project_id: int | None = None
     notes: str = ""
     parts: list[PartInput] = Field(min_length=1)
     details: dict[str, str] = Field(default_factory=dict)
@@ -110,6 +111,17 @@ class CreateWorkOrderBody(BaseModel):
 class UpdateWorkOrderBody(BaseModel):
     status: str | None = None
     assigned_to: int | None = None
+    project_id: int | None = None
+
+
+class CreateProjectBody(BaseModel):
+    name: str = Field(min_length=3, max_length=200)
+    description: str = Field(default="", max_length=10000)
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def trim_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
 
 
 class SendMessageBody(BaseModel):
@@ -144,6 +156,7 @@ def serialize_order(o: WorkOrder):
             "details": o.details, "assigned_to": o.assigned_to,
             "assignee": serialize_user(o.assignee) if o.assignee else None,
             "created_by": o.created_by, "created_at": o.created_at.isoformat(),
+            "project_id": o.project_id,
             "parts": [{"part_id": p.part_id, "selected_part_number": p.selected_part_number,
                        "quantity": p.quantity, "drawing_number": p.drawing_number_snapshot,
                        "drawing_revision": p.drawing_rev_snapshot,
@@ -411,6 +424,8 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
     if body.order_type not in TYPE_CONFIG:
         raise HTTPException(422, "Unsupported work order type")
     config = TYPE_CONFIG[body.order_type]
+    if body.project_id is not None and not db.get(Project, body.project_id):
+        raise HTTPException(422, "Project not found")
     if body.subtype not in config["subtypes"]:
         raise HTTPException(422, "Unsupported subtype for this work order type")
     if body.priority not in ("Low", "Normal", "High", "Urgent"):
@@ -447,7 +462,8 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
     number = f"{config['code']}-{year}-{counter.value:05d}-{suffix}"
     wo = WorkOrder(number=number, order_type=body.order_type, subtype=body.subtype,
                    title=body.title.strip(), priority=body.priority, notes=body.notes,
-                   assigned_to=body.assigned_to, created_by=user.id, details=body.details)
+                   assigned_to=body.assigned_to, created_by=user.id, details=body.details,
+                   project_id=body.project_id)
     db.add(wo)
     db.flush()
     for entry, part, drawing in resolved_parts:
@@ -461,7 +477,8 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
         db.add(AssignmentEvent(work_order_id=wo.id, actor_id=user.id,
                                previous_user_id=None, assigned_user_id=body.assigned_to))
         record(db, user, "work_order.created", "work_order", wo.id,
-               {"number": wo.number, "assigned_to": body.assigned_to, "order_type": body.order_type})
+               {"number": wo.number, "assigned_to": body.assigned_to, "order_type": body.order_type,
+                "project_id": body.project_id})
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -476,7 +493,7 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
     if not order:
         raise HTTPException(404, "Work order not found")
     if user.role == "Production":
-        if order.assigned_to != user.id or "assigned_to" in body.model_fields_set:
+        if order.assigned_to != user.id or body.model_fields_set - {"status"}:
             raise HTTPException(403, "Production may update status only on its own assignments")
     else:
         allow_roles(user, "Quality", "Engineering", "Management")
@@ -497,6 +514,11 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
             db.add(AssignmentEvent(work_order_id=order.id, actor_id=user.id,
                                    previous_user_id=order.assigned_to, assigned_user_id=body.assigned_to))
             order.assigned_to = body.assigned_to
+    if "project_id" in body.model_fields_set and body.project_id != order.project_id:
+        if body.project_id is not None and not db.get(Project, body.project_id):
+            raise HTTPException(422, "Project not found")
+        changes["project_id"] = {"before": order.project_id, "after": body.project_id}
+        order.project_id = body.project_id
     if changes:
         record(db, user, "work_order.updated", "work_order", order.id, changes)
     db.commit()
@@ -516,6 +538,45 @@ def assignment_history(order_id: int, db: Session = Depends(session), user: User
              "assigned_user_id": e.assigned_user_id, "previous_employee": name(e.previous_user_id),
              "assigned_employee": name(e.assigned_user_id), "created_at": e.created_at.isoformat()}
             for e in entries]
+
+
+def serialize_project(project, orders):
+    return {"id": project.id, "name": project.name, "description": project.description,
+            "status": project.status, "created_at": project.created_at.isoformat(),
+            "work_order_count": len(orders),
+            "open_work_order_count": sum(o.status not in ("Completed", "Closed") for o in orders)}
+
+
+@app.get("/api/projects")
+def list_projects(db: Session = Depends(session), user: User = Depends(current_user)):
+    projects = db.scalars(select(Project).order_by(Project.id.desc()).limit(200)).all()
+    ids = [p.id for p in projects]
+    orders = db.scalars(select(WorkOrder).where(WorkOrder.project_id.in_(ids))).all() if ids else []
+    grouped = {}
+    for order in orders:
+        grouped.setdefault(order.project_id, []).append(order)
+    return [serialize_project(p, grouped.get(p.id, [])) for p in projects]
+
+
+@app.post("/api/projects", status_code=201)
+def create_project(body: CreateProjectBody, db: Session = Depends(session), user: User = Depends(current_user)):
+    allow_roles(user, "Quality", "Engineering", "Management")
+    project = Project(name=body.name, description=body.description, created_by=user.id)
+    db.add(project)
+    db.flush()
+    record(db, user, "project.created", "project", project.id, {"name": project.name})
+    db.commit()
+    return serialize_project(project, [])
+
+
+@app.get("/api/projects/{project_id}")
+def get_project(project_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+    orders = db.scalars(select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
+                        .where(WorkOrder.project_id == project_id).order_by(WorkOrder.id.desc())).all()
+    return {**serialize_project(project, orders), "work_orders": [serialize_order(o) for o in orders]}
 
 
 @app.get("/api/admin/audit")

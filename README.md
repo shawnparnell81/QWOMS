@@ -1,6 +1,6 @@
 # QWOMS — Quality Work Order Management System
 
-**Phase 1 development foundation — not a deployed or production-approved company application.**
+**Phase 2 development in progress — not a deployed or production-approved company application.**
 
 A browser-based Quality Work Order Management System for Quality, Engineering, Production, and Management across multiple sites. This is **not** a full QMS.
 
@@ -20,7 +20,9 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 
 ## Important limitations
 
-**Not built yet:** advanced Excel forms editing inside the app with exact Excel fidelity, automatic form rules, completed-form filing by type with user-entered filenames, projects, time/labor, pallet tracking, supplier chargebacks, production-ready object storage and migrations, approval flows, advanced audit trail, group chat, and cloud deployment. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
+**Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, initial department permissions, audit/assignment history, and project links are available. See `docs/BUILD_STATUS.md` for exact evidence and limits.
+
+**Not built yet:** advanced Excel forms editing inside the app with exact Excel fidelity, automatic form rules, completed-form filing by type with user-entered filenames, time/labor, pallet tracking, supplier chargebacks, production-approved storage, approval flows, comprehensive audit/security coverage, group chat, and cloud deployment. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
 
 The current file store uses local disk and SQLite is the default developer database; neither arrangement should be treated as the final cloud-hosting design. Security review, CSRF protection, origin policy, rate limiting, backups, SSO policy if needed, object storage, database migrations, permissions testing, and Excel compatibility testing are mandatory before using company data.
 

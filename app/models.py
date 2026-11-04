@@ -72,6 +72,16 @@ class WorkOrderCounter(Base):
     __table_args__ = (UniqueConstraint("code", "year", name="uq_counter_code_year"),)
 
 
+class Project(Base):
+    __tablename__ = "projects"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(30), default="Open")
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class WorkOrder(Base):
     __tablename__ = "work_orders"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -85,6 +95,7 @@ class WorkOrder(Base):
     details: Mapped[dict] = mapped_column(JSON, default=dict)  # Work-type-specific, validated fields
     assigned_to: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     assignee: Mapped[User | None] = relationship(foreign_keys=[assigned_to])
     parts: Mapped[list["WorkOrderPart"]] = relationship(back_populates="work_order", cascade="all, delete-orphan")

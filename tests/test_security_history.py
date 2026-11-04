@@ -11,12 +11,12 @@ def login_as(web, username, password):
     return web.cookies['qwoms_token']
 
 
-def create_order(web, assigned_to=1):
+def create_order(web, assigned_to=1, project_id=None):
     part_import(web, [['Fictional Shocks', 'SEC-001', 'SEC-ALT-001', '', '', '']])
     part = web.get('/api/parts/search?q=SEC-001').json()[0]
     response = web.post('/api/work-orders', json={
         'order_type': 'Inspection', 'subtype': 'AQL', 'title': 'Fictional security inspection',
-        'assigned_to': assigned_to, 'parts': [{'part_id': part['id'],
+        'assigned_to': assigned_to, 'project_id': project_id, 'parts': [{'part_id': part['id'],
          'selected_part_number': 'SEC-001', 'quantity': 1}]})
     assert response.status_code == 201, response.text
     return response.json()['id']
@@ -113,6 +113,11 @@ def test_department_permission_matrix(client, role):
     assert web.get('/api/dashboard').status_code == 200
     assert web.get('/api/files').status_code == 200
     assert web.get('/api/messages').status_code == 200
+    assert web.get('/api/projects').status_code == 200
+    project = web.post('/api/projects', json={'name':'Fictional department project'})
+    assert project.status_code == (403 if role == 'Production' else 201)
+    if role == 'Production':
+        assert web.patch(f'/api/work-orders/{order_id}', json={'project_id':99999}).status_code == 403
     assert web.get('/api/admin/audit').status_code == (200 if role == 'Management' else 403)
     response = web.patch(f'/api/work-orders/{order_id}', json={'assigned_to': 1})
     assert response.status_code == (403 if role == 'Production' else 200)
