@@ -27,13 +27,14 @@
         <button data-view="new" class="nav-item"><span>⊕</span> Create Work Order</button>
         <button data-view="projects" class="nav-item"><span>▱</span> Projects</button>
         <button data-view="parts" class="nav-item"><span>◫</span> Part Master</button>
+        <button data-view="workflow" class="nav-item"><span>☷</span> Work requirements</button>
         <button data-view="controlled" class="nav-item"><span>▣</span> Controlled revisions</button>
         <button data-view="files" class="nav-item"><span>◩</span> Drawings &amp; Files</button>
         <button data-view="messages" class="nav-item"><span>◉</span> Messages <span id="nav-unread" class="nav-count hidden">0</span></button>
       </nav>
       <p class="nav-label">SYSTEM</p>
       <nav><button data-view="admin" class="nav-item"><span>⚙</span> User Administration</button></nav>
-      <div class="sidebar-foot"><div class="phase-chip">● Phase 1 · Development</div><p>Only test data should be used until hosting, security, and spreadsheet compatibility are validated.</p></div>
+      <div class="sidebar-foot"><div class="phase-chip">● Phase 2 · Development</div><p>Only test data should be used until hosting, security, and spreadsheet compatibility are validated.</p></div>
     </aside>
     <div class="main-wrap">
       <header class="topbar"><div class="crumb">QUALITY OPERATIONS <span>/</span> <b id="crumb">My Dashboard</b></div><div class="account"><span id="site-label" class="site-label"></span><span id="user-avatar" class="avatar"></span><div><b id="user-name"></b><small id="user-role"></small></div><button id="logout" class="plain-btn" title="Sign out">⇥</button></div></header>
@@ -42,5 +43,6 @@
   </div>
   <div id="toast" class="toast hidden" role="status"></div>
   <script src="/static/app.js" defer></script>
-<script src="/static/controlled.js"></script>
+<script src="/static/controlled.js" defer></script>
+<script src="/static/workflow.js" defer></script>
 </body></html>

@@ -9,7 +9,7 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 - Modern browser UI with employee initials as avatars, a dashboard, and role-aware navigation.
 - Separate usernames/passwords (management creates accounts; no default passwords).
 - Six distinct work order types with different subtype choices and job-specific fields: Validation/FAI, Inspection, Test, Repair, Parts Weighing, Photos.
-- Automatic **work order** numbers; users, not the app, name saved documents/forms (completed form saving comes in a later phase).
+- Automatic **work order** numbers; users, not the app, name completed uploads and saved documents. In-browser workbook editing remains unavailable.
 - Assign work orders to employees and show assigned work on their dashboards.
 - Multiple parts per work order and customer-specific part-number aliases for the same physical part.
 - Excel `.xlsx` Part Master import with a preview, deduplication, conflict reporting, and blank fields retained; includes product families, UPC, drawing number, and revision.
@@ -20,9 +20,9 @@ A browser-based Quality Work Order Management System for Quality, Engineering, P
 
 ## Important limitations
 
-**Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, initial department permissions, audit/assignment history, and project links are available. See `docs/BUILD_STATUS.md` for exact evidence and limits.
+**Phase 2 foundations:** Alembic migrations, local Docker/PostgreSQL setup, private S3 storage adapter, revocable sessions with CSRF protection, initial department permissions, audit/assignment history, project links, controlled Engineering revision approvals, scoped work requirements and approved form attachments/completed-file storage are available. See [controlled workflows](docs/CONTROLLED_WORKFLOWS.md). See `docs/BUILD_STATUS.md` for exact evidence and limits.
 
-**Not built yet:** advanced Excel forms editing inside the app with exact Excel fidelity, automatic form rules, completed-form filing by type with user-entered filenames, time/labor, pallet tracking, supplier chargebacks, production-approved storage, approval flows, comprehensive audit/security coverage, group chat, and cloud deployment. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
+**Not built yet:** advanced Excel forms editing inside the app with exact Excel fidelity, time/labor, pallet tracking, supplier chargebacks, production-approved storage, comprehensive audit/security coverage, group chat, and cloud deployment. These remain requirements; see `docs/PRODUCT_REQUIREMENTS.md`.
 
 The current file store uses local disk and SQLite is the default developer database; neither arrangement should be treated as the final cloud-hosting design. Security review, CSRF protection, origin policy, rate limiting, backups, SSO policy if needed, object storage, database migrations, permissions testing, and Excel compatibility testing are mandatory before using company data.
 
@@ -67,4 +67,4 @@ For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a
 
 ## Next milestone for Codex
 
-Add database migrations, robust authentication/security review, durable PostgreSQL-backed cloud storage, and a controlled **form template registry** before implementing browser-based Excel workbook editing. Do not replace workbook formulas or formatting with a basic HTML form; exact workbook preservation must be proven on representative real examples.
+Follow `docs/BUILD_STATUS.md` and `docs/LAUNCH_ACCELERATION.md`. Resolve exact Excel editor licensing/fidelity, finish all remaining accepted workflows and security/storage/restore gates, and validate a hosted synthetic demo only in the authorized free Render workspace. A demo is not company-wide go-live. No PR until explicit user approval.

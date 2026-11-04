@@ -112,6 +112,8 @@ class WorkOrderPart(Base):
     drawing_rev_snapshot: Mapped[str | None] = mapped_column(String(50), nullable=True)
     drawing_file_id: Mapped[int | None] = mapped_column(ForeignKey("stored_files.id"), nullable=True)
     controlled_revision_id: Mapped[int | None] = mapped_column(ForeignKey('controlled_revisions.id'),nullable=True)
+    requirements_snapshot: Mapped[dict]=mapped_column(JSON,default=dict,server_default='{}')
+    field_values: Mapped[dict]=mapped_column(JSON,default=dict,server_default='{}')
     drawing_status: Mapped[str] = mapped_column(String(50), default="Missing reference")
     work_order: Mapped[WorkOrder] = relationship(back_populates="parts")
     part: Mapped[PhysicalPart] = relationship()
@@ -221,3 +223,55 @@ class RevisionEvent(Base):
     status: Mapped[str] = mapped_column(String(30))
     reason: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=utcnow)
+
+
+class WorkflowRule(Base):
+    __tablename__='workflow_rules'
+    id: Mapped[int]=mapped_column(primary_key=True)
+    name: Mapped[str]=mapped_column(String(200))
+    order_type: Mapped[str]=mapped_column(String(40))
+    subtype: Mapped[str]=mapped_column(String(100),default='')
+    family_id: Mapped[int | None]=mapped_column(ForeignKey('product_families.id'),nullable=True)
+    part_id: Mapped[int | None]=mapped_column(ForeignKey('physical_parts.id'),nullable=True)
+    fields: Mapped[list]=mapped_column(JSON,default=list)
+    instructions: Mapped[str]=mapped_column(Text,default='')
+    document_ids: Mapped[list]=mapped_column(JSON,default=list)
+    active: Mapped[bool]=mapped_column(Boolean,default=True)
+    created_by: Mapped[int]=mapped_column(ForeignKey('users.id'))
+    created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+
+
+class FormFilingRule(Base):
+    __tablename__='form_filing_rules'
+    id: Mapped[int]=mapped_column(primary_key=True)
+    order_type: Mapped[str]=mapped_column(String(40))
+    subtype: Mapped[str]=mapped_column(String(100),default='')
+    folder: Mapped[str]=mapped_column(String(200))
+    __table_args__=(UniqueConstraint('order_type','subtype',name='uq_form_filing_scope'),)
+
+
+class WorkOrderAttachment(Base):
+    __tablename__='work_order_attachments'
+    id: Mapped[int]=mapped_column(primary_key=True)
+    work_order_id: Mapped[int]=mapped_column(ForeignKey('work_orders.id'),index=True)
+    part_id: Mapped[int]=mapped_column(ForeignKey('physical_parts.id'))
+    revision_id: Mapped[int]=mapped_column(ForeignKey('controlled_revisions.id'))
+    file_id: Mapped[int]=mapped_column(ForeignKey('stored_files.id'))
+    kind: Mapped[str]=mapped_column(String(30))
+    number: Mapped[str]=mapped_column(String(150))
+    revision: Mapped[str]=mapped_column(String(50))
+    sha256: Mapped[str]=mapped_column(String(64))
+    filename: Mapped[str]=mapped_column(String(255))
+    category_folder: Mapped[str]=mapped_column(String(200))
+    __table_args__=(UniqueConstraint('work_order_id','part_id','revision_id',name='uq_order_part_document'),)
+
+
+class CompletedForm(Base):
+    __tablename__='completed_forms'
+    id: Mapped[int]=mapped_column(primary_key=True)
+    work_order_id: Mapped[int]=mapped_column(ForeignKey('work_orders.id'),index=True)
+    attachment_id: Mapped[int]=mapped_column(ForeignKey('work_order_attachments.id'))
+    file_id: Mapped[int]=mapped_column(ForeignKey('stored_files.id'),unique=True)
+    project_id: Mapped[int | None]=mapped_column(ForeignKey('projects.id'),nullable=True)
+    saved_by: Mapped[int]=mapped_column(ForeignKey('users.id'))
+    saved_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)

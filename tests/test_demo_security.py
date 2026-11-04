@@ -49,6 +49,8 @@ def test_readiness_security_headers_and_demo_banner_flag(client, monkeypatch):
     assert 'SYNTHETIC DATA ONLY' in web.get('/').text
     assert web.get('/healthz').headers['X-Frame-Options']=='DENY'
     assert web.get('/healthz').headers['Strict-Transport-Security'].startswith('max-age=')
+    monkeypatch.setenv('QWOMS_BUILD_COMMIT','unknown');monkeypatch.setenv('RENDER_GIT_COMMIT','a'*40)
+    assert web.get('/healthz').json()['build_commit']=='a'*40
     import app.main as module
     def unavailable(engine):
         raise RuntimeError('Fictional database unavailable')
@@ -113,3 +115,12 @@ def test_synthetic_bootstrap_is_idempotent_without_credential_overwrite(client,m
         before=db.scalar(select(User).where(User.username=='demo.manager')).password_hash
         seed(db);db.commit()
         assert db.scalar(select(User).where(User.username=='demo.manager')).password_hash==before
+
+
+def test_unicode_basic_credentials_are_rejected_without_server_error(client,monkeypatch):
+    import base64
+    web,_=client
+    monkeypatch.setenv('QWOMS_DEMO_MODE','true');monkeypatch.setenv('QWOMS_DEMO_ACCESS_MODE','basic')
+    monkeypatch.setenv('QWOMS_DEMO_GATE_PASSWORD','x'*64)
+    encoded=base64.b64encode('demo:неверный'.encode()).decode()
+    assert web.get('/',headers={'Authorization':'Basic '+encoded}).status_code==401

@@ -31,6 +31,8 @@ from .deployment import validate_settings, demo_mode, public_origin, demo_gate_o
 from .throttling import check_login, finish_login
 from .controlled import mapped_draft, drawing_reference
 from .models import ControlledRevision,WorkOrderPart
+from .models import ControlledDocument,WorkOrderAttachment,CompletedForm
+from .workflows import resolve,validate_values,approved_documents,attach
 
 DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))
 
@@ -108,6 +110,8 @@ class PartInput(BaseModel):
     part_id: int
     selected_part_number: str
     quantity: int = Field(ge=1)
+    field_values: dict[str,str] = Field(default_factory=dict)
+    rule_ids: list[int] | None = None
 
 
 class CreateWorkOrderBody(BaseModel):
@@ -118,7 +122,7 @@ class CreateWorkOrderBody(BaseModel):
     assigned_to: int | None = None
     project_id: int | None = None
     notes: str = ""
-    parts: list[PartInput] = Field(min_length=1)
+    parts: list[PartInput] = Field(min_length=1,max_length=100)
     details: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("title", mode="before")
@@ -181,6 +185,7 @@ def serialize_order(o: WorkOrder):
                        "drawing_revision": p.drawing_rev_snapshot,
                        "drawing_status": p.drawing_status,
                        "controlled_revision_id":p.controlled_revision_id,
+                       "requirements":p.requirements_snapshot,"field_values":p.field_values,
                        "drawing_file_id": p.drawing_file_id} for p in o.parts]}
 
 
@@ -197,8 +202,10 @@ def home():
 
 @app.get("/healthz")
 def health():
+    commit=os.getenv('QWOMS_BUILD_COMMIT','unknown')
+    if commit=='unknown':commit=os.getenv('RENDER_GIT_COMMIT','unknown')
     return {"status": "ok", "phase": "synthetic-demo" if demo_mode() else "developer-foundation",
-            "build_commit": os.getenv("QWOMS_BUILD_COMMIT", "unknown")}
+            "build_commit": commit}
 
 
 @app.get('/api/public-config')
@@ -491,13 +498,30 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
         assignee = db.get(User, body.assigned_to)
         if not assignee or not assignee.active:
             raise HTTPException(422, "Assigned employee not found")
-    resolved_parts = []
+    if len({p.part_id for p in body.parts})!=len(body.parts):
+        raise HTTPException(422,'Choose one alias per physical part and combine its quantity')
+    prepared=[]
+    document_ids=set();drawing_numbers=set()
     for p in body.parts:
         part = db.scalar(select(PhysicalPart).options(selectinload(PhysicalPart.aliases)).where(PhysicalPart.id == p.part_id))
         if not part or not any(a.part_number.casefold() == p.selected_part_number.strip().casefold() for a in part.aliases):
             raise HTTPException(422, "Selected part number is not an alias of the specified physical part")
+        requirements=resolve(db,part,body.order_type,body.subtype)
+        if requirements['rule_ids'] and sorted(p.rule_ids or [])!=sorted(requirements['rule_ids']):
+            raise HTTPException(409,'Work requirements changed or were not reviewed; refresh this part workflow before creating the order')
+        validate_values(requirements,p.field_values)
+        prepared.append((p,part,requirements))
+        document_ids.update(requirements['document_ids'])
+        if part.drawing_number:drawing_numbers.add(part.drawing_number.casefold())
+    # Lock all affected control identities in one stable order, shared with approvals.
+    db.scalars(select(ControlledDocument).where(or_(ControlledDocument.id.in_(document_ids),
+        (ControlledDocument.kind=='Drawing') & ControlledDocument.identity_key.in_(drawing_numbers)))
+        .order_by(ControlledDocument.id).with_for_update()).all()
+    resolved_parts=[]
+    for p,part,requirements in prepared:
         revision,drawing,drawing_state=drawing_reference(db,part.drawing_number,part.drawing_revision)
-        resolved_parts.append((p, part, drawing,revision,drawing_state))
+        documents=approved_documents(db,requirements)
+        resolved_parts.append((p,part,drawing,revision,drawing_state,requirements,documents))
     year = datetime.now(timezone.utc).year
     counter = db.scalar(select(WorkOrderCounter).where(WorkOrderCounter.code == config["code"],
             WorkOrderCounter.year == year).with_for_update())
@@ -516,13 +540,15 @@ def create_order(body: CreateWorkOrderBody, db: Session = Depends(session), user
                    project_id=body.project_id)
     db.add(wo)
     db.flush()
-    for entry, part, drawing, revision, drawing_state in resolved_parts:
+    for entry, part, drawing, revision, drawing_state, requirements, documents in resolved_parts:
         wo.parts.append(WorkOrderPart(part_id=part.id, selected_part_number=entry.selected_part_number.strip(),
                                      quantity=entry.quantity, drawing_number_snapshot=part.drawing_number,
                                      drawing_rev_snapshot=part.drawing_revision,
                                      drawing_file_id=drawing.id if drawing else None,
                                      controlled_revision_id=revision.id if revision else None,
+                                     requirements_snapshot=requirements,field_values=entry.field_values,
                                      drawing_status=drawing_state))
+        attach(db,wo,part,documents)
     try:
         db.add(AssignmentEvent(work_order_id=wo.id, actor_id=user.id,
                                previous_user_id=None, assigned_user_id=body.assigned_to))
@@ -556,6 +582,13 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
                 raise HTTPException(409,'Engineering must resolve missing, unapproved or superseded drawing references before execution')
             if any(p.controlled_revision_id and db.get(ControlledRevision,p.controlled_revision_id).status=='Obsolete' for p in order.parts):
                 raise HTTPException(409,'An obsolete pinned drawing requires Engineering review before execution')
+            phase='execution' if body.status=='In Progress' else 'completion'
+            for part in order.parts:validate_values(part.requirements_snapshot,part.field_values,phase)
+            for attachment in db.scalars(select(WorkOrderAttachment).where(WorkOrderAttachment.work_order_id==order.id)).all():
+                if db.get(ControlledRevision,attachment.revision_id).status=='Obsolete':
+                    raise HTTPException(409,'An attached instruction/form was withdrawn; Engineering review required')
+                if phase=='completion' and attachment.kind=='Form template' and not db.scalar(select(CompletedForm.id).where(CompletedForm.attachment_id==attachment.id)):
+                    raise HTTPException(409,'Save every mandatory completed form before closing this work order')
         if order.status != body.status:
             changes["status"] = {"before": order.status, "after": body.status}
             order.status = body.status
@@ -692,3 +725,5 @@ def send_message(body: SendMessageBody, db: Session = Depends(session), user: Us
 
 from .controlled_api import router as controlled_router
 app.include_router(controlled_router)
+from .workflow_api import router as workflow_router
+app.include_router(workflow_router)

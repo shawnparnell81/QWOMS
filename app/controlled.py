@@ -3,6 +3,10 @@ import hashlib
 from datetime import datetime,timezone
 from io import BytesIO
 from zipfile import ZipFile,BadZipFile
+from zlib import error as ZlibError
+from defusedxml.ElementTree import fromstring
+from defusedxml.common import DefusedXmlException
+from xml.etree.ElementTree import ParseError
 from fastapi import HTTPException
 from sqlalchemy import select,func
 from .models import ControlledDocument,ControlledRevision,RevisionEvent,PhysicalPart,StoredFile
@@ -20,12 +24,20 @@ def validate_xlsx(content):
             names=set(archive.namelist())
             if not {'[Content_Types].xml','xl/workbook.xml'}.issubset(names):
                 raise ValueError('Not an XLSX workbook')
+            if any(archive.getinfo(n).file_size>2*1024*1024 for n in ['[Content_Types].xml','xl/workbook.xml']):
+                raise ValueError('Workbook metadata exceeds the safe limit')
+            types=fromstring(archive.read('[Content_Types].xml'))
+            workbook=fromstring(archive.read('xl/workbook.xml'))
+            if not types.tag.endswith('}Types') or not workbook.tag.endswith('}workbook'):
+                raise ValueError('Workbook metadata is invalid')
+            if any('macroenabled' in n.attrib.get('ContentType','').casefold() for n in types):
+                raise ValueError('Macro-enabled workbooks are not accepted as .xlsx forms')
             if any('vbaproject' in n.casefold() or n.startswith('/') or '..' in n.split('/') for n in names):
                 raise ValueError('Macros or unsafe workbook paths are not accepted')
             if archive.testzip() is not None:
                 raise ValueError('Workbook checksum validation failed')
-    except (BadZipFile,ValueError) as exc:
-        raise HTTPException(422,str(exc))
+    except (BadZipFile,ValueError,RuntimeError,NotImplementedError,OSError,ZlibError,DefusedXmlException,ParseError) as exc:
+        raise HTTPException(422,'Invalid or unsupported .xlsx workbook container') from exc
 
 
 def file_bytes(db,file):

@@ -21,7 +21,7 @@ def demo_gate_ok(request):
     try:
         scheme, encoded = request.headers.get('authorization','').split(' ',1)
         username, password = base64.b64decode(encoded,validate=True).decode().split(':',1)
-        return scheme.casefold()=='basic' and hmac.compare_digest(username,'demo') and hmac.compare_digest(password,os.getenv('QWOMS_DEMO_GATE_PASSWORD',''))
+        return scheme.casefold()=='basic' and hmac.compare_digest(username.encode(),b'demo') and hmac.compare_digest(password.encode(),os.getenv('QWOMS_DEMO_GATE_PASSWORD','').encode())
     except (ValueError,UnicodeError):
         return False
 
