@@ -53,3 +53,9 @@ Read `docs/LAUNCH_ACCELERATION.md` at the beginning of each task. Prioritize an 
 - Favor fast, integrated development and automated regression tests across workstreams. An impressive demo, local test pass, or cloud URL alone is insufficient evidence of operational readiness.
 - Do not claim the app will work perfectly without testing. Real representative workbook compatibility, security, backups/restore, and user acceptance are release gates.
 - Stay on `development/qwoms-complete-build`; multiple commits, one final PR only upon user approval. Code and tests cannot be run asynchronously outside an active Codex task.
+
+## One login only — user requirement (2026-11-04)
+
+- The QWOMS website must show **one username/password login only**. No separate browser HTTP Basic prompt, demo-gate password, secondary employee portal login or extra authentication layer before the app's login screen.
+- For the synthetic Render demo, remove the HTTP Basic gate while preserving individual QWOMS sessions, HTTPS, CSRF protection, permission checks and login throttling. A public login screen is acceptable for **synthetic test data only**; no real company content until independent production security approval.
+- For production, each user signs in once using their individual QWOMS account. Sole initial Administrator sets up all employees and grants permissions explicitly. Do not reintroduce double login through future Blueprint sync/deploy.
