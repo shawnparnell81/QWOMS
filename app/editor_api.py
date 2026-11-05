@@ -118,6 +118,7 @@ def begin(order_id:int,attachment_id:int,body:Begin,request:Request,engine:Liter
         saved=db.get(CompletedForm,body.completed_id)
         if not saved or saved.work_order_id!=order.id or saved.attachment_id!=attachment.id:raise HTTPException(404,'Completed workbook does not belong to this attached form')
         source=db.get(StoredFile,saved.file_id)
+    elif order.archived_at is not None:raise HTTPException(409,'Archived work orders are read-only')
     elif order.status in ('Completed','Closed'):raise HTTPException(409,'Open a saved completed workbook for a closed order')
     blob=file_bytes(db,source);validate_for_editor(blob)
     if not body.completed_id and hashlib.sha256(blob).hexdigest()!=attachment.sha256:raise HTTPException(409,'Pinned blank master integrity check failed')
