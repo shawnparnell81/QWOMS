@@ -175,7 +175,7 @@ def attachments(order_id:int,db:Session=Depends(session),user:User=Depends(curre
 def can_edit(user,order):
     if user.role=='Production' and order.assigned_to!=user.id:raise HTTPException(403,'Only assigned Production employees may record this work')
     if order.archived_at is not None:raise HTTPException(409,'Archived work orders cannot be modified')
-    if order.status in ('Completed','Closed'):raise HTTPException(409,'Completed records cannot be rewritten')
+    if order.status in ('Completed','Closed','Cancelled'):raise HTTPException(409,'Completed records cannot be rewritten')
 
 
 @router.patch('/work-orders/{order_id}/parts/{part_id}/fields')
