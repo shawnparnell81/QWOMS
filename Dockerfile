@@ -9,6 +9,8 @@ RUN --mount=type=secret,id=proxy_ca \
 RUN useradd --uid 10001 --create-home qwoms && mkdir /data && chown qwoms:qwoms /data
 COPY --chown=qwoms:qwoms app ./app
 COPY --chown=qwoms:qwoms migrations ./migrations
+# Reject syntactically invalid Python before deployment or database migration.
+RUN python -m compileall -q app migrations
 COPY --chown=qwoms:qwoms alembic.ini .
 COPY --chown=qwoms:qwoms scripts/container-entrypoint.sh ./container-entrypoint.sh
 ARG QWOMS_BUILD_COMMIT=unknown
