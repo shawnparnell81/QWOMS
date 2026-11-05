@@ -711,10 +711,21 @@ def dashboard(db: Session = Depends(session), user: User = Depends(current_user)
     open_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
         WorkOrder.assigned_to == user.id,
         WorkOrder.status.notin_(("Completed", "Closed")))) or 0
+    # Dashboard KPIs use persisted records, not UI sample values or a 200-row list.
+    from .models import LaborEntry
+    completed_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
+        WorkOrder.status.in_(("Completed", "Closed")))) or 0
+    in_progress_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
+        WorkOrder.status == "In Progress")) or 0
+    labor_seconds = db.scalar(select(func.coalesce(func.sum(LaborEntry.duration_seconds), 0))
+        .where(LaborEntry.stopped_at.is_not(None))) or 0
     return {"assigned": [serialize_order(o) for o in assigned],
             "assigned_count": assigned_count,
             "open_count": open_count,
             "unread_messages": unread,
+            "in_progress_count": in_progress_count,
+            "completed_count": completed_count,
+            "labor_seconds": int(labor_seconds),
             "total_work_orders": db.scalar(select(func.count()).select_from(WorkOrder)) or 0,
             "total_parts": db.scalar(select(func.count()).select_from(PhysicalPart)) or 0}
 
