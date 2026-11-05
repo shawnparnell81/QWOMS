@@ -81,6 +81,9 @@ def management(user):
 def order_access(db,order_id,user,write=False):
     order=db.get(WorkOrder,order_id)
     if not order:raise HTTPException(404,'Work order not found')
+    if order.archived_at is not None:
+        if write:raise HTTPException(409,'Archived work orders cannot be modified')
+        if not user.is_admin:raise HTTPException(404,'Work order not found')
     if user.role=='Production' and order.assigned_to!=user.id:raise HTTPException(403,'Only assigned Production employees may access operations')
     if write and order.status in ('Completed','Closed'):raise HTTPException(409,'Work order is closed')
     return order
@@ -210,7 +213,7 @@ def approve_cost(item_id:int,body:Approval,db:Session=Depends(session),user:User
 def chargeback(project_id:int,db:Session=Depends(session),user:User=Depends(current_user)):
     management(user)
     if not db.get(Project,project_id):raise HTTPException(404,'Project not found')
-    orders=db.scalars(select(WorkOrder).where(WorkOrder.project_id==project_id)).all();ids=[o.id for o in orders]
+    orders=db.scalars(select(WorkOrder).where(WorkOrder.project_id==project_id, WorkOrder.archived_at.is_(None))).all();ids=[o.id for o in orders]
     entries=db.scalars(select(LaborEntry).where(LaborEntry.work_order_id.in_(ids),LaborEntry.approved_by.is_not(None),LaborEntry.stopped_at.is_not(None))).all()
     costs=db.scalars(select(ChargeItem).where(ChargeItem.work_order_id.in_(ids),ChargeItem.approved_by.is_not(None))).all()
     lines=[{'kind':'labor','id':e.id,'work_order_id':e.work_order_id,'employee_id':e.employee_id,'department':e.department_snapshot,'activity':e.activity,'seconds':e.duration_seconds,'rate_cents':e.rate_cents,'amount_cents':int((Decimal(e.duration_seconds)*Decimal(e.rate_cents)/3600).quantize(Decimal('1'),rounding=ROUND_HALF_UP))} for e in entries]
