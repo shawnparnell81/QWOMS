@@ -151,6 +151,10 @@ class UpdateWorkOrderBody(BaseModel):
     status: str | None = None
     assigned_to: int | None = None
     project_id: int | None = None
+    title: str | None = Field(default=None, min_length=3, max_length=250)
+    priority: str | None = None
+    notes: str | None = Field(default=None, max_length=10000)
+    details: dict[str, str] | None = None
 
 
 class ArchiveOrderBody(BaseModel):
@@ -602,12 +606,35 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
         raise HTTPException(404, "Work order not found")
     if order.archived_at is not None:
         raise HTTPException(409, "Archived work orders cannot be modified; restore first")
+    if order.status in ("Completed", "Closed", "Cancelled"):
+        raise HTTPException(409, "Completed or cancelled work orders are read-only")
     if user.role == "Production":
         if order.assigned_to != user.id or body.model_fields_set - {"status"}:
             raise HTTPException(403, "Production may update status only on its own assignments")
     else:
         allow_roles(user, "Quality", "Engineering", "Management")
     changes = {}
+    if body.title is not None:
+        title = body.title.strip()
+        if len(title) < 3:raise HTTPException(422,'Work order title must be at least three characters')
+        if title != order.title:
+            changes['title']={'before':order.title,'after':title}
+            order.title=title
+    if body.priority is not None:
+        if body.priority not in ('Low','Normal','High','Urgent'):raise HTTPException(422,'Invalid priority')
+        if body.priority != order.priority:
+            changes['priority']={'before':order.priority,'after':body.priority}
+            order.priority=body.priority
+    if body.notes is not None and body.notes != order.notes:
+        changes['notes']={'before':order.notes,'after':body.notes}
+        order.notes=body.notes
+    if body.details is not None:
+        allowed=set(TYPE_CONFIG[order.order_type]['fields'])
+        unknown=set(body.details)-allowed
+        if unknown:raise HTTPException(422,'These fields do not belong to the order type: '+', '.join(sorted(unknown)))
+        if body.details!=order.details:
+            changes['details']={'before':order.details,'after':body.details}
+            order.details=body.details
     if body.status in ('Completed','Closed'):
         from .models import DispositionEvent
         latest=db.scalar(select(DispositionEvent).where(DispositionEvent.work_order_id==order.id).order_by(DispositionEvent.id.desc()))
@@ -650,6 +677,29 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
         order.project_id = body.project_id
     if changes:
         record(db, user, "work_order.updated", "work_order", order.id, changes)
+    db.commit()
+    return serialize_order(query_order(db, order_id))
+
+
+@app.post("/api/work-orders/{order_id}/cancel")
+def cancel_order(order_id: int, body: ArchiveOrderBody, db: Session = Depends(session),
+                 user: User = Depends(current_user)):
+    from .models import LaborEntry
+    if user.role not in ("Quality","Engineering","Management") and not user.is_admin:
+        raise HTTPException(403, "Only Quality, Engineering, Management or Administrators can cancel orders")
+    order = db.scalar(select(WorkOrder).where(WorkOrder.id == order_id).with_for_update())
+    if not order or order.archived_at is not None:
+        raise HTTPException(404, "Work order not found")
+    if order.status in ("Cancelled", "Completed", "Closed"):
+        raise HTTPException(409, "This order cannot be cancelled from its current status")
+    if body.confirm_number != order.number:
+        raise HTTPException(422, "Type the exact work order number to confirm cancellation")
+    if db.scalar(select(LaborEntry.id).where(LaborEntry.work_order_id == order_id, LaborEntry.stopped_at.is_(None))):
+        raise HTTPException(409, "Stop active work timers before cancelling")
+    old = order.status
+    order.status = "Cancelled"
+    record(db, user, "work_order.cancelled", "work_order", order.id,
+           {"number": order.number, "reason": body.reason, "from_status": old, "to_status": "Cancelled"})
     db.commit()
     return serialize_order(query_order(db, order_id))
 
@@ -716,7 +766,7 @@ def serialize_project(project, orders):
     return {"id": project.id, "name": project.name, "description": project.description,
             "status": project.status, "created_at": project.created_at.isoformat(),
             "work_order_count": len(orders),
-            "open_work_order_count": sum(o.status not in ("Completed", "Closed") for o in orders)}
+            "open_work_order_count": sum(o.status not in ("Completed", "Closed", "Cancelled") for o in orders)}
 
 
 @app.get("/api/projects")
@@ -771,7 +821,7 @@ def dashboard(db: Session = Depends(session), user: User = Depends(current_user)
         WorkOrder.assigned_to == user.id, WorkOrder.archived_at.is_(None))) or 0
     open_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
         WorkOrder.assigned_to == user.id,
-        WorkOrder.status.notin_(("Completed", "Closed")), WorkOrder.archived_at.is_(None))) or 0
+        WorkOrder.status.notin_(("Completed", "Closed", "Cancelled")), WorkOrder.archived_at.is_(None))) or 0
     # Dashboard KPIs use persisted records, not UI sample values or a 200-row list.
     from .models import LaborEntry
     completed_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
