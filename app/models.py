@@ -100,6 +100,10 @@ class WorkOrder(Base):
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # Recoverable soft-delete. Audit history, files, timing and assigned numbers stay intact.
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    archived_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    archive_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     assignee: Mapped[User | None] = relationship(foreign_keys=[assigned_to])
     parts: Mapped[list["WorkOrderPart"]] = relationship(back_populates="work_order", cascade="all, delete-orphan")
 
