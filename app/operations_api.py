@@ -85,7 +85,7 @@ def order_access(db,order_id,user,write=False):
         if write:raise HTTPException(409,'Archived work orders cannot be modified')
         if not user.is_admin:raise HTTPException(404,'Work order not found')
     if user.role=='Production' and order.assigned_to!=user.id:raise HTTPException(403,'Only assigned Production employees may access operations')
-    if write and order.status in ('Completed','Closed'):raise HTTPException(409,'Work order is closed')
+    if write and order.status in ('Completed','Closed','Cancelled'):raise HTTPException(409,'Work order is closed')
     return order
 
 
