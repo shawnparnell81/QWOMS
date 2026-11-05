@@ -107,6 +107,7 @@ def resolve_drawings(order_id:int,db:Session=Depends(session),user:User=Depends(
     if user.role!='Engineering':raise HTTPException(403,'Engineering required')
     order=db.scalar(select(WorkOrder).where(WorkOrder.id==order_id).with_for_update())
     if not order:raise HTTPException(404,'Work order not found')
+    if order.archived_at is not None:raise HTTPException(409,'Archived work orders are read-only')
     if order.status!='Open':raise HTTPException(409,'References can only be resolved before work begins')
     for part in order.parts:
         if part.controlled_revision_id and part.drawing_status=='Approved':continue
