@@ -55,6 +55,14 @@ python -m pytest -q
 
 For a PostgreSQL environment, set `DATABASE_URL=postgresql+psycopg://...`, use a persistent `QWOMS_SECRET_KEY`, and configure secure cookies and approved persistent document storage **before** evaluating deployment. Alembic now owns schema changes; startup refuses a stale database. See [Phase 2 operations](docs/PHASE2_OPERATIONS.md) for legacy database adoption, S3 configuration, and Docker Desktop instructions.
 
+## Modern interface and printing (development branch)
+
+- Modern business-dashboard redesign: real total work orders, recorded labor, in-progress and completed KPI counts; type shortcuts; recent work and assigned work; modern order register and navigation styling.
+- **Print page** in the main application header prints whichever authorized view is currently shown, with clean print formatting and current form values. Every work-order detail also includes **Print work order**.
+- Attached **Excel forms** use the editor's **Print form** control (currently active worksheet); original PDFs and images can be opened for native browser printing. Print appearance is not yet certified pixel-identical to Microsoft Excel.
+- See `docs/PRINTING.md` for supported views, workbook print limits and verification steps. These changes are on `development/qwoms-complete-build` only and do not update the older hosted synthetic demo until an authorized deployment.
+- Browser/API regression scripts are included but must be executed and accepted in a live private preview before release.
+
 ## Repository structure
 
 - `app/main.py`: API endpoints, assignment, drawing folder import, work orders, messaging.
