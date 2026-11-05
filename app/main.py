@@ -153,6 +153,17 @@ class UpdateWorkOrderBody(BaseModel):
     project_id: int | None = None
 
 
+class ArchiveOrderBody(BaseModel):
+    """Traceable recoverable archive/restore, not a destructive database delete."""
+    confirm_number: str = Field(min_length=1, max_length=120)
+    reason: str = Field(min_length=8, max_length=2000)
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def strip_reason(cls, v):
+        return v.strip() if isinstance(v, str) else v
+
+
 class CreateProjectBody(BaseModel):
     name: str = Field(min_length=3, max_length=200)
     description: str = Field(default="", max_length=10000)
@@ -196,6 +207,8 @@ def serialize_order(o: WorkOrder):
             "assignee": serialize_user(o.assignee) if o.assignee else None,
             "created_by": o.created_by, "created_at": o.created_at.isoformat(),
             "project_id": o.project_id,
+            "archived": o.archived_at is not None, "archived_at": o.archived_at.isoformat() if o.archived_at else None,
+            "archive_reason": o.archive_reason if o.archived_at else None,
             "parts": [{"part_id": p.part_id, "selected_part_number": p.selected_part_number,
                        "quantity": p.quantity, "drawing_number": p.drawing_number_snapshot,
                        "drawing_revision": p.drawing_rev_snapshot,
@@ -479,8 +492,11 @@ def map_drawing(file_id: int, body: DrawingMapping, db: Session = Depends(sessio
 
 
 @app.get("/api/work-orders")
-def list_orders(assigned_to_me: bool = False, db: Session = Depends(session), user: User = Depends(current_user)):
+def list_orders(assigned_to_me: bool = False, archived_only: bool = False, db: Session = Depends(session), user: User = Depends(current_user)):
+    if archived_only and not user.is_admin:
+        raise HTTPException(403, "Only Administrators may view archived work orders")
     query = select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
+    query = query.where(WorkOrder.archived_at.is_not(None) if archived_only else WorkOrder.archived_at.is_(None))
     if assigned_to_me:
         query = query.where(WorkOrder.assigned_to == user.id)
     query = query.order_by(WorkOrder.created_at.desc(), WorkOrder.id.desc()).limit(200)
@@ -490,7 +506,7 @@ def list_orders(assigned_to_me: bool = False, db: Session = Depends(session), us
 @app.get("/api/work-orders/{order_id}")
 def get_order(order_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
     order = query_order(db, order_id)
-    if not order:
+    if not order or (order.archived_at is not None and not user.is_admin):
         raise HTTPException(404, "Work order not found")
     return serialize_order(order)
 
@@ -584,6 +600,8 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
     order = db.scalar(select(WorkOrder).where(WorkOrder.id == order_id).with_for_update())
     if not order:
         raise HTTPException(404, "Work order not found")
+    if order.archived_at is not None:
+        raise HTTPException(409, "Archived work orders cannot be modified; restore first")
     if user.role == "Production":
         if order.assigned_to != user.id or body.model_fields_set - {"status"}:
             raise HTTPException(403, "Production may update status only on its own assignments")
@@ -636,6 +654,49 @@ def update_order(order_id: int, body: UpdateWorkOrderBody, db: Session = Depends
     return serialize_order(query_order(db, order_id))
 
 
+@app.post("/api/work-orders/{order_id}/archive")
+def archive_order(order_id: int, body: ArchiveOrderBody, db: Session = Depends(session),
+                  user: User = Depends(require_admin)):
+    from .models import LaborEntry
+    order = db.scalar(select(WorkOrder).where(WorkOrder.id == order_id).with_for_update())
+    if not order:
+        raise HTTPException(404, "Work order not found")
+    if order.archived_at is not None:
+        raise HTTPException(409, "Work order is already archived")
+    if body.confirm_number != order.number:
+        raise HTTPException(422, "Type the exact work order number to confirm deletion")
+    if db.scalar(select(LaborEntry.id).where(LaborEntry.work_order_id == order_id, LaborEntry.stopped_at.is_(None))):
+        raise HTTPException(409, "Stop active work timers before deleting this work order")
+    order.archived_at = datetime.now(timezone.utc)
+    order.archived_by = user.id
+    order.archive_reason = body.reason
+    record(db, user, "work_order.archived", "work_order", order.id,
+           {"number": order.number, "reason": body.reason, "status_preserved": order.status})
+    db.commit()
+    return serialize_order(query_order(db, order_id))
+
+
+@app.post("/api/work-orders/{order_id}/restore")
+def restore_order(order_id: int, body: ArchiveOrderBody, db: Session = Depends(session),
+                  user: User = Depends(require_admin)):
+    order = db.scalar(select(WorkOrder).where(WorkOrder.id == order_id).with_for_update())
+    if not order:
+        raise HTTPException(404, "Work order not found")
+    if order.archived_at is None:
+        raise HTTPException(409, "Work order is not archived")
+    if body.confirm_number != order.number:
+        raise HTTPException(422, "Type the exact work order number to confirm restoration")
+    archive_context = {"archived_at": order.archived_at.isoformat(),
+                       "archived_by": order.archived_by, "archive_reason": order.archive_reason}
+    order.archived_at = None
+    order.archived_by = None
+    order.archive_reason = None
+    record(db, user, "work_order.restored", "work_order", order.id,
+           {**archive_context, "number": order.number, "restore_reason": body.reason})
+    db.commit()
+    return serialize_order(query_order(db, order_id))
+
+
 @app.get("/api/work-orders/{order_id}/assignment-history")
 def assignment_history(order_id: int, db: Session = Depends(session), user: User = Depends(current_user)):
     if not db.get(WorkOrder, order_id):
@@ -662,7 +723,7 @@ def serialize_project(project, orders):
 def list_projects(db: Session = Depends(session), user: User = Depends(current_user)):
     projects = db.scalars(select(Project).order_by(Project.id.desc()).limit(200)).all()
     ids = [p.id for p in projects]
-    orders = db.scalars(select(WorkOrder).where(WorkOrder.project_id.in_(ids))).all() if ids else []
+    orders = db.scalars(select(WorkOrder).where(WorkOrder.project_id.in_(ids), WorkOrder.archived_at.is_(None))).all() if ids else []
     grouped = {}
     for order in orders:
         grouped.setdefault(order.project_id, []).append(order)
@@ -686,7 +747,7 @@ def get_project(project_id: int, db: Session = Depends(session), user: User = De
     if not project:
         raise HTTPException(404, "Project not found")
     orders = db.scalars(select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
-                        .where(WorkOrder.project_id == project_id).order_by(WorkOrder.id.desc())).all()
+                        .where(WorkOrder.project_id == project_id, WorkOrder.archived_at.is_(None)).order_by(WorkOrder.id.desc())).all()
     return {**serialize_project(project, orders), "work_orders": [serialize_order(o) for o in orders]}
 
 
@@ -704,19 +765,19 @@ def audit_history(before_id: int | None = None, db: Session = Depends(session),
 @app.get("/api/dashboard")
 def dashboard(db: Session = Depends(session), user: User = Depends(current_user)):
     assigned = db.scalars(select(WorkOrder).options(selectinload(WorkOrder.assignee), selectinload(WorkOrder.parts))
-                          .where(WorkOrder.assigned_to == user.id).order_by(WorkOrder.id.desc()).limit(30)).all()
+                          .where(WorkOrder.assigned_to == user.id, WorkOrder.archived_at.is_(None)).order_by(WorkOrder.id.desc()).limit(30)).all()
     unread = db.scalar(select(func.count()).select_from(Message).where(Message.recipient_id == user.id, Message.read_at.is_(None))) or 0
     assigned_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
-        WorkOrder.assigned_to == user.id)) or 0
+        WorkOrder.assigned_to == user.id, WorkOrder.archived_at.is_(None))) or 0
     open_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
         WorkOrder.assigned_to == user.id,
-        WorkOrder.status.notin_(("Completed", "Closed")))) or 0
+        WorkOrder.status.notin_(("Completed", "Closed")), WorkOrder.archived_at.is_(None))) or 0
     # Dashboard KPIs use persisted records, not UI sample values or a 200-row list.
     from .models import LaborEntry
     completed_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
-        WorkOrder.status.in_(("Completed", "Closed")))) or 0
+        WorkOrder.status.in_(("Completed", "Closed")), WorkOrder.archived_at.is_(None))) or 0
     in_progress_count = db.scalar(select(func.count()).select_from(WorkOrder).where(
-        WorkOrder.status == "In Progress")) or 0
+        WorkOrder.status == "In Progress", WorkOrder.archived_at.is_(None))) or 0
     labor_seconds = db.scalar(select(func.coalesce(func.sum(LaborEntry.duration_seconds), 0))
         .where(LaborEntry.stopped_at.is_not(None))) or 0
     return {"assigned": [serialize_order(o) for o in assigned],
@@ -726,7 +787,7 @@ def dashboard(db: Session = Depends(session), user: User = Depends(current_user)
             "in_progress_count": in_progress_count,
             "completed_count": completed_count,
             "labor_seconds": int(labor_seconds),
-            "total_work_orders": db.scalar(select(func.count()).select_from(WorkOrder)) or 0,
+            "total_work_orders": db.scalar(select(func.count()).select_from(WorkOrder).where(WorkOrder.archived_at.is_(None))) or 0,
             "total_parts": db.scalar(select(func.count()).select_from(PhysicalPart)) or 0}
 
 
