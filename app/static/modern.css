@@ -217,3 +217,22 @@ label{font-size:11px;color:#4c5f79;font-weight:710}
  .page-intro{align-items:stretch}
 }
 @media(prefers-reduced-motion:reduce){.nav-item,.quick-card,.btn,.type-card{transition:none!important}}
+
+/* Accessible, clearly confirmed recoverable work-order deletion */
+.archive-dialog{border:1px solid #dfe5f0;padding:0;width:min(510px,calc(100vw - 24px));max-height:90vh;border-radius:19px;background:#fff;box-shadow:0 25px 100px rgba(15,24,44,.30);color:#1c2a46;overflow:auto}
+.archive-dialog::backdrop{background:rgba(13,24,46,.60);backdrop-filter:blur(3px)}
+.archive-dialog-form{display:grid;gap:16px;padding:27px}
+.archive-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.archive-dialog-header .eyebrow{margin:0 0 7px}
+.archive-dialog-header h2{font-size:22px}
+.archive-dialog-header .plain-btn{font-size:22px}
+.archive-dialog .muted{margin:0;font-size:13px}
+.archive-dialog .alert{margin:0}
+.archive-dialog label{font-size:12px}
+.archive-dialog input,.archive-dialog textarea{margin-top:8px}
+.archive-dialog-actions{display:flex;justify-content:flex-end;gap:9px}
+.archive-dialog .archive-danger{background:#bd4555;border-color:#bd4555;color:#fff;box-shadow:none}
+.archive-dialog .archive-danger:hover{background:#a93646}
+.text-danger{color:#b84450!important}
+.work-table td:last-child .btn{padding:7px 10px}
+@media(max-width:760px){.archive-dialog-form{padding:20px}.archive-dialog-actions{flex-direction:column-reverse}.archive-dialog-actions .btn{width:100%}}
