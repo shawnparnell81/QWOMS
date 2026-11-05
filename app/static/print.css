@@ -1,0 +1,85 @@
+/* QWOMS browser printing: print the current authorized view, not the app chrome.
+   Workbook/PDF originals retain their own separate native print paths. */
+.print-document-heading,.print-field-value{display:none}
+.print-action{white-space:nowrap}
+@media screen and (max-width:760px){
+  .print-action{padding:8px 10px;font-size:11px}
+}
+@media print{
+  @page{size:auto;margin:13mm}
+  html,body{width:100%!important;min-height:0!important;height:auto!important;overflow:visible!important;
+    margin:0!important;padding:0!important;background:#fff!important;color:#16233c!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #shell.shell,.main-wrap,#main.main{display:block!important;position:static!important;height:auto!important;
+    min-height:0!important;width:100%!important;max-width:none!important;overflow:visible!important;
+    margin:0!important;padding:0!important;box-shadow:none!important;background:#fff!important}
+  .sidebar,.topbar,#demo-banner,.toast,.nav-label,.sidebar-foot,.no-print,
+  .page-intro .btn,.btn,.plain-btn,.segment,.registry-tabs,.registry-search,
+  .ws-view-tabs,.ws-focus-button,.ws-heading-actions button,.ws-dialog,.ws-upload-dialog,
+  [data-print-page],button:not(.order-number):not(.linkish),.auth-screen{
+    display:none!important}
+  .print-document-heading{display:block!important;border-bottom:2px solid #4c5dda;padding:0 0 7mm;margin:0 0 7mm}
+  .print-document-brand{display:block;color:#4c5dda;font-size:9pt;font-weight:800;letter-spacing:.06em}
+  .print-document-heading h1{font-size:23pt;line-height:1.2;margin:2.5mm 0 1mm;font-weight:800;color:#1b2a48}
+  .print-document-meta{font-size:8pt;color:#687a91}
+  .page-intro,.dashboard-welcome{display:block!important;margin-bottom:5mm}
+  .page-intro h1,.dashboard-welcome h1{font-size:18pt}
+  .card,.kpi-card,.quick-card,.ws-resource-panel,.ws-main-panel,.ws-context-panel{
+    background:#fff!important;box-shadow:none!important;border:1px solid #dfe4ef!important;
+    border-radius:6px!important;max-width:none!important;overflow:visible!important}
+  .card{padding:4mm;margin:0 0 4mm}
+  .stat-grid,.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3mm}
+  .kpi-card{padding:3mm}.kpi-card strong{font-size:18pt}
+  .kpi-card p{font-size:8pt}
+  .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm}
+  .quick-card{min-height:0!important;padding:3mm!important;break-inside:avoid}
+  .quick-card .quick-icon{display:none!important}
+  .dashboard-panels,.two-col,.ws-grid,.ws-lower-grid{display:block!important;max-width:none!important}
+  .dashboard-panels>.card,.two-col>.card{break-inside:auto!important}
+  .assigned-list,.aliases{gap:1mm}
+  .assigned-entry{padding:2mm!important;margin-bottom:1mm;break-inside:avoid}
+  .assigned-chevron,.assigned-footer button,.dashboard-message button{display:none!important}
+  .type-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .workflow,.type-card{background:#fff!important;break-inside:avoid}
+  .table-wrap{overflow:visible!important;max-height:none!important}
+  .data-table{width:100%!important;table-layout:auto!important;white-space:normal!important;
+    border-collapse:collapse!important;font-size:8pt}
+  .data-table th,.data-table td{padding:2mm 1.5mm!important;white-space:normal!important;
+    overflow-wrap:anywhere!important;border-bottom:1px solid #e4e9f1}
+  .data-table thead{display:table-header-group}
+  .data-table tr{break-inside:avoid}
+  .work-table td:last-child,.work-table th:last-child{display:none!important}
+  .work-table .order-number{display:inline!important;font-size:8pt;color:#3649ad;
+    text-decoration:none;cursor:default;padding:0;background:none;border:0}
+  .work-table .order-kind .kind-icon{display:none}
+  .work-table .order-kind strong{font-size:8pt}
+  .work-table .order-title{white-space:normal!important;overflow:visible!important;max-width:none!important}
+  .avatar{height:7mm!important;width:7mm!important;font-size:7pt!important}
+  .person-cell{white-space:normal!important}
+  .registry-caption,.muted,.tiny{color:#5d6d83!important}
+  .fields-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3mm}
+  .fields-grid .wide{grid-column:1 / -1!important}
+  #main .print-value-source{display:none!important}
+  #main .print-field-value{display:block!important;white-space:pre-wrap;overflow-wrap:anywhere;
+    border-bottom:1px solid #dce3ec;min-height:6mm;padding:1.5mm 0;
+    font-size:10pt;font-weight:500;color:#1c2c47}
+  input,select,textarea{box-shadow:none!important}
+  .draw-status,.alert,.section-kicker{break-inside:avoid}
+  .alert{border-color:#dce2ee!important}
+  .ws-resource-panel,.ws-main-panel,.ws-context-panel{margin:0 0 4mm!important}
+  .validation-mode .main,.workspace-focus .main{padding:0!important}
+  .ws-grid,.ws-lower-grid{overflow:visible!important}
+  .ws-view-tabs{display:none!important}
+  #ws-document-preview iframe,#workspace-excel-frame{display:none!important}
+  #ws-editor-slot:not([hidden]):after{
+    content:"To print the original workbook layout, use Print form in the in-app Excel editor.";
+    display:block;font-size:9pt;font-weight:650;color:#687a91;padding:3mm}
+  #ws-document-preview:has(iframe):after{
+    content:"This PDF opens separately for native document printing. Use the document's Open original to print link.";
+    display:block;font-size:9pt;color:#687a91}
+  img{max-width:100%!important}
+  a{color:#3149a2;text-decoration:underline}
+  .chat-list{max-height:none!important;overflow:visible!important}
+  .chat-msg,.activity-row,.assigned-entry{break-inside:avoid}
+  h1,h2,h3,thead,.panel-head{break-after:avoid}
+}
