@@ -25,6 +25,9 @@ MAX_EVIDENCE=25*1024*1024
 def access(db,order_id,user,write=False):
     order=db.scalar(select(WorkOrder).where(WorkOrder.id==order_id).with_for_update().execution_options(populate_existing=True)) if write else db.get(WorkOrder,order_id)
     if not order:raise HTTPException(404,'Work order not found')
+    if order.archived_at is not None:
+        if write:raise HTTPException(409,'Archived work orders cannot be modified')
+        if not user.is_admin:raise HTTPException(404,'Work order not found')
     # New job evidence is restricted to the assignee/creator, Management or Administrator.
     reviewer=user.role=='Engineering' and 'engineering.approve' in (user.capabilities or []) and not write
     if not(user.is_admin or user.role=='Management' or reviewer or user.id in (order.assigned_to,order.created_by)):
@@ -76,7 +79,7 @@ def workspace(order_id:int,db:Session=Depends(session),user:User=Depends(current
                   'started_at':e.started_at,'stopped_at':e.stopped_at,'seconds':e.duration_seconds} for e in labor],
         'labor_seconds':sum(e.duration_seconds or 0 for e in labor),'dispositions':[disposition_json(db,e) for e in dispositions],
         'activity':[{'id':e.id,'action':e.action,'actor':db.get(User,e.actor_id).display_name if e.actor_id else 'System','at':e.created_at,'changes':e.changes} for e in history],
-        'can_edit':order.status not in ('Completed','Closed') and (user.is_admin or user.role=='Management' or user.id in (order.assigned_to,order.created_by)),'can_approve':user.role=='Engineering' and 'engineering.approve' in (user.capabilities or [])}
+        'can_edit':order.archived_at is None and order.status not in ('Completed','Closed') and (user.is_admin or user.role=='Management' or user.id in (order.assigned_to,order.created_by)),'can_approve':user.role=='Engineering' and 'engineering.approve' in (user.capabilities or [])}
 
 
 def media(blob,filename,category):
