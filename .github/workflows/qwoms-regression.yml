@@ -1,0 +1,53 @@
+name: QWOMS development regression
+on:
+  push:
+    branches:
+      - development/qwoms-complete-build
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: qwoms_ci
+          POSTGRES_USER: qwoms_ci
+          POSTGRES_PASSWORD: synthetic_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U qwoms_ci -d qwoms_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install exact backend dependencies
+        run: python -m pip install -r requirements.txt -c requirements.lock
+      - name: Compile Python and validate browser JavaScript syntax
+        run: |
+          python -m compileall -q app migrations
+          node --check app/static/app.js
+          node --check app/static/workspace.js
+          node --check app/static/archive.js
+          node --check app/static/print.js
+          node --check app/static/free-editor.js
+      - name: SQLite integration suite
+        env:
+          QWOMS_SECRET_KEY: test-only-secret-not-for-deployment-abcdefghijklmnopqrstuvxyz0123456789
+        run: python -m pytest -q
+      - name: PostgreSQL 17 integration suite
+        env:
+          QWOMS_SECRET_KEY: test-only-secret-not-for-deployment-abcdefghijklmnopqrstuvxyz0123456789
+          QWOMS_TEST_DATABASE_URL: postgresql+psycopg://qwoms_ci:synthetic_ci_only@localhost:5432/qwoms_ci
+        run: python -m pytest -q
