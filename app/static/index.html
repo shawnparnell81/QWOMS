@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QWOMS · Quality Work Orders</title><link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/workspace.css"><link rel="stylesheet" href="/static/modern.css"></head>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QWOMS · Quality Work Orders</title><link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/workspace.css"><link rel="stylesheet" href="/static/modern.css"><link rel="stylesheet" href="/static/print.css"></head>
 <body>
   <div id="demo-banner" class="alert warn hidden" role="status">DEMO — SYNTHETIC DATA ONLY. NOT APPROVED FOR COMPANY OPERATIONS.</div>
   <div id="auth-screen" class="auth-screen">
@@ -39,7 +39,7 @@
       <div class="sidebar-foot"><div class="phase-chip">● Development workspace</div><p>Test data only. Company information is not approved for this environment.</p></div>
     </aside>
     <div class="main-wrap">
-      <header class="topbar"><div class="crumb">QUALITY OPERATIONS <span>/</span> <b id="crumb">My Dashboard</b></div><div class="account"><span id="site-label" class="site-label"></span><span id="user-avatar" class="avatar"></span><div><b id="user-name"></b><small id="user-role"></small></div><button id="logout" class="plain-btn" title="Sign out">⇥</button></div></header>
+      <header class="topbar"><div class="crumb">QUALITY OPERATIONS <span>/</span> <b id="crumb">My Dashboard</b></div><div class="account"><button id="print-current-page" class="btn subtle print-action no-print" type="button" title="Print the current QWOMS page">⎙ Print page</button><span id="site-label" class="site-label"></span><span id="user-avatar" class="avatar"></span><div><b id="user-name"></b><small id="user-role"></small></div><button id="logout" class="plain-btn" title="Sign out">⇥</button></div></header>
       <main id="main" class="main"></main>
     </div>
   </div>
@@ -51,4 +51,5 @@
 <script src="/static/operations.js" defer></script>
 <script src="/static/workspace.js" defer></script>
 <script src="/static/templates.js" defer></script>
+<script src="/static/print.js" defer></script>
 </body></html>
