@@ -39,7 +39,7 @@ def render(draft,order,sheet=None,edits=None):
         calc=workbook.Calculator(book).calculate()
         data=workbook.model(book,calc,sheet)
     except workbook.WorkbookIssue as exc:raise HTTPException(422,str(exc))
-    data.update({'draft_id':draft.id,'version':draft.version,'order_id':order.id,'project_id':order.project_id,'read_only':order.status in ('Completed','Closed')})
+    data.update({'draft_id':draft.id,'version':draft.version,'order_id':order.id,'project_id':order.project_id,'read_only':order.archived_at is not None or order.status in ('Completed','Closed')})
     return data,book,calc
 
 
