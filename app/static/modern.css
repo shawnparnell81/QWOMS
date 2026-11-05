@@ -236,3 +236,12 @@ label{font-size:11px;color:#4c5f79;font-weight:710}
 .text-danger{color:#b84450!important}
 .work-table td:last-child .btn{padding:7px 10px}
 @media(max-width:760px){.archive-dialog-form{padding:20px}.archive-dialog-actions{flex-direction:column-reverse}.archive-dialog-actions .btn{width:100%}}
+
+.edit-dialog{width:min(590px,calc(100vw - 24px))}
+.edit-dialog .edit-detail-label{display:block;margin-top:12px}
+.edit-dialog .edit-detail-label textarea{margin-top:7px;min-height:65px;resize:vertical}
+.edit-dialog #edit-type-fields{max-height:32vh;overflow:auto;padding-right:5px}
+.edit-dialog .section-kicker{margin:8px 0 11px}
+.edit-dialog textarea{min-height:80px}
+.work-table .utility{gap:5px}
+.work-table .utility .btn{padding:7px 9px}
