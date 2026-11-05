@@ -23,19 +23,23 @@
   const error = modal.querySelector('#archive-dialog-error');
   let target = null;
 
-  function open(button, restore) {
-    if (!state?.me?.is_admin) return;
-    target = {id: Number(restore ? button.dataset.restoreOrder : button.dataset.archiveOrder),
-      number: button.dataset.orderNumber, restore};
+  function open(button, mode) {
+    if (mode !== 'cancel' && !state?.me?.is_admin) return;
+    if (mode === 'cancel' && !state?.me?.is_admin && !['Quality','Engineering','Management'].includes(state.me.role))return;
+    target = {id: Number(button.dataset.restoreOrder || button.dataset.archiveOrder || button.dataset.cancelOrder),
+      number: button.dataset.orderNumber, mode};
     form.reset();
     error.textContent='';
-    title.textContent = restore ? 'Restore archived work order' : 'Delete work order';
-    info.textContent = (restore ? 'Restore ' : 'Delete ') + target.number + '?';
-    note.textContent = restore
+    const restoring=mode==='restore', cancelling=mode==='cancel';
+    title.textContent = restoring ? 'Restore archived work order' : cancelling ? 'Cancel work order' : 'Delete work order';
+    info.textContent = (restoring ? 'Restore ' : cancelling ? 'Cancel ' : 'Delete ') + target.number + '?';
+    note.textContent = restoring
       ? 'Restore the original work order with its saved number, history, drawings and attached evidence.'
-      : 'This is recoverable deletion, not permanent erasure. The order leaves active lists but its number, documents, completed forms, labor and audit records remain.';
-    submit.textContent = restore ? 'Restore work order' : 'Delete work order';
-    submit.classList.toggle('archive-danger', !restore);
+      : cancelling
+        ? 'The work order will be marked Cancelled and removed from active assignments. Its number, drawings, forms, labor and history remain recorded.'
+        : 'This is recoverable deletion, not permanent erasure. The order leaves active lists but its number, documents, completed forms, labor and audit records remain.';
+    submit.textContent = restoring ? 'Restore work order' : cancelling ? 'Cancel work order' : 'Delete work order';
+    submit.classList.toggle('archive-danger', !restoring);
     modal.showModal();
     form.elements.confirm_number.focus();
   }
@@ -43,10 +47,10 @@
   modal.querySelector('#archive-cancel').onclick=()=>modal.close();
   modal.addEventListener('click', event => {if(event.target===modal)modal.close()});
   document.addEventListener('click',event=>{
-    const button=event.target.closest('[data-archive-order],[data-restore-order]');
+    const button=event.target.closest('[data-archive-order],[data-restore-order],[data-cancel-order]');
     if(!button)return;
     event.preventDefault();event.stopPropagation();
-    open(button,button.hasAttribute('data-restore-order'));
+    open(button,button.hasAttribute('data-restore-order')?'restore':button.hasAttribute('data-cancel-order')?'cancel':'archive');
   },true);
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -57,13 +61,14 @@
     if(reason.length<8){error.textContent='Enter a specific reason (at least 8 characters).';return}
     submit.disabled=true;error.textContent='';
     try{
-      const action=target.restore?'restore':'archive';
+      const action=target.mode==='restore'?'restore':target.mode==='cancel'?'cancel':'archive';
       await api('/api/work-orders/'+target.id+'/'+action,{method:'POST',body:{confirm_number:number,reason}});
-      const restored=target.restore;
+      const restored=target.mode==='restore';
+      const cancelled=target.mode==='cancel';
       modal.close();
       state.orderFilter=restored?'archived':'all';
       await navigate('orders');
-      toast(restored?'Work order restored; history preserved.':'Work order deleted from active lists; archived history preserved.');
+      toast(restored?'Work order restored; history preserved.':cancelled?'Work order cancelled; record and history preserved.':'Work order deleted from active lists; archived history preserved.');
     }catch(err){error.textContent=err.message||'Unable to update this work order'}
     finally{submit.disabled=false}
   });
