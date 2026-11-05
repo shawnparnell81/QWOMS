@@ -170,12 +170,18 @@ def test_current_database_operations_evidence_and_drafts_survive(client):
     engine=Session.kw['bind'];downgrade(engine,'0012');before=snapshot(engine);upgrade(engine)
     after=snapshot(engine)
     for table,rows in before.items():
-        if table!='alembic_version':assert after[table]==rows
+        if table!='alembic_version':
+            # Forward migrations may add nullable columns while preserving
+            # every pre-existing value and original quality record.
+            assert [{key:item[key] for key in (rows[0].keys() if rows else [])}
+                    for item in after[table]] == rows,table
+    assert all(o['archived_at'] is None and o['archived_by'] is None and o['archive_reason'] is None
+               for o in after['work_orders'])
     assert after['schema_reconciliations']==[]
     require_current(engine)
 
 
 def test_version_stamp_cannot_hide_legacy_schema(client):
     web,Session=client;engine,_,_,_=prepare(web,Session,'0009')
-    with engine.begin() as c:c.execute(sa.text("UPDATE alembic_version SET version_num='0013'"))
+    with engine.begin() as c:c.execute(sa.text("UPDATE alembic_version SET version_num='0014'"))
     with pytest.raises(RuntimeError,match='schema history is incompatible'):require_current(engine)
